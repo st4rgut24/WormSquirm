@@ -3,9 +3,10 @@ using UnityEngine;
 
 public class Ring
 {
+    public Vector3[] vertices;
+
     float radius;
     Vector3 center;
-    Vector3[] vertices;
 
     public Ring(float radius, int vertexCount, float vertexSpacing, float height)
 	{

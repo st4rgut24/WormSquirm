@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -15,38 +16,35 @@ public class TunnelMake : MonoBehaviour
     float prevHeight = 0;
     int growCounter = 0;
 
-    bool startFlag = true;
-    Vector3 oldLocation;
 
     private Vector3[] vertices;
 
-    List<Ring> rings;
+    Ring prevRing;
+    Vector3 prevPos = new Vector3(-1, -1, -1);
 
     private void OnEnable()
     {
         Player.OnMove += GrowTunnel;
     }
 
+    private void Awake()
+    {
+        prevRing = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, prevPos.y);
+    }
+
     void Start()
     {
-        rings = new List<Ring>();
     }
 
     public void GrowTunnel(Vector3 position)
     {
-        if (startFlag)
+        if (position.y > prevPos.y)
         {
-            startFlag = false;
+            GenerateTunnel(position);
         }
-        else if (position.y - oldLocation.y > 0) // if we are moving in position upwards direction
-        {
-            Debug.Log("Grow Tunnel");
-            GenerateTunnel(oldLocation.y, position.y);
-        }
-        oldLocation = position;
     }
 
-    void GenerateTunnel(float startHeight, float endHeight)
+    void GenerateTunnel(Vector3 position)
     {
         GameObject segment = Instantiate(TunnelSegment);
         MeshFilter meshFilter = segment.GetComponent<MeshFilter>();
@@ -54,22 +52,9 @@ public class TunnelMake : MonoBehaviour
         Mesh tunnelMesh = new Mesh();
         meshFilter.mesh = tunnelMesh;
 
-        vertices = new Vector3[tunnelSegments * 2];
+        Ring ring = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, position.y);
 
-        for (int i = 0; i < tunnelSegments; i++)
-        {
-            float t = i * segmentSpacing;
-            //float noise = Mathf.PerlinNoise(0, t * noiseScale) * 2 - 1; // Adjust noise scale as needed
-
-            //float tunnelRadiusAtPoint = tunnelRadius + noise;
-            float angle = Mathf.Lerp(0, 2 * Mathf.PI, i / (float)tunnelSegments);
-
-            float x = Mathf.Cos(angle) * tunnelRadius; // tunnelRadiusAtPoint;
-            float z = Mathf.Sin(angle) * tunnelRadius; // tunnelRadiusAtPoint;
-
-            vertices[i] = new Vector3(x, startHeight, z);
-            vertices[i + tunnelSegments] = new Vector3(x, endHeight, z); // Adjust tunnel height as needed
-        }
+        Vector3[] vertices = ring.vertices.Concat(prevRing.vertices).ToArray();
 
         tunnelMesh.vertices = vertices;
 
@@ -101,6 +86,9 @@ public class TunnelMake : MonoBehaviour
         }
 
         tunnelMesh.triangles = triangles;
+
+        prevRing = ring;
+        prevPos = position;
     }
 
     private void OnDisable()
