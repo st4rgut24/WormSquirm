@@ -54,7 +54,7 @@ public class TunnelMake : MonoBehaviour
 
         Ring ring = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, position.y);
 
-        Vector3[] vertices = ring.vertices.Concat(prevRing.vertices).ToArray();
+        Vector3[] vertices = prevRing.vertices.Concat(ring.vertices).ToArray();
 
         tunnelMesh.vertices = vertices;
 
