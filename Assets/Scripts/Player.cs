@@ -4,14 +4,19 @@ using System.Collections;
 
 public class Player : MonoBehaviour
 {
-    public static event Action<Vector3> OnMove;
+    public static event Action<Transform> OnMove;
 
-    public float moveSpeed = 5f;
+    public float rotationSpeed = 50f;
+    public float acceleration = 5f;
+    public float deceleration = 2f; // Adjust the deceleration factor
+    private float currentSpeed = 0f;
+
+    Vector3 prevPosition = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
 
     private void Start()
     {
         // Start the coroutine
-        StartCoroutine(MoveCoroutine());
+        StartCoroutine(NotifyCoroutine());
     }
 
     void Update()
@@ -21,30 +26,65 @@ public class Player : MonoBehaviour
         float verticalInput = Input.GetAxis("Vertical");
         float upDownInput = Input.GetAxis("UpDown");
 
-        // Calculate movement direction
-        Vector3 movement = new Vector3(horizontalInput, upDownInput, verticalInput) * moveSpeed * Time.deltaTime;
-        // Move the player
-        transform.Translate(movement);
+        // Calculate rotation angles
+        float yaw = horizontalInput * rotationSpeed * Time.deltaTime;
+        float pitch = upDownInput * rotationSpeed * Time.deltaTime;
+        float roll = verticalInput * rotationSpeed * Time.deltaTime;
 
-    }
+        // Rotate the player
+        transform.Rotate(new Vector3(pitch, yaw, roll));
 
-    private IEnumerator MoveCoroutine()
-    {
-        while (true)
+        // Check if spacebar is pressed
+        if (Input.GetKey(KeyCode.Space))
         {
-            OnMove?.Invoke(transform.position);
-            yield return new WaitForSeconds(3f);
+            // Accelerate the player in the current direction
+            AccelerateInCurrentDirection();
+        }
+        else
+        {
+            // Decelerate the player when the spacebar is not pressed
+            Decelerate();
         }
     }
 
-    void OnCollisionEnter(Collision collision)
+    void AccelerateInCurrentDirection()
     {
-        Debug.Log("Collision Detected");
-        // Check if the player collides with an object tagged as "Cube"
-        if (collision.gameObject.CompareTag("cube"))
+        // Get the forward direction of the player in world space
+        Vector3 forwardDirection = transform.forward;
+
+        // Accelerate the player in the current direction
+        currentSpeed += acceleration * Time.deltaTime;
+        float moveDistance = currentSpeed * Time.deltaTime;
+        transform.Translate(forwardDirection * moveDistance, Space.World);
+    }
+
+    void Decelerate()
+    {
+        // Decelerate the player when the spacebar is not pressed
+        currentSpeed -= deceleration * Time.deltaTime;
+        currentSpeed = Mathf.Max(currentSpeed, 0f); // Ensure speed doesn't go below zero
+        float moveDistance = currentSpeed * Time.deltaTime;
+
+        // If the player is moving, translate the player to simulate deceleration
+        if (currentSpeed > 0f)
         {
-            Debug.Log("on collision with cube");
-            GameObject.Destroy(collision.gameObject);
+            transform.Translate(transform.forward * moveDistance, Space.World);
+
+            // Notify subscribers about the move event
+            OnMove?.Invoke(transform);
+        }
+    }
+
+    private IEnumerator NotifyCoroutine()
+    {
+        while (true)
+        {
+            if (transform.position != prevPosition)
+            {
+                prevPosition = transform.position;
+                OnMove?.Invoke(transform);
+            }
+            yield return new WaitForSeconds(3f);
         }
     }
 }

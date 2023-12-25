@@ -8,7 +8,7 @@ public class TunnelMake : MonoBehaviour
 {
     public GameObject TunnelSegment;
 
-    public int tunnelSegments = 3;
+    public int tunnelSegments = 10;
     public float segmentSpacing = 1.0f;
     public float tunnelRadius = 2.0f;
     public float noiseScale = 0.1f;
@@ -16,10 +16,12 @@ public class TunnelMake : MonoBehaviour
     float prevHeight = 0;
     int growCounter = 0;
 
+    Vector3 startPosition = new Vector3(0, 0, 0);
+
 
     private Vector3[] vertices;
 
-    Ring prevRing;
+    Ring prevRing = null;
     Vector3 prevPos = new Vector3(-1, -1, -1);
 
     private void OnEnable()
@@ -29,22 +31,25 @@ public class TunnelMake : MonoBehaviour
 
     private void Awake()
     {
-        prevRing = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, prevPos.y);
+        
     }
 
-    void Start()
+    public void GrowTunnel(Transform transform)
     {
-    }
+        Vector3 position = transform.position;
+        Vector3 direction = transform.forward;
 
-    public void GrowTunnel(Vector3 position)
-    {
-        if (position.y > prevPos.y)
+        if (prevRing == null) // initialize start of tunnel
         {
-            GenerateTunnel(position);
+            prevRing = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, direction, position); // update normal vector
+        }
+        else
+        {
+            GenerateTunnel(position, direction);
         }
     }
 
-    void GenerateTunnel(Vector3 position)
+    void GenerateTunnel(Vector3 position, Vector3 direction)
     {
         GameObject segment = Instantiate(TunnelSegment);
         MeshFilter meshFilter = segment.GetComponent<MeshFilter>();
@@ -52,7 +57,7 @@ public class TunnelMake : MonoBehaviour
         Mesh tunnelMesh = new Mesh();
         meshFilter.mesh = tunnelMesh;
 
-        Ring ring = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, position.y);
+        Ring ring = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, direction, position);
 
         Vector3[] vertices = prevRing.vertices.Concat(ring.vertices).ToArray();
 
