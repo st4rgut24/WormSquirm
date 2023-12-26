@@ -24,20 +24,17 @@ public class TunnelMake : MonoBehaviour
     Ring prevRing = null;
     Vector3 prevPos = new Vector3(-1, -1, -1);
 
-    private void OnEnable()
-    {
-        Player.OnMove += GrowTunnel;
-    }
-
     private void Awake()
     {
         
     }
 
-    public void GrowTunnel(Transform transform)
+    public GameObject GrowTunnel(Transform transform)
     {
         Vector3 position = transform.position;
         Vector3 direction = transform.forward;
+
+        GameObject tunnelObject = null;
 
         if (prevRing == null) // initialize start of tunnel
         {
@@ -45,11 +42,13 @@ public class TunnelMake : MonoBehaviour
         }
         else
         {
-            GenerateTunnel(position, direction);
+            tunnelObject = GenerateTunnelMesh(position, direction);
         }
+
+        return tunnelObject;
     }
 
-    void GenerateTunnel(Vector3 position, Vector3 direction)
+    GameObject GenerateTunnelMesh(Vector3 position, Vector3 direction)
     {
         GameObject segment = Instantiate(TunnelSegment);
         MeshFilter meshFilter = segment.GetComponent<MeshFilter>();
@@ -94,10 +93,7 @@ public class TunnelMake : MonoBehaviour
 
         prevRing = ring;
         prevPos = position;
-    }
 
-    private void OnDisable()
-    {
-        Player.OnMove -= GrowTunnel;
+        return segment;
     }
 }

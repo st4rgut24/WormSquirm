@@ -71,7 +71,6 @@ public class Player : MonoBehaviour
             transform.Translate(transform.forward * moveDistance, Space.World);
 
             // Notify subscribers about the move event
-            OnMove?.Invoke(transform);
         }
     }
 
@@ -84,7 +83,7 @@ public class Player : MonoBehaviour
                 prevPosition = transform.position;
                 OnMove?.Invoke(transform);
             }
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(1f);
         }
     }
 }

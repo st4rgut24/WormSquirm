@@ -20,23 +20,6 @@ public class Ring
     void setVertices(int vertexCount, float vertexSpacing, Vector3 normal)
     {
 
-        //for (int i = 0; i < vertexCount; i++)
-        //{
-        //    float t = i * vertexSpacing;
-        //    //float noise = Mathf.PerlinNoise(0, t * noiseScale) * 2 - 1; // Adjust noise scale as needed
-
-        //    //float tunnelRadiusAtPoint = tunnelRadius + noise;
-        //    float angle = Mathf.Lerp(0, 2 * Mathf.PI, i / (float)vertexCount);
-
-        //    float x = Mathf.Cos(angle) * this.radius; // tunnelRadiusAtPoint;
-        //    float z = Mathf.Sin(angle) * this.radius; // tunnelRadiusAtPoint;
-
-        //    vertices[i] = new Vector3(x, height, z);
-        //}
-        Debug.Log("new ring");
-        Debug.Log("normal: " + normal);
-        Debug.Log("center: " + center);
-
         for (int i = 0; i < vertexCount; i++)
         {
             float t = i * vertexSpacing;
