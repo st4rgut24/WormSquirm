@@ -15,7 +15,7 @@ public class TunnelManager : MonoBehaviour
     Grid tunnelGrid;
 
     GameObject prevSegment;
-    private Dictionary<Transform, GameObject> segmentDict; // maps Player Transform to previous segments
+    private Dictionary<Transform, GameObject> PrevSegmentDict; // maps Player Transform to previous segments
 
     int cubeCount = 0;
 
@@ -31,7 +31,7 @@ public class TunnelManager : MonoBehaviour
 	{
         tunnelMaker = GameObject.FindObjectOfType<TunnelMake>();
         tunnelGrid = new Grid();
-        segmentDict = new Dictionary<Transform, GameObject>();
+        PrevSegmentDict = new Dictionary<Transform, GameObject>();
     }
 
     // testing
@@ -75,7 +75,7 @@ public class TunnelManager : MonoBehaviour
         // if tunnel does not exist yet, create it
         if (otherTunnels != null)
         {
-            otherTunnels.Remove(segmentDict[projectedTransform]); // adjoining segment does not count as intersected object
+            otherTunnels.Remove(PrevSegmentDict[projectedTransform]); // adjoining segment does not count as intersected object
             List<GameObject> intersectedTunnels = CollisionUtils.getIntersectedObjects(projectedSegment, otherTunnels);
 
             if (intersectedTunnels.Count > 0)
@@ -85,7 +85,7 @@ public class TunnelManager : MonoBehaviour
             }
         }
 
-        segmentDict[projectedTransform] = projectedSegment;
+        PrevSegmentDict[projectedTransform] = projectedSegment;
     }
 
     GameObject addNewTunnel(Transform transform)

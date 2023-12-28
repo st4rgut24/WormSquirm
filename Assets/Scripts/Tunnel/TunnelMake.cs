@@ -19,15 +19,13 @@ public class TunnelMake : MonoBehaviour
 
     Vector3 startPosition = new Vector3(0, 0, 0);
 
-
     private Vector3[] vertices;
 
-    Ring prevRing = null;
-    Vector3 prevPos = new Vector3(-1, -1, -1);
+    private Dictionary<Transform, Ring> PrevRingDict; // maps Player Transform to previous rings
 
     private void Awake()
     {
-        
+        PrevRingDict = new Dictionary<Transform, Ring>();
     }
 
 
@@ -39,13 +37,14 @@ public class TunnelMake : MonoBehaviour
 
         GameObject tunnelObject = null;
 
-        if (prevRing == null) // initialize start of tunnel
+        if (!PrevRingDict.ContainsKey(transform)) // initialize start of tunnel
         {
-            prevRing = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, direction, position); // update normal vector
+            Ring ring = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, direction, position);
+            PrevRingDict.Add(transform, ring); // update normal vector
         }
         else
         {
-            tunnelObject = GenerateTunnelMesh(position, direction);
+            tunnelObject = GenerateTunnelMesh(transform, position, direction);
             tunnelObject.name = "Tunnel " + tunnelCounter;
             tunnelCounter++;
         }
@@ -53,7 +52,14 @@ public class TunnelMake : MonoBehaviour
         return tunnelObject;
     }
 
-    GameObject GenerateTunnelMesh(Vector3 position, Vector3 direction)
+    /// <summary>
+    /// Calculate a Tunnel's Mesh
+    /// </summary>
+    /// <param name="transform">Transform of the agent that created the mesh</param>
+    /// <param name="position">position of the ring</param>
+    /// <param name="direction">direction the tunnel is growing</param>
+    /// <returns></returns>
+    GameObject GenerateTunnelMesh(Transform transform, Vector3 position, Vector3 direction)
     {
         GameObject segment = Instantiate(TunnelSegment);
         MeshFilter meshFilter = segment.GetComponent<MeshFilter>();
@@ -63,7 +69,7 @@ public class TunnelMake : MonoBehaviour
 
         Ring ring = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, direction, position);
 
-        Vector3[] vertices = prevRing.vertices.Concat(ring.vertices).ToArray();
+        Vector3[] vertices = PrevRingDict[transform].vertices.Concat(ring.vertices).ToArray();
 
         tunnelMesh.vertices = vertices;
 
@@ -96,8 +102,7 @@ public class TunnelMake : MonoBehaviour
 
         tunnelMesh.triangles = triangles;
 
-        prevRing = ring;
-        prevPos = position;
+        PrevRingDict[transform] = ring;
 
         return segment;
     }
