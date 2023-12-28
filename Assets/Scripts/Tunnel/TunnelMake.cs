@@ -14,7 +14,8 @@ public class TunnelMake : MonoBehaviour
     public float noiseScale = 0.1f;
 
     float prevHeight = 0;
-    int growCounter = 0;
+
+    int tunnelCounter = 0;
 
     Vector3 startPosition = new Vector3(0, 0, 0);
 
@@ -28,6 +29,8 @@ public class TunnelMake : MonoBehaviour
     {
         
     }
+
+
 
     public GameObject GrowTunnel(Transform transform)
     {
@@ -43,6 +46,8 @@ public class TunnelMake : MonoBehaviour
         else
         {
             tunnelObject = GenerateTunnelMesh(position, direction);
+            tunnelObject.name = "Tunnel " + tunnelCounter;
+            tunnelCounter++;
         }
 
         return tunnelObject;

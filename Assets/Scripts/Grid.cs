@@ -6,7 +6,8 @@ public class Grid
 {
     Vector3Int dimension;
 
-    public int unitsPerCell = 1; // world units per array indice
+    public int unitsPerCell = 4; // world units per array indice
+                                 // minimum should be four times max dimension of a gameobject
 
     private List<GameObject>[,,] grid;
 
@@ -31,10 +32,10 @@ public class Grid
         int length = Mathf.CeilToInt((float)GameManager.Instance.zAxisLength / unitsPerCell);
         int height = Mathf.CeilToInt((float)GameManager.Instance.yAxisLength / unitsPerCell);
 
-        return new Vector3Int(width, length, height);
+        return new Vector3Int(width, length, height); 
     }
 
-    public void addGameObject(Vector3 pos, GameObject go)
+    public void AddGameObject(Vector3 pos, GameObject go)
     {
         if (!GameManager.Instance.isValidPos(pos))
         {
@@ -49,11 +50,11 @@ public class Grid
         {
             grid[cellPos.x, cellPos.y, cellPos.z] = new List<GameObject>();
         }
-
+        Debug.Log("Save gameobject " + go.name + " with world pos " + pos + " to cell position " + cellPos);
         grid[cellPos.x, cellPos.y, cellPos.z].Add(go);
     }
 
-    public bool hasGameObjects(Vector3 worldPos)
+    public bool HasGameObjects(Vector3 worldPos)
     {
         if (!GameManager.Instance.isValidPos(worldPos))
         {
@@ -73,6 +74,9 @@ public class Grid
         }
 
         Vector3Int cellPos = ConvertWorldPosToGridPos(worldPos);
+
+        Debug.Log("Get GameObjects at world position " + worldPos + " and cell position " + cellPos);
+
 
         return grid[cellPos.x, cellPos.y, cellPos.z];
     }

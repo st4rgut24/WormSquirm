@@ -32,7 +32,6 @@ public class Ring
             Vector3 vector2 = normal + new Vector3(1, 1, 1) ;
             Vector3 planeVector = Vector3.Cross(normal, vector2).normalized;
             Vector3 point = this.center + rotation * (planeVector * radius);
-            Debug.Log(point);
             vertices[i] = point;
         }
     }

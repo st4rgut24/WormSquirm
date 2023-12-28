@@ -79,11 +79,11 @@ public class Player : MonoBehaviour
         while (true)
         {
             if (transform.position != prevPosition)
-            {
+             {
                 prevPosition = transform.position;
                 OnMove?.Invoke(transform);
             }
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.5f);
         }
     }
 }
