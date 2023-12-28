@@ -70,7 +70,7 @@ public class Grid
     {
         if (!GameManager.Instance.isValidPos(worldPos))
         {
-            throw new System.Exception("GameObject is out of bounds");
+            throw new System.Exception("GameObject is out of bounds " + worldPos);
         }
 
         Vector3Int cellPos = ConvertWorldPosToGridPos(worldPos);

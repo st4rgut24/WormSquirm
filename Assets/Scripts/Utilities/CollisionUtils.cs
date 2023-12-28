@@ -38,7 +38,7 @@ public class CollisionUtils
 
                 if (targetBounds.Intersects(otherBounds))
                 {
-                      intersectingObjects.Add(otherObject); // Bounds intersect with at least one GameObject in the list
+                         intersectingObjects.Add(otherObject); // Bounds intersect with at least one GameObject in the list
                 }
                 else
                 {

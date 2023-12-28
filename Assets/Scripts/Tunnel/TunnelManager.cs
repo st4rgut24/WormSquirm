@@ -13,8 +13,10 @@ public class TunnelManager : MonoBehaviour
 
     TunnelMake tunnelMaker;
     Grid tunnelGrid;
-    private Dictionary<GameObject, GameObject> segmentsDict; // maps segments to previous segments
+
     GameObject prevSegment;
+    private Dictionary<Transform, GameObject> segmentDict; // maps Player Transform to previous segments
+
     int cubeCount = 0;
 
     // testing
@@ -22,14 +24,14 @@ public class TunnelManager : MonoBehaviour
 
     private void OnEnable()
     {
-        Player.OnMove += TunnelAction;
+        Agent.OnMove += TunnelAction;
     }
 
     void Awake()
 	{
         tunnelMaker = GameObject.FindObjectOfType<TunnelMake>();
         tunnelGrid = new Grid();
-        segmentsDict = new Dictionary<GameObject, GameObject>();
+        segmentDict = new Dictionary<Transform, GameObject>();
     }
 
     // testing
@@ -73,18 +75,17 @@ public class TunnelManager : MonoBehaviour
         // if tunnel does not exist yet, create it
         if (otherTunnels != null)
         {
-            Debug.Log("Get intersected objects");
-            otherTunnels.Remove(prevSegment); // adjoining segment does not count as intersected object
+            otherTunnels.Remove(segmentDict[projectedTransform]); // adjoining segment does not count as intersected object
             List<GameObject> intersectedTunnels = CollisionUtils.getIntersectedObjects(projectedSegment, otherTunnels);
 
             if (intersectedTunnels.Count > 0)
             {
-                  Debug.Log("Tunnel Intersection Detected!");
+                Debug.Log("Tunnel Intersection Detected!");
                 OnIntersectTunnel?.Invoke(projectedSegment, intersectedTunnels);
             }
         }
 
-        prevSegment = projectedSegment;
+        segmentDict[projectedTransform] = projectedSegment;
     }
 
     GameObject addNewTunnel(Transform transform)
@@ -96,11 +97,6 @@ public class TunnelManager : MonoBehaviour
         }
 
         GameObject segment = tunnelMaker.GrowTunnel(transform);
-
-        if (prevSegment != null && segment != null)
-        {
-            segmentsDict.Add(segment, prevSegment);
-        }
 
         if (segment != null)
         {
@@ -118,7 +114,7 @@ public class TunnelManager : MonoBehaviour
 
     private void OnDisable()
     {
-        Player.OnMove -= TunnelAction;
+        Agent.OnMove -= TunnelAction;
     }
 }
 

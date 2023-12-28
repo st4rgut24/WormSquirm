@@ -2,21 +2,18 @@ using System;
 using UnityEngine;
 using System.Collections;
 
-public class Player : MonoBehaviour
+public class Player : Agent
 {
-    public static event Action<Transform> OnMove;
-
     public float rotationSpeed = 50f;
     public float acceleration = 5f;
     public float deceleration = 2f; // Adjust the deceleration factor
     private float currentSpeed = 0f;
 
-    Vector3 prevPosition = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
 
-    private void Start()
+    protected override void Start()
     {
         // Start the coroutine
-        StartCoroutine(NotifyCoroutine());
+        base.Start();
     }
 
     void Update()
@@ -71,19 +68,6 @@ public class Player : MonoBehaviour
             transform.Translate(transform.forward * moveDistance, Space.World);
 
             // Notify subscribers about the move event
-        }
-    }
-
-    private IEnumerator NotifyCoroutine()
-    {
-        while (true)
-        {
-            if (transform.position != prevPosition)
-             {
-                prevPosition = transform.position;
-                OnMove?.Invoke(transform);
-            }
-            yield return new WaitForSeconds(0.5f);
         }
     }
 }

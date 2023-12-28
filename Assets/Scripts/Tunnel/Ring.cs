@@ -14,11 +14,13 @@ public class Ring
         this.vertices = new Vector3[vertexCount];
         this.center = center;
 
-        setVertices(vertexCount, vertexSpacing, Vector3.forward);
+        setVertices(vertexCount, vertexSpacing, normal);
     }
 
     void setVertices(int vertexCount, float vertexSpacing, Vector3 normal)
     {
+        Vector3 vector2 = normal + new Vector3(1, 1, 1);
+        Vector3 planeVector = Vector3.Cross(normal, vector2).normalized;
 
         for (int i = 0; i < vertexCount; i++)
         {
@@ -29,9 +31,9 @@ public class Ring
             float angle = Mathf.Lerp(0, 360f, i / (float)vertexCount);
 
             Quaternion rotation = Quaternion.AngleAxis(angle, normal);
-            Vector3 vector2 = normal + new Vector3(1, 1, 1) ;
-            Vector3 planeVector = Vector3.Cross(normal, vector2).normalized;
+            Debug.Log("plane vector " + planeVector);
             Vector3 point = this.center + rotation * (planeVector * radius);
+            Debug.Log("point " + point + " at angle " + angle);
             vertices[i] = point;
         }
     }
