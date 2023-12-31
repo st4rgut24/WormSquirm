@@ -10,7 +10,7 @@ public class TunnelUtils
     /// <param name="targetObject">the object we are testing intersects</param>
     /// <param name="objectList">list of objects we are testing intersects</param>
     /// <returns></returns>
-    public static List<GameObject> getIntersectedObjects(GameObject targetObject, List<GameObject> objectList)
+    public static List<GameObject> GetIntersectedObjects(GameObject targetObject, List<GameObject> objectList)
     {
         List<GameObject> intersectingObjects = new List<GameObject>();
 
@@ -39,22 +39,20 @@ public class TunnelUtils
     /// <summary>
     /// Get the object that contains the targetObject
     /// </summary>
-    /// <param name="targetObject">The target GameObject</param>
+    /// <param name="targetPosition">The target GameObject</param>
     /// <param name="objectList">List of candidate GameObjects that may contain targetObject</param>
     /// <returns></returns>
-    public static GameObject getEnclosingObject(GameObject targetObject, List<GameObject> objectList)
+    public static GameObject getEnclosingObject(Vector3 targetPosition, List<GameObject> objectList)
     {
-        Bounds targetBounds = targetObject.GetComponent<Renderer>().bounds;
-
         foreach (GameObject otherObject in objectList)
         {
-            if (otherObject != null && otherObject != targetObject) // Ensure the GameObject in the list is not null
+            if (otherObject != null) // Ensure the GameObject in the list is not null
             {
                 Bounds otherBounds = otherObject.GetComponent<Renderer>().bounds;
 
-                if (otherBounds.Contains(targetObject.transform.position)) // consider using Contains() instead and passing in the targetPosition?
+                if (otherBounds.Contains(targetPosition))
                 {
-                    return otherObject; // Bounds intersect with at least one GameObject in the list
+                    return otherObject;
                 }
             }
         }

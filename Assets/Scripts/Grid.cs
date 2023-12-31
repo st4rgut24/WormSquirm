@@ -66,24 +66,9 @@ public class Grid
         {
             grid[cellPos.x, cellPos.y, cellPos.z] = new List<GameObject>();
         }
-        // Debug.Log("Save gameobject " + go.name + " with world pos " + pos + " to cell position " + cellPos);
+         Debug.Log("Save gameobject " + go.name + " with world pos " + pos + " to cell position " + cellPos);
         grid[cellPos.x, cellPos.y, cellPos.z].Add(go);
     }
-
-    //public List<GameObject> GetGameObjects(Vector3 worldPos)
-    //{
-    //    if (!GameManager.Instance.isValidPos(worldPos))
-    //    {
-    //        throw new System.Exception("GameObject is out of bounds " + worldPos);
-    //    }
-
-    //    Vector3Int cellPos = ConvertWorldPosToGridPos(worldPos);
-
-    //    Debug.Log("Get GameObjects at world position " + worldPos + " and cell position " + cellPos);
-
-
-    //    return grid[cellPos.x, cellPos.y, cellPos.z];
-    //}
 
     bool isWithinGrid(int i, int j, int k)
     {
@@ -103,7 +88,7 @@ public class Grid
 
         Vector3Int cellPos = ConvertWorldPosToGridPos(worldPos);
 
-        // Debug.Log("Get GameObjects at cell position " + cellPos);
+         Debug.Log("Get GameObjects at cell position " + cellPos);
 
         int x = cellPos.x;
         int y = cellPos.y;

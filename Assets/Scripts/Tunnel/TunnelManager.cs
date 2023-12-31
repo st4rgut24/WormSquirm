@@ -1,127 +1,27 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
-/// <summary>
-/// Manages locations of existing tunnel, uses player position to determine
-/// whether to create a new tunnel
-/// </summary>
-public class TunnelManager : MonoBehaviour
+public class TunnelManager : Singleton<TunnelManager>
 {
-    public static event Action<GameObject, List<GameObject>> OnIntersectTunnel;
 
-    TunnelMake tunnelMaker;
-    Grid tunnelGrid;
+    TunnelInsiderManager tunnelInsiderManager;
+    TunnelCreatorManager tunnelCreatorManager;
+	TunnelIntersectorManager tunnelIntersectorManager;
+	TunnelActionManager tunnelActionManager;
 
-    private Dictionary<Transform, GameObject> PrevSegmentDict; // maps Player Transform to previous segments
-
-    int cubeCount = 0;
-
-    // testing
-    bool isSpawn = false;
-
-    private void OnEnable()
-    {
-        Agent.OnMove += TunnelAction;
-    }
-
-    void Awake()
+    // Use this for initialization
+    void Start()
 	{
-        tunnelMaker = GameObject.FindObjectOfType<TunnelMake>();
-        tunnelGrid = new Grid(4, 3);
-        PrevSegmentDict = new Dictionary<Transform, GameObject>();
-    }
-
-    // testing
-    public void SetSpawnFlag()
-    {
-        // Debug.Log("Set spawn flag");
-        isSpawn = true;
-    }
-
-    /// <summary>
-    /// spawn an obstacle in front of the transform
-    /// </summary>
-    /// <param name="targetTransform">transform of the object the obstacle should be in front of</param>
-    public void SpawnObstacle(Transform targetTransform)
-    {
-        // Calculate the position in front of the targetTransform
-        Vector3 spawnPosition = targetTransform.position + targetTransform.forward;
-
-        // Create a new GameObject (cube) at the calculated position
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cube.transform.position = spawnPosition;
-        Debug.Log("Spawn cube");
-
-        cube.name = "Cube " + cubeCount;
-        // Set the scale of the cube to (1, 1, 1)
-        cube.transform.localScale = Vector3.one * 3;
-
-        tunnelGrid.AddGameObject(cube.transform.position, cube);
-        cubeCount++;
-    }
-
-    /// <summary>
-    /// take an action based on the location of the next tunnel segment
-    /// </summary>
-    /// <param name="projectedTransform">The projected location of the tunnel/player</param>
-	void TunnelAction(Transform projectedTransform)
-	{
-        List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(projectedTransform.position); // TODO: a transform may intersect with a segment yet
-                                                                                                // be in a different cell.
-                            
-        GameObject projectedSegment = addNewTunnel(projectedTransform);
-
-        // if tunnel does not exist yet, create it
-        if (PrevSegmentDict.ContainsKey(projectedTransform))
-        {
-            otherTunnels.Remove(PrevSegmentDict[projectedTransform]); // adjoining segment does not count as intersected object
-            List<GameObject> intersectedTunnels = TunnelUtils.getIntersectedObjects(projectedSegment, otherTunnels);
-
-            if (intersectedTunnels.Count > 0)
-            {
-                Debug.Log("Tunnel Intersection Detected!");
-                intersectedTunnels.ForEach((tunnel) =>
-                {
-                    Debug.Log("Destroy tunnel " + tunnel.name);
-                    //GameObject.Destroy(tunnel);
-                });
-                OnIntersectTunnel?.Invoke(projectedSegment, intersectedTunnels);
-
-            }
-        }
-
-        PrevSegmentDict[projectedTransform] = projectedSegment;
-    }
-
-    GameObject addNewTunnel(Transform transform)
-    {
-        if (isSpawn)
-        {
-            SpawnObstacle(transform);
-            isSpawn = false;
-        }
-
-        GameObject segment = tunnelMaker.GrowTunnel(transform);
-
-        if (segment != null)
-        {
-            tunnelGrid.AddGameObject(transform.position, segment);
-        }
-       
-        return segment;
-    }
+		tunnelInsiderManager = TunnelInsiderManager.Instance;
+		tunnelCreatorManager = TunnelCreatorManager.Instance;
+		tunnelActionManager = TunnelActionManager.Instance;
+		tunnelIntersectorManager = TunnelIntersectorManager.Instance;
+	}
 
 	// Update is called once per frame
 	void Update()
 	{
 			
 	}
-
-    private void OnDisable()
-    {
-        Agent.OnMove -= TunnelAction;
-    }
 }
 
