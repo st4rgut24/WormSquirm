@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
 {
+    public int maxSegmentLength = 3; // the maximum length of a tunnel segment
+
     public Vector3Int origin = new Vector3Int(0, 0, 0);
 
     public int xAxisLength = 100;

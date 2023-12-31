@@ -14,7 +14,6 @@ public class TunnelManager : MonoBehaviour
     TunnelMake tunnelMaker;
     Grid tunnelGrid;
 
-    GameObject prevSegment;
     private Dictionary<Transform, GameObject> PrevSegmentDict; // maps Player Transform to previous segments
 
     int cubeCount = 0;
@@ -30,14 +29,14 @@ public class TunnelManager : MonoBehaviour
     void Awake()
 	{
         tunnelMaker = GameObject.FindObjectOfType<TunnelMake>();
-        tunnelGrid = new Grid();
+        tunnelGrid = new Grid(4, 3);
         PrevSegmentDict = new Dictionary<Transform, GameObject>();
     }
 
     // testing
     public void SetSpawnFlag()
     {
-        Debug.Log("Set spawn flag");
+        // Debug.Log("Set spawn flag");
         isSpawn = true;
     }
 
@@ -66,22 +65,30 @@ public class TunnelManager : MonoBehaviour
     /// <summary>
     /// take an action based on the location of the next tunnel segment
     /// </summary>
-    /// <param name="projectedTransform">The projected location of the tunnel</param>
+    /// <param name="projectedTransform">The projected location of the tunnel/player</param>
 	void TunnelAction(Transform projectedTransform)
 	{
-        List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(projectedTransform.position);
+        List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(projectedTransform.position); // TODO: a transform may intersect with a segment yet
+                                                                                                // be in a different cell.
+                            
         GameObject projectedSegment = addNewTunnel(projectedTransform);
 
         // if tunnel does not exist yet, create it
-        if (otherTunnels != null)
+        if (PrevSegmentDict.ContainsKey(projectedTransform))
         {
             otherTunnels.Remove(PrevSegmentDict[projectedTransform]); // adjoining segment does not count as intersected object
-            List<GameObject> intersectedTunnels = CollisionUtils.getIntersectedObjects(projectedSegment, otherTunnels);
+            List<GameObject> intersectedTunnels = TunnelUtils.getIntersectedObjects(projectedSegment, otherTunnels);
 
             if (intersectedTunnels.Count > 0)
             {
                 Debug.Log("Tunnel Intersection Detected!");
+                intersectedTunnels.ForEach((tunnel) =>
+                {
+                    Debug.Log("Destroy tunnel " + tunnel.name);
+                    //GameObject.Destroy(tunnel);
+                });
                 OnIntersectTunnel?.Invoke(projectedSegment, intersectedTunnels);
+
             }
         }
 

@@ -12,8 +12,12 @@ public class Bot : Agent
 
     private float startTime;
 
+    bool reachedDestination;
+
     private void Awake()
     {
+        reachedDestination = false;
+
         startLocation = start.position;
         endLocation = goal.position;
 
@@ -39,9 +43,12 @@ public class Bot : Agent
         startTime = Time.time;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        MoveBot();
+        //if (!reachedDestination)
+        //{
+            MoveBot();
+        //}
     }
 
     private void MoveBot()
@@ -58,6 +65,7 @@ public class Bot : Agent
         if (fractionOfJourney >= 1.0f)
         {
             startTime = Time.time;
+            //reachedDestination = true;
         }
     }
 }

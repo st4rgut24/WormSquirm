@@ -16,8 +16,10 @@ public class Player : Agent
         base.Start();
     }
 
-    void Update()
+    protected override void Update()
     {
+        base.Update();
+
         // Get input from arrow keys
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");

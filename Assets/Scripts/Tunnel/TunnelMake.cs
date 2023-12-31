@@ -8,10 +8,10 @@ public class TunnelMake : MonoBehaviour
 {
     public GameObject TunnelSegment;
 
-    public int tunnelSegments = 10;
-    public float segmentSpacing = 1.0f;
-    public float tunnelRadius = 2.0f;
-    public float noiseScale = 0.1f;
+    public int tunnelSegments;
+    public float segmentSpacing;
+    public float tunnelRadius;
+    public float noiseScale;
 
     float prevHeight = 0;
 
@@ -39,7 +39,7 @@ public class TunnelMake : MonoBehaviour
 
         if (!PrevRingDict.ContainsKey(transform)) // initialize start of tunnel
         {
-            Ring ring = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, direction, position);
+            Ring ring = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, direction, position, noiseScale);
             PrevRingDict.Add(transform, ring); // update normal vector
         }
         else
@@ -67,7 +67,7 @@ public class TunnelMake : MonoBehaviour
         Mesh tunnelMesh = new Mesh();
         meshFilter.mesh = tunnelMesh;
 
-        Ring ring = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, direction, position);
+        Ring ring = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, direction, position, noiseScale);
 
         Vector3[] vertices = PrevRingDict[transform].vertices.Concat(ring.vertices).ToArray();
 

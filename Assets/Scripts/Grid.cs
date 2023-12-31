@@ -1,19 +1,35 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using static UnityEditor.PlayerSettings;
 
 public class Grid
 {
     Vector3Int dimension;
 
-    public int unitsPerCell = 4; // world units per array indice
-                                 // minimum should be four times max dimension of a gameobject
+    public int unitsPerCell; 
+
+    int searchBuffer;        // number of adjoining cells need to check due to uncertainty
+                             // of gameobject size
 
     private List<GameObject>[,,] grid;
 
-    public Grid() {
+    /// <summary>
+    /// Create a grid to lookup GameObjects by position
+    /// </summary>
+    /// <param name="unitsPerCell"> world units per array indice </param>
+    /// <param name="maxDimSize"> max size (l,w,h) of the stored gameobjects </param>
+    public Grid(int unitsPerCell, int maxDimSize) {
+
+        this.unitsPerCell = unitsPerCell;
+        this.searchBuffer = getSearchBuffer(maxDimSize, unitsPerCell);
+
         this.dimension = getDimension();
         grid = new List<GameObject>[this.dimension.x, this.dimension.y, this.dimension.z];
+    }
+
+
+    int getSearchBuffer(int maxDimSize, int unitsPerCell)
+    {
+        return Mathf.FloorToInt(maxDimSize / this.unitsPerCell) + 1;
     }
 
     Vector3Int ConvertWorldPosToGridPos(Vector3 worldPos)
@@ -50,20 +66,30 @@ public class Grid
         {
             grid[cellPos.x, cellPos.y, cellPos.z] = new List<GameObject>();
         }
-        Debug.Log("Save gameobject " + go.name + " with world pos " + pos + " to cell position " + cellPos);
+        // Debug.Log("Save gameobject " + go.name + " with world pos " + pos + " to cell position " + cellPos);
         grid[cellPos.x, cellPos.y, cellPos.z].Add(go);
     }
 
-    public bool HasGameObjects(Vector3 worldPos)
+    //public List<GameObject> GetGameObjects(Vector3 worldPos)
+    //{
+    //    if (!GameManager.Instance.isValidPos(worldPos))
+    //    {
+    //        throw new System.Exception("GameObject is out of bounds " + worldPos);
+    //    }
+
+    //    Vector3Int cellPos = ConvertWorldPosToGridPos(worldPos);
+
+    //    Debug.Log("Get GameObjects at world position " + worldPos + " and cell position " + cellPos);
+
+
+    //    return grid[cellPos.x, cellPos.y, cellPos.z];
+    //}
+
+    bool isWithinGrid(int i, int j, int k)
     {
-        if (!GameManager.Instance.isValidPos(worldPos))
-        {
-            throw new System.Exception("GameObject is out of bounds");
-        }
-
-        Vector3Int cellPos = ConvertWorldPosToGridPos(worldPos);
-
-        return grid[cellPos.x, cellPos.y, cellPos.z] != null;
+        return i >= 0 && i < grid.GetLength(0) &&
+                        j >= 0 && j < grid.GetLength(1) &&
+                        k >= 0 && k < grid.GetLength(2);
     }
 
     public List<GameObject> GetGameObjects(Vector3 worldPos)
@@ -73,11 +99,32 @@ public class Grid
             throw new System.Exception("GameObject is out of bounds " + worldPos);
         }
 
+        List<GameObject> result = new List<GameObject>();
+
         Vector3Int cellPos = ConvertWorldPosToGridPos(worldPos);
 
-        Debug.Log("Get GameObjects at world position " + worldPos + " and cell position " + cellPos);
+        // Debug.Log("Get GameObjects at cell position " + cellPos);
 
+        int x = cellPos.x;
+        int y = cellPos.y;
+        int z = cellPos.z;
 
-        return grid[cellPos.x, cellPos.y, cellPos.z];
+        // Iterate through the cells in the specified buffer around the indexed cell
+        for (int i = x - this.searchBuffer; i <= x + this.searchBuffer; i++)
+        {
+            for (int j = y - this.searchBuffer; j <= y + this.searchBuffer; j++)
+            {
+                for (int k = z - this.searchBuffer; k <= z + this.searchBuffer; k++)
+                {
+                    if (isWithinGrid(i,j,k) && grid[i, j, k] != null)
+                    {
+                        // Add all objects from the current cell to the result list
+                        result.AddRange(grid[i, j, k]);
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 }

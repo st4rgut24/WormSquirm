@@ -8,28 +8,32 @@ public class Agent : MonoBehaviour
 
     Vector3 prevPosition = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
 
+    Vector3 startNotifyPosition;
+
     // Use this for initialization
     protected virtual void Start()
 	{
-        StartCoroutine(NotifyCoroutine());
+        startNotifyPosition = transform.position;
     }
 
     // Update is called once per frame
-    void Update()
+    protected virtual void Update()
 	{
-			
+        float distance = Vector3.Distance(startNotifyPosition, transform.position);
+
+        if (distance >= GameManager.Instance.maxSegmentLength)
+        {
+            notifyPosition();
+            startNotifyPosition = transform.position;
+        }
 	}
 
-    private IEnumerator NotifyCoroutine()
+    private void notifyPosition()
     {
-        while (true)
+        if (transform.position != prevPosition)
         {
-            if (transform.position != prevPosition)
-            {
-                prevPosition = transform.position;
-                OnMove?.Invoke(transform);
-            }
-            yield return new WaitForSeconds(0.5f);
+            prevPosition = transform.position;
+            OnMove?.Invoke(transform);
         }
     }
 }
