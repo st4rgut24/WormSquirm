@@ -45,10 +45,10 @@ public class Bot : Agent
 
     private void FixedUpdate()
     {
-        //if (!reachedDestination)
-        //{
+        if (!reachedDestination)
+        {
             MoveBot();
-        //}
+        }
     }
 
     private void MoveBot()
@@ -65,7 +65,7 @@ public class Bot : Agent
         if (fractionOfJourney >= 1.0f)
         {
             startTime = Time.time;
-            //reachedDestination = true;
+            reachedDestination = true;
         }
     }
 }

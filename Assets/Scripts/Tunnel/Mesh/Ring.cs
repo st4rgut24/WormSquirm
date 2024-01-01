@@ -3,30 +3,32 @@ using UnityEngine;
 
 public class Ring
 {
+    const float defaultNoise = 0;
+
     public Vector3[] vertices;
 
     float radius;
     Vector3 center;
 
-    public Ring(float radius, int vertexCount, float vertexSpacing, Vector3 normal, Vector3 center, float noiseScale)
+    public Ring(float radius, int vertexCount, Vector3 normal, Vector3 center, float? noiseScale)
 	{
         this.radius = radius;
         this.vertices = new Vector3[vertexCount];
         this.center = center;
 
 
-        setVertices(vertexCount, vertexSpacing, normal, noiseScale);
+        setVertices(vertexCount, normal, noiseScale);
     }
 
-    void setVertices(int vertexCount, float vertexSpacing, Vector3 normal, float noiseScale)
+    void setVertices(int vertexCount, Vector3 normal, float? noiseScale)
     {
         Vector3 vector2 = normal + new Vector3(1, 1, 1);
         Vector3 planeVector = Vector3.Cross(normal, vector2).normalized;
 
         for (int i = 0; i < vertexCount; i++)
         {
-            float t = i * vertexSpacing;
-            float noise = Mathf.PerlinNoise(0, t * noiseScale) * 2 - 1; // Adjust noise scale as needed
+
+            float noise = getNoise(i, noiseScale);
 
             float tunnelRadiusAtPoint = radius + noise;
             float angle = Mathf.Lerp(0, 360f, i / (float)vertexCount);
@@ -37,6 +39,11 @@ public class Ring
             // Debug.Log("point " + point + " at angle " + angle);
             vertices[i] = point;
         }
+    }
+
+    float getNoise(int index, float? noiseScale)
+    {
+        return noiseScale.HasValue ? Mathf.PerlinNoise(0, index * (float)noiseScale) * 2 - 1 : defaultNoise;
     }
 }
 

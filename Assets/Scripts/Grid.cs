@@ -66,7 +66,7 @@ public class Grid
         {
             grid[cellPos.x, cellPos.y, cellPos.z] = new List<GameObject>();
         }
-         Debug.Log("Save gameobject " + go.name + " with world pos " + pos + " to cell position " + cellPos);
+         //Debug.Log("Save gameobject " + go.name + " with world pos " + pos + " to cell position " + cellPos);
         grid[cellPos.x, cellPos.y, cellPos.z].Add(go);
     }
 
@@ -88,7 +88,7 @@ public class Grid
 
         Vector3Int cellPos = ConvertWorldPosToGridPos(worldPos);
 
-         Debug.Log("Get GameObjects at cell position " + cellPos);
+         //Debug.Log("Get GameObjects at cell position " + cellPos);
 
         int x = cellPos.x;
         int y = cellPos.y;

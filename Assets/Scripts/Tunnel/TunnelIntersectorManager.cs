@@ -8,8 +8,14 @@ using System.Collections.Generic;
 /// </summary>
 public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 {
+    public int rayRings = 3; // The bigger this number is, the smaller the interval
+
     TunnelMake tunnelMaker;
     Grid tunnelGrid;
+
+    TunnelProps _props;
+
+    int _rayInterval; // the smaller the ray interval, the more precise the collision tests during intersection
 
     private Dictionary<Transform, GameObject> PrevSegmentDict; // maps Player Transform to previous segments
 
@@ -27,40 +33,49 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
     private void Start()
     {
         tunnelGrid = GameManager.Instance.GetGrid(GridType.Tunnel);
+        _props = TunnelManager.Instance.defaultProps;
+        _rayInterval = Mathf.FloorToInt(_props.TunnelRadius / rayRings);
     }
 
     /// <summary>
     /// Get the Tunnels that will be intersected
     /// </summary>
-    /// <param name="playerTransform">The transform of the player</param>
-	void IntersectAction(Transform playerTransform, List<GameObject> otherTunnels, GameObject prevSegment)
+    /// <param name="transform">The transform of the tunnel end</param>
+    /// <param name="otherTunnels">Other tunnels in the vicinity of the active tunnel</param>
+    /// <param name="prevTunnel">Previous tunnel segment belonging to the active tunnel</param>
+	void IntersectAction(Transform transform, GameObject prevTunnel, List<GameObject> otherTunnels) // todo: restore otherObjects list and call TunnelUtils.GetIntersectedObjects()
     {
-        // 1. Create a Tunnel
-        GameObject segment = tunnelMaker.GrowTunnel(playerTransform); 
+        GameObject projectedSegment = tunnelMaker.GrowTunnel(transform);
 
-        otherTunnels.Remove(prevSegment); // adjoining segment does not count as intersected object
-        List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(segment, otherTunnels);
+        // get intersected tunnels (may be more than 1)
+        otherTunnels.Remove(prevTunnel); // adjoining segment does not count as intersected object
+        List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment, otherTunnels);
 
-        // 2. Get the intersecting GameObjects
-        if (intersectedTunnels.Count > 0)
-        {
-            Debug.Log("Tunnel Intersection Detected!");
-            intersectedTunnels.ForEach((tunnel) =>
-            {
-                Debug.Log("Intersects tunnel " + tunnel.name);
-                //GameObject.Destroy(tunnel);
-            });
+        // 1. Create Rays with player forward vector
+        List<Ray> rays = RayUtils.CreateRays(transform, _props.TunnelSegments, _props.TunnelRadius, _rayInterval);
 
-        }
+        // 2. Attach MeshCollider to intersected tunnel
+        ComponentUtils.addMeshColliders(intersectedTunnels);
 
-        // TODO: 
         // 3. Get the intersecting Faces
         // 4. Delete the intersecting Faces
+        // Todo: test
+        DeleteIntersectedFaces(intersectedTunnels, rays);
+
         // 5. Create a Ring segment to best fill the hole
         // 6. Create a new Tunnel segment that connects to the ring segment occupying the hole
 
-        PrevSegmentDict[playerTransform] = segment;
-        GameObject.Destroy(segment);
+        ComponentUtils.removeMeshColliders(intersectedTunnels);
+    }
+
+     void DeleteIntersectedFaces(List<GameObject> tunnels, List<Ray> rays)
+    { 
+        List<Mesh> meshes = ComponentUtils.GetMeshes(tunnels);
+
+        meshes.ForEach((mesh) =>
+        {
+            TunnelDelete.DeleteFacesHitByRays(mesh, rays);
+        });
     }
 
     // Update is called once per frame

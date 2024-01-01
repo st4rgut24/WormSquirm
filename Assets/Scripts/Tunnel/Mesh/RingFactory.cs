@@ -12,9 +12,9 @@ public class RingFactory
      * <param name="center">The center of the ring</param>
      * <param name="normal">The vector perpendicular to the ring</param>
      */
-    public static Ring get(float radius, float vertexSpacing, int vertexCount, Vector3 normal, Vector3 center, float noiseScale)
+    public static Ring get(float radius, int vertexCount, Vector3 normal, Vector3 center, float? noiseScale)
     {
-        return new Ring(radius, vertexCount, vertexSpacing, normal, center, noiseScale);
+        return new Ring(radius, vertexCount, normal, center, noiseScale);
     }
 }
 

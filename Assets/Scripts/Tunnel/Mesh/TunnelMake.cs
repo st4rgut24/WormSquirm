@@ -4,14 +4,11 @@ using System.Linq;
 
 using UnityEngine;
 
-public class TunnelMake : MonoBehaviour
+public class TunnelMake: MonoBehaviour
 {
     public GameObject TunnelSegment;
 
-    public int tunnelSegments;
-    public float segmentSpacing;
-    public float tunnelRadius;
-    public float noiseScale;
+    TunnelProps _props;
 
     float prevHeight = 0;
 
@@ -28,7 +25,15 @@ public class TunnelMake : MonoBehaviour
         PrevRingDict = new Dictionary<Transform, Ring>();
     }
 
+    private void Start()
+    {
+        setProps(TunnelManager.Instance.defaultProps);
+    }
 
+    public void setProps(TunnelProps props)
+    {
+        _props = props;
+    }
 
     public GameObject GrowTunnel(Transform transform)
     {
@@ -39,7 +44,7 @@ public class TunnelMake : MonoBehaviour
 
         if (!PrevRingDict.ContainsKey(transform)) // initialize start of tunnel
         {
-            Ring ring = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, direction, position, noiseScale);
+            Ring ring = RingFactory.get(_props.TunnelRadius, _props.TunnelSegments, direction, position, _props.NoiseScale);
             PrevRingDict.Add(transform, ring); // update normal vector
         }
         else
@@ -67,9 +72,11 @@ public class TunnelMake : MonoBehaviour
         Mesh tunnelMesh = new Mesh();
         meshFilter.mesh = tunnelMesh;
 
-        Ring ring = RingFactory.get(tunnelRadius, segmentSpacing, tunnelSegments, direction, position, noiseScale);
+        Ring ring = RingFactory.get(_props.TunnelRadius, _props.TunnelSegments, direction, position, _props.NoiseScale);
 
         Vector3[] vertices = PrevRingDict[transform].vertices.Concat(ring.vertices).ToArray();
+
+        int tunnelSegments = _props.TunnelSegments;
 
         tunnelMesh.vertices = vertices;
 
