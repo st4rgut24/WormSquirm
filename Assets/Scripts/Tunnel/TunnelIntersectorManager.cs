@@ -52,7 +52,7 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
         List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment, otherTunnels);
 
         // 1. Create Rays with player forward vector
-        List<Ray> rays = RayUtils.CreateRays(transform, _props.TunnelSegments, _props.TunnelRadius, _rayInterval);
+        List<Ray> rays = RayUtils.CreateRays(transform, _props.TunnelSegments, _props.TunnelRadius / 2, _rayInterval);
 
         // 2. Attach MeshCollider to intersected tunnel
         ComponentUtils.addMeshColliders(intersectedTunnels);
@@ -74,7 +74,8 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 
         meshes.ForEach((mesh) =>
         {
-            TunnelDelete.DeleteFacesHitByRays(mesh, rays);
+            TunnelDelete tunnelDelete = new TunnelDelete(mesh, rays);
+            tunnelDelete.DeleteFaces();
         });
     }
 
