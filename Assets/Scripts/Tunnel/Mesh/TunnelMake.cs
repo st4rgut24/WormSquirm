@@ -35,6 +35,11 @@ public class TunnelMake: MonoBehaviour
         _props = props;
     }
 
+    public void clearPrevRingEntry(Transform transform)
+    {
+        PrevRingDict.Remove(transform);
+    }
+
     public GameObject GrowTunnel(Transform transform)
     {
         Vector3 position = transform.position;

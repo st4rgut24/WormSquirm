@@ -42,37 +42,16 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
     }
 
     /// <summary>
-    /// spawn an obstacle in front of the transform
-    /// </summary>
-    /// <param name="targetTransform">transform of the object the obstacle should be in front of</param>
-    public void SpawnObstacle(Transform targetTransform)
-    {
-        // Calculate the position in front of the targetTransform
-        Vector3 spawnPosition = targetTransform.position + targetTransform.forward;
-
-        // Create a new GameObject (cube) at the calculated position
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cube.transform.position = spawnPosition;
-        Debug.Log("Spawn cube");
-
-        cube.name = "Cube " + cubeCount;
-        // Set the scale of the cube to (1, 1, 1)
-        cube.transform.localScale = Vector3.one * 3;
-
-        tunnelGrid.AddGameObject(cube.transform.position, cube);
-        cubeCount++;
-    }
-
-    /// <summary>
     /// Create a Tunnel segment
     /// </summary>
     /// <param name="playerTransform">The transform of the player</param>
-	void CreateAction(Transform playerTransform, Dictionary<Transform, GameObject> NewSegmentDict)
+    /// <param name="NewSegmentDict">Mapping of new segments</param>
+    /// <param name="lastAction">The action preceding this Create action</param>
+	void CreateAction(Transform playerTransform, Dictionary<Transform, GameObject> NewSegmentDict, TunnelActionManager.Action lastAction)
     {
-        if (isSpawn)
+        if (lastAction == TunnelActionManager.Action.Intersect)
         {
-            SpawnObstacle(playerTransform);
-            isSpawn = false;
+            tunnelMaker.clearPrevRingEntry(playerTransform); // a new segment requires previous ring to be reset
         }
 
         GameObject segment = tunnelMaker.GrowTunnel(playerTransform);

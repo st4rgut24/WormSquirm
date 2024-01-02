@@ -54,11 +54,17 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
         List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment, otherTunnels);
         List<Ray> rays = RayUtils.CreateRays(transform, _props.TunnelSegments, _props.TunnelRadius / 2, _rayInterval);
 
+
         intersectedTunnels.ForEach((tunnel) =>
         {
             TunnelDelete tunnelDelete = new TunnelDelete(tunnel, rays, isInsideTunnel);
             tunnelDelete.DeleteTunnel();
         });
+
+        if (isInsideTunnel)
+        {
+            Destroy(projectedSegment); // remove the segment if created inside the tunnel
+        }
     }
 
     // Update is called once per frame
