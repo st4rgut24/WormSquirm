@@ -17,11 +17,24 @@ public class TunnelDelete
         this.rays = rays;
     }
 
+    public void DeleteInvertedFaces(GameObject tunnel)
+    {
+        FlipNormals();
+        tunnel.AddComponent<MeshCollider>();
+        DeleteFaces();
+        //FlipNormals();
+    }
+
+    /// <summary>
+    /// Deletes faces using a collider test, inverting faces if necessary to test collision
+    /// </summary>
+    /// <param name="invertFaces">flag to invert faces</param>
     public void DeleteFaces()
     {
         HashSet<int> HitTriangleIdxSet = GetTrianglesHitByRays(this.mesh, this.rays);
         int[] removeFaceIdxArr = HitTriangleIdxSet.ToArray<int>();
         RemoveTriangles(removeFaceIdxArr);
+        //this.mesh.RecalculateNormals();
     }
 
     void RemoveTriangles(int[] trianglesToRemove)
@@ -54,7 +67,7 @@ public class TunnelDelete
         {
             Ray ray = rays[i];
             GetTrianglesHitByRay(ray, triangleRemoveSet);
-        }
+        }  
 
         return triangleRemoveSet;
     }
@@ -74,4 +87,14 @@ public class TunnelDelete
             removalIdxSet.Add(hit.triangleIndex);
         }
     }
+
+    /// <summary>
+    /// Flip the normals of a mesh to test collision on the inside faces
+    /// </summary>
+    /// <param name="mesh">Mesh</param> 
+    void FlipNormals()
+    {
+        mesh.triangles = mesh.triangles.Reverse().ToArray();
+    }
 }
+    

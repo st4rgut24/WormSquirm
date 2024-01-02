@@ -43,40 +43,49 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
     /// <param name="transform">The transform of the tunnel end</param>
     /// <param name="otherTunnels">Other tunnels in the vicinity of the active tunnel</param>
     /// <param name="prevTunnel">Previous tunnel segment belonging to the active tunnel</param>
-	void IntersectAction(Transform transform, GameObject prevTunnel, List<GameObject> otherTunnels) // todo: restore otherObjects list and call TunnelUtils.GetIntersectedObjects()
+    /// <param name="lastAction">The last tunnel action taken prior to intersection</param>
+	void IntersectAction(Transform transform, GameObject prevTunnel, List<GameObject> otherTunnels, TunnelActionManager.Action lastAction) // todo: restore otherObjects list and call TunnelUtils.GetIntersectedObjects()
     {
+        bool isInsideTunnel = lastAction == TunnelActionManager.Action.Follow;
         GameObject projectedSegment = tunnelMaker.GrowTunnel(transform);
 
         // get intersected tunnels (may be more than 1)
         otherTunnels.Remove(prevTunnel); // adjoining segment does not count as intersected object
         List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment, otherTunnels);
-
-        // 1. Create Rays with player forward vector
         List<Ray> rays = RayUtils.CreateRays(transform, _props.TunnelSegments, _props.TunnelRadius / 2, _rayInterval);
 
-        // 2. Attach MeshCollider to intersected tunnel
         ComponentUtils.addMeshColliders(intersectedTunnels);
-
-        // 3. Get the intersecting Faces
-        // 4. Delete the intersecting Faces
-        // Todo: test
-        DeleteIntersectedFaces(intersectedTunnels, rays);
-
-        // 5. Create a Ring segment to best fill the hole
-        // 6. Create a new Tunnel segment that connects to the ring segment occupying the hole
-
+        DeleteIntersectedFaces(intersectedTunnels, rays, isInsideTunnel);
         ComponentUtils.removeMeshColliders(intersectedTunnels);
     }
 
-     void DeleteIntersectedFaces(List<GameObject> tunnels, List<Ray> rays)
+     void DeleteIntersectedFaces(List<GameObject> tunnels, List<Ray> rays, bool invertFaces)
     { 
         List<Mesh> meshes = ComponentUtils.GetMeshes(tunnels);
 
-        meshes.ForEach((mesh) =>
+        if (invertFaces)
         {
-            TunnelDelete tunnelDelete = new TunnelDelete(mesh, rays);
-            tunnelDelete.DeleteFaces();
-        });
+            ComponentUtils.removeMeshColliders(tunnels);
+
+            tunnels.ForEach((tunnel) =>
+            {
+                MeshFilter mesh = tunnel.GetComponent<MeshFilter>();
+                TunnelDelete tunnelDelete = new TunnelDelete(mesh.mesh, rays);
+
+                Debug.Log("Delete faces");
+                tunnelDelete.DeleteInvertedFaces(tunnel);
+            });
+        }
+        else
+        {
+            meshes.ForEach((mesh) =>
+            {
+                TunnelDelete tunnelDelete = new TunnelDelete(mesh, rays);
+
+                Debug.Log("Delete faces");
+                tunnelDelete.DeleteFaces();
+            });
+        }
     }
 
     // Update is called once per frame

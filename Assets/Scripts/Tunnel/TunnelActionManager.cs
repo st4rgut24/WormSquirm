@@ -10,12 +10,19 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 {
     Grid tunnelGrid;
 
-    Dictionary<Transform, bool> isTunnelingDict; // <Player Transform, creating tunnel flag>
     Dictionary<Transform, GameObject> PrevCreatedSegmentDict; // <Player Transform, the last tunnel segment player created>
+    Dictionary<Transform, Action> LastTunnelActionDict; // <Player Transform, the last tunnel action>
 
-    public static event Action<Transform, GameObject, List<GameObject>> OnIntersectTunnel; // intersect an existing tunnel
+    public static event Action<Transform, GameObject, List<GameObject>, Action> OnIntersectTunnel; // intersect an existing tunnel
     public static event Action<Transform, Dictionary<Transform, GameObject>> OnCreateTunnel; // create a new unobstructed tunnel
     public static event Action<Transform> OnFollowTunnel; // follow path of existing tunnel
+
+    public enum Action {
+        Follow,
+        Intersect,
+        Create,
+        None
+    }
 
     private void OnEnable()
     {
@@ -24,29 +31,14 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
     private void Awake()
     {
-        isTunnelingDict = new Dictionary<Transform, bool>();
         PrevCreatedSegmentDict = new Dictionary<Transform, GameObject>();
+        LastTunnelActionDict = new Dictionary<Transform, Action>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
         tunnelGrid = GameManager.Instance.GetGrid(GridType.Tunnel);
-    }
-
-    /// <summary>
-    /// Get boolean flag indicating if the player is actively extending a new tunnel
-    /// </summary>
-    /// <param name="playerTransform">Transform identifying a player</param>
-    /// <returns>True if extending a tunnel or if the key does not exist</returns>
-    bool isTunneling(Transform playerTransform)
-    {
-        if (!isTunnelingDict.ContainsKey(playerTransform))
-        {
-            isTunnelingDict[playerTransform] = true;
-        }
-
-        return isTunnelingDict[playerTransform];
     }
 
     /// <summary>
@@ -59,24 +51,34 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
         GameObject EnclosingTunnel = TunnelUtils.getEnclosingObject(playerTransform.position, otherTunnels);
 
-        if (EnclosingTunnel == null)
+        Action lastTunnelAction = LastTunnelActionDict.ContainsKey(playerTransform) ? LastTunnelActionDict[playerTransform] : Action.None;
+
+        Debug.Log("Enclosing tunnel is " + EnclosingTunnel?.name);
+
+        if (IsIntersect(EnclosingTunnel, lastTunnelAction)) // intersect
+        {
+             Debug.Log("Tunnel Action Intersect");
+            GameObject prevSegment = PrevCreatedSegmentDict[playerTransform];
+            OnIntersectTunnel?.Invoke(playerTransform, prevSegment, otherTunnels, lastTunnelAction);
+            LastTunnelActionDict[playerTransform] = Action.Intersect;
+        }
+        else if (EnclosingTunnel == null)
         {
             Debug.Log("Tunnel Action Create");
             OnCreateTunnel?.Invoke(playerTransform, PrevCreatedSegmentDict);
-            isTunnelingDict[playerTransform] = true;
-        }
-        else if (isTunneling(playerTransform))
-        {
-            Debug.Log("Tunnel Action Intersect");
-            GameObject prevSegment = PrevCreatedSegmentDict[playerTransform];
-            OnIntersectTunnel?.Invoke(playerTransform, prevSegment, otherTunnels);
-            isTunnelingDict[playerTransform] = false;
+            LastTunnelActionDict[playerTransform] = Action.Create;
         }
         else
         {
             Debug.Log("Tunnel Action Follow");
             OnFollowTunnel?.Invoke(playerTransform);
+            LastTunnelActionDict[playerTransform] = Action.Follow;
         }
+    }
+
+    bool IsIntersect(GameObject enclosingTunnel, Action lastTunnelAction)
+    {
+        return enclosingTunnel == null ? lastTunnelAction == Action.Follow : lastTunnelAction == Action.Create;
     }
 
     // Update is called once per frame
