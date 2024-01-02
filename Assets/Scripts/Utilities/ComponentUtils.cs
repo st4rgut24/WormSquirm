@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class ComponentUtils: MonoBehaviour
 {
+    public static Mesh GetMesh(GameObject obj)
+    {
+        MeshFilter meshFilter = obj.GetComponent<MeshFilter>();
+        return meshFilter.mesh;
+
+    }
+
     public static List<Mesh> GetMeshes(List<GameObject>objects)
     {
         List<Mesh> meshList = new List<Mesh>();
@@ -15,6 +22,15 @@ public class ComponentUtils: MonoBehaviour
         });
 
         return meshList;
+    }
+
+    public static void removeMeshCollider(GameObject obj)
+    {
+        MeshCollider meshCollider = obj.GetComponent<MeshCollider>();
+        if (meshCollider != null)
+        {
+            Destroy(meshCollider);
+        }
     }
 
     public static void removeMeshColliders(List<GameObject> objects)

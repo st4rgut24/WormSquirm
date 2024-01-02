@@ -54,38 +54,11 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
         List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment, otherTunnels);
         List<Ray> rays = RayUtils.CreateRays(transform, _props.TunnelSegments, _props.TunnelRadius / 2, _rayInterval);
 
-        ComponentUtils.addMeshColliders(intersectedTunnels);
-        DeleteIntersectedFaces(intersectedTunnels, rays, isInsideTunnel);
-        ComponentUtils.removeMeshColliders(intersectedTunnels);
-    }
-
-     void DeleteIntersectedFaces(List<GameObject> tunnels, List<Ray> rays, bool invertFaces)
-    { 
-        List<Mesh> meshes = ComponentUtils.GetMeshes(tunnels);
-
-        if (invertFaces)
+        intersectedTunnels.ForEach((tunnel) =>
         {
-            ComponentUtils.removeMeshColliders(tunnels);
-
-            tunnels.ForEach((tunnel) =>
-            {
-                MeshFilter mesh = tunnel.GetComponent<MeshFilter>();
-                TunnelDelete tunnelDelete = new TunnelDelete(mesh.mesh, rays);
-
-                Debug.Log("Delete faces");
-                tunnelDelete.DeleteInvertedFaces(tunnel);
-            });
-        }
-        else
-        {
-            meshes.ForEach((mesh) =>
-            {
-                TunnelDelete tunnelDelete = new TunnelDelete(mesh, rays);
-
-                Debug.Log("Delete faces");
-                tunnelDelete.DeleteFaces();
-            });
-        }
+            TunnelDelete tunnelDelete = new TunnelDelete(tunnel, rays, isInsideTunnel);
+            tunnelDelete.DeleteTunnel();
+        });
     }
 
     // Update is called once per frame

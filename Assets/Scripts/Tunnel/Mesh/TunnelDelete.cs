@@ -9,20 +9,43 @@ public class TunnelDelete
 {
     List<Ray> rays;
     Mesh mesh;
+    GameObject tunnel;
+
+    bool isInverted;
+
     HashSet<int> removeIdxSet;
 
-    public TunnelDelete(Mesh mesh, List<Ray> rays)
+    public TunnelDelete(GameObject Tunnel, List<Ray> rays, bool isInverted)
     {
-        this.mesh = mesh;
+        this.tunnel = Tunnel;
+        this.mesh = ComponentUtils.GetMesh(Tunnel);
         this.rays = rays;
+        this.isInverted = isInverted;
     }
 
-    public void DeleteInvertedFaces(GameObject tunnel)
+    public void DeleteTunnel()
     {
-        FlipNormals();
-        tunnel.AddComponent<MeshCollider>();
+        if (isInverted)
+        {
+            DeleteInvertedFaces();
+        }
+        else
+        {
+            DeleteFaces();
+        }
+    }
+
+    public void DeleteInvertedFaces()
+    {
+        int[] flippedFaces = MeshUtils.FlipNormals(mesh);
+
+        mesh.triangles = flippedFaces;
+
         DeleteFaces();
-        //FlipNormals();
+
+        int[] originalFaces = MeshUtils.FlipNormals(mesh);
+
+        mesh.triangles = originalFaces;
     }
 
     /// <summary>
@@ -31,10 +54,14 @@ public class TunnelDelete
     /// <param name="invertFaces">flag to invert faces</param>
     public void DeleteFaces()
     {
+        tunnel.AddComponent<MeshCollider>();
+
         HashSet<int> HitTriangleIdxSet = GetTrianglesHitByRays(this.mesh, this.rays);
         int[] removeFaceIdxArr = HitTriangleIdxSet.ToArray<int>();
         RemoveTriangles(removeFaceIdxArr);
         //this.mesh.RecalculateNormals();
+
+        ComponentUtils.removeMeshCollider(tunnel);
     }
 
     void RemoveTriangles(int[] trianglesToRemove)
@@ -86,15 +113,6 @@ public class TunnelDelete
 
             removalIdxSet.Add(hit.triangleIndex);
         }
-    }
-
-    /// <summary>
-    /// Flip the normals of a mesh to test collision on the inside faces
-    /// </summary>
-    /// <param name="mesh">Mesh</param> 
-    void FlipNormals()
-    {
-        mesh.triangles = mesh.triangles.Reverse().ToArray();
     }
 }
     
