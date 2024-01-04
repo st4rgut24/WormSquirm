@@ -49,10 +49,10 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
     /// <param name="lastAction">The action preceding this Create action</param>
 	void CreateAction(Transform playerTransform, Dictionary<Transform, GameObject> NewSegmentDict, TunnelActionManager.Action lastAction)
     {
-        if (lastAction == TunnelActionManager.Action.Intersect)
-        {
-            tunnelMaker.clearPrevRingEntry(playerTransform); // a new segment requires previous ring to be reset
-        }
+        //if (lastAction == TunnelActionManager.Action.Intersect)
+        //{
+        //    RingManager.Instance.Remove(playerTransform); // a new segment requires previous ring to be reset
+        //}
 
         GameObject segment = tunnelMaker.GrowTunnel(playerTransform);
 

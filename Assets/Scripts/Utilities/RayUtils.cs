@@ -11,11 +11,11 @@ public class RayUtils
     /// <param name="radius"></param>
     /// <param name="ringInterval"></param>
     /// <returns></returns>
-    public static List<Ray> CreateRays(Transform transform, int ringVertexCount, float radius, float ringInterval)
+    public static List<Ray> CreateRays(Transform transform, int ringVertexCount, float radius, float ringInterval, int offsetMultiple)
     {
         List<Ray> rays = new List<Ray>();
 
-        Vector3 offsetCenter = transform.position - transform.forward;// offset so the rays can intersect the mesh
+        Vector3 offsetCenter = transform.position - transform.forward * offsetMultiple;// offset so the rays can intersect the mesh
 
         List<Vector3> ringOrigins = GetRingPoints(transform.forward, offsetCenter, ringVertexCount, radius, ringInterval);
 
@@ -36,7 +36,7 @@ public class RayUtils
 
         while (currentRadius <= maxRadius)
         {
-            Ring ring = RingFactory.get(currentRadius, ringVertexCount, orientation, position, null);
+            Ring ring = RingManager.Instance.Create(currentRadius, ringVertexCount, orientation, position, null);
 
             // Add the points to the overall list
             ringPoints.AddRange(ring.vertices);

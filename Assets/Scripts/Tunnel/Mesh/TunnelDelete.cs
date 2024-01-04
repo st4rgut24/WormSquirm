@@ -7,52 +7,24 @@ using UnityEngine;
 /// </summary>
 public class TunnelDelete
 {
-    List<Ray> rays;
-    Mesh mesh;
-    GameObject tunnel;
-
-    bool isInverted;
+    protected List<Ray> rays;
+    protected Mesh mesh;
+    protected GameObject tunnel;
 
     HashSet<int> removeIdxSet;
 
-    public TunnelDelete(GameObject Tunnel, List<Ray> rays, bool isInverted)
+    public TunnelDelete(GameObject Tunnel, List<Ray> rays)
     {
         this.tunnel = Tunnel;
         this.mesh = ComponentUtils.GetMesh(Tunnel);
         this.rays = rays;
-        this.isInverted = isInverted;
-    }
-
-    public void DeleteTunnel()
-    {
-        if (isInverted)
-        {
-            DeleteInvertedFaces();
-        }
-        else
-        {
-            DeleteFaces();
-        }
-    }
-
-    public void DeleteInvertedFaces()
-    {
-        int[] flippedFaces = MeshUtils.FlipNormals(mesh);
-
-        mesh.triangles = flippedFaces;
-
-        DeleteFaces();
-
-        int[] originalFaces = MeshUtils.FlipNormals(mesh);
-
-        mesh.triangles = originalFaces;
     }
 
     /// <summary>
     /// Deletes faces using a collider test, inverting faces if necessary to test collision
     /// </summary>
     /// <param name="invertFaces">flag to invert faces</param>
-    public void DeleteFaces()
+    public virtual void DeleteTunnel()
     {
         tunnel.AddComponent<MeshCollider>();
 
@@ -104,14 +76,16 @@ public class TunnelDelete
         RaycastHit hit;
 
         // Draw the ray in the Scene view regardless of whether it hits anything
-        Debug.DrawRay(ray.origin, ray.direction * 1000f, Color.red, 10.0f);
+        //Debug.DrawRay(ray.origin, ray.direction * 1000f, Color.red, 10.0f);
 
         if (Physics.Raycast(ray.origin, ray.direction, out hit))
         {
-            Debug.Log("remove triangle at index " + hit.triangleIndex);
-            Debug.DrawRay(ray.origin, ray.direction * 1000f, Color.green, 10.0f);
-
-            removalIdxSet.Add(hit.triangleIndex);
+            if (hit.collider.gameObject == tunnel) // if tunnel was the hit gameobject, then add the triangle to removal set
+            {
+                Debug.DrawRay(ray.origin, ray.direction * 1000f, Color.red, 10.0f);
+                Debug.Log("Remove the triangle from Tunnel " + tunnel.name + " at index " + hit.triangleIndex);
+                removalIdxSet.Add(hit.triangleIndex);
+            }
         }
     }
 }

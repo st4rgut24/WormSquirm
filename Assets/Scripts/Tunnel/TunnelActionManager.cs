@@ -12,8 +12,9 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
     Dictionary<Transform, GameObject> PrevCreatedSegmentDict; // <Player Transform, the last tunnel segment player created>
     Dictionary<Transform, Action> LastTunnelActionDict; // <Player Transform, the last tunnel action>
+    Dictionary<Transform, Vector3> PrevPosDict; // <Player Transform, the player's previous position>
 
-    public static event Action<Transform, GameObject, List<GameObject>, Action> OnIntersectTunnel; // intersect an existing tunnel
+    public static event Action<Transform, GameObject, Vector3, List<GameObject>, Action> OnIntersectTunnel; // intersect an existing tunnel
     public static event Action<Transform, Dictionary<Transform, GameObject>, Action> OnCreateTunnel; // create a new unobstructed tunnel
     public static event Action<Transform> OnFollowTunnel; // follow path of existing tunnel
 
@@ -32,6 +33,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     private void Awake()
     {
         PrevCreatedSegmentDict = new Dictionary<Transform, GameObject>();
+        PrevPosDict = new Dictionary<Transform, Vector3>();
         LastTunnelActionDict = new Dictionary<Transform, Action>();
     }
 
@@ -53,13 +55,14 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
         Action lastTunnelAction = LastTunnelActionDict.ContainsKey(playerTransform) ? LastTunnelActionDict[playerTransform] : Action.None;
 
-        Debug.Log("Enclosing tunnel is " + EnclosingTunnel?.name);
+        //Debug.Log("Enclosing tunnel is " + EnclosingTunnel?.name);
 
         if (IsIntersect(EnclosingTunnel, lastTunnelAction)) // intersect
         {
-            Debug.Log("Tunnel Action Intersect");
+            Debug.Log("TunnelAction Intersect");
             GameObject prevSegment = PrevCreatedSegmentDict[playerTransform];
-            OnIntersectTunnel?.Invoke(playerTransform, prevSegment, otherTunnels, lastTunnelAction);
+            Vector3 prevPos = PrevPosDict[playerTransform];
+            OnIntersectTunnel?.Invoke(playerTransform, prevSegment, prevPos, otherTunnels, lastTunnelAction);
             LastTunnelActionDict[playerTransform] = Action.Intersect;
         }
         else if (EnclosingTunnel == null)
@@ -74,6 +77,8 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
             OnFollowTunnel?.Invoke(playerTransform);
             LastTunnelActionDict[playerTransform] = Action.Follow;
         }
+
+        PrevPosDict[playerTransform] = playerTransform.position;
     }
 
     bool IsIntersect(GameObject enclosingTunnel, Action lastTunnelAction)

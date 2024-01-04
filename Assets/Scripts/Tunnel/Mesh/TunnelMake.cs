@@ -18,26 +18,14 @@ public class TunnelMake: MonoBehaviour
 
     private Vector3[] vertices;
 
-    private Dictionary<Transform, Ring> PrevRingDict; // maps Player Transform to previous rings
 
     private void Awake()
     {
-        PrevRingDict = new Dictionary<Transform, Ring>();
     }
 
     private void Start()
     {
-        setProps(TunnelManager.Instance.defaultProps);
-    }
-
-    public void setProps(TunnelProps props)
-    {
-        _props = props;
-    }
-
-    public void clearPrevRingEntry(Transform transform)
-    {
-        PrevRingDict.Remove(transform);
+        _props = TunnelManager.Instance.defaultProps;
     }
 
     public GameObject GrowTunnel(Transform transform)
@@ -47,10 +35,10 @@ public class TunnelMake: MonoBehaviour
 
         GameObject tunnelObject = null;
 
-        if (!PrevRingDict.ContainsKey(transform)) // initialize start of tunnel
+        if (!RingManager.Instance.ContainsRing(transform)) // initialize start of tunnel
         {
-            Ring ring = RingFactory.get(_props.TunnelRadius, _props.TunnelSegments, direction, position, _props.NoiseScale);
-            PrevRingDict.Add(transform, ring); // update normal vector
+            Ring ring = RingManager.Instance.Create(direction, position);
+            RingManager.Instance.Add(transform, ring); // update normal vector
         }
         else
         {
@@ -77,9 +65,10 @@ public class TunnelMake: MonoBehaviour
         Mesh tunnelMesh = new Mesh();
         meshFilter.mesh = tunnelMesh;
 
-        Ring ring = RingFactory.get(_props.TunnelRadius, _props.TunnelSegments, direction, position, _props.NoiseScale);
+        Ring ring = RingManager.Instance.Create(direction, position);
+        Ring prevRing = RingManager.Instance.Get(transform);
 
-        Vector3[] vertices = PrevRingDict[transform].vertices.Concat(ring.vertices).ToArray();
+        Vector3[] vertices = prevRing.vertices.Concat(ring.vertices).ToArray();
 
         int tunnelSegments = _props.TunnelSegments;
 
@@ -114,7 +103,7 @@ public class TunnelMake: MonoBehaviour
 
         tunnelMesh.triangles = triangles;
 
-        PrevRingDict[transform] = ring;
+        RingManager.Instance.UpdateEntry(transform, ring);
 
         return segment;
     }

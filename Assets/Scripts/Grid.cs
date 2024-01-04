@@ -29,7 +29,7 @@ public class Grid
 
     int getSearchBuffer(int maxDimSize, int unitsPerCell)
     {
-        return Mathf.FloorToInt(maxDimSize / this.unitsPerCell) + 1;
+        return Mathf.FloorToInt(maxDimSize / this.unitsPerCell) + 2;
     }
 
     Vector3Int ConvertWorldPosToGridPos(Vector3 worldPos)
@@ -66,15 +66,15 @@ public class Grid
         {
             grid[cellPos.x, cellPos.y, cellPos.z] = new List<GameObject>();
         }
-         //Debug.Log("Save gameobject " + go.name + " with world pos " + pos + " to cell position " + cellPos);
+        Debug.Log("Save gameobject " + go.name + " with world pos " + pos + " to cell position " + cellPos);
         grid[cellPos.x, cellPos.y, cellPos.z].Add(go);
     }
 
-    bool isWithinGrid(int i, int j, int k)
+    bool isWithinGrid(int x, int y, int z)
     {
-        return i >= 0 && i < grid.GetLength(0) &&
-                        j >= 0 && j < grid.GetLength(1) &&
-                        k >= 0 && k < grid.GetLength(2);
+        return x >= 0 && x < grid.GetLength(0) &&
+                        y >= 0 && y < grid.GetLength(1) &&
+                        z >= 0 && z < grid.GetLength(2);
     }
 
     public List<GameObject> GetGameObjects(Vector3 worldPos)
@@ -88,7 +88,7 @@ public class Grid
 
         Vector3Int cellPos = ConvertWorldPosToGridPos(worldPos);
 
-         //Debug.Log("Get GameObjects at cell position " + cellPos);
+        Debug.Log("Get GameObjects at cell position " + cellPos + " world Pos " + worldPos);
 
         int x = cellPos.x;
         int y = cellPos.y;
