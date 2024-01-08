@@ -8,6 +8,8 @@ using System.Collections.Generic;
 /// </summary>
 public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 {
+    public static event Action<GameObject, GameObject, List<GameObject>> OnAddIntersectedTunnel;
+
     public int rayRings = 3; // The bigger this number is, the smaller the interval
     public int offsetMultiple = 2; // How many units the intersection ray should be offset from the intersecting faces
 
@@ -73,11 +75,20 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
         List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment, otherTunnels);
         List<Ray> rays = RayUtils.CreateRays(transform, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
 
+        List<GameObject> deletedTunnels = new List<GameObject>();
+
         intersectedTunnels.ForEach((tunnel) =>
         {
             TunnelDelete tunnelDelete = TunnelDeleteFactory.Get(tunnel, rays, isInsideTunnel);
-            tunnelDelete.DeleteTunnel();
+            bool isDeleted = tunnelDelete.DeleteTunnel();
+
+            if (isDeleted)
+            {
+                deletedTunnels.Add(tunnel);
+            }
         });
+
+        OnAddIntersectedTunnel?.Invoke(projectedSegment, prevTunnel, deletedTunnels);
     }
 
     // Update is called once per frame

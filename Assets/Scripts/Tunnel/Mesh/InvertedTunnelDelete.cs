@@ -9,17 +9,19 @@ public class InvertedTunnelDelete : TunnelDelete
 
     }
 
-    public override void DeleteTunnel()
+    public override bool DeleteTunnel()
     {
         int[] flippedFaces = MeshUtils.FlipNormals(mesh);
 
         mesh.triangles = flippedFaces;
 
-        base.DeleteTunnel();
+        bool isDeleted = base.DeleteTunnel();
 
         int[] originalFaces = MeshUtils.FlipNormals(mesh);
 
         mesh.triangles = originalFaces;
+
+        return isDeleted;
     }
 }
 

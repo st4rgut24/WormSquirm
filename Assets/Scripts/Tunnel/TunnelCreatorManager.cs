@@ -8,10 +8,11 @@ using System.Collections.Generic;
 /// </summary>
 public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
 {
+    public static event Action<GameObject, GameObject, List<GameObject>> OnAddCreatedTunnel; // <Prev GameObject, Cur GameObject>
+
     TunnelMake tunnelMaker;
     Grid tunnelGrid;
-
-    private Dictionary<Transform, GameObject> PrevSegmentDict; // maps Player Transform to previous segments
+    List<GameObject> nextTunnels = new List<GameObject>();
 
     int cubeCount = 0;
 
@@ -26,7 +27,6 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
     void Awake()
     {
         tunnelMaker = GameObject.FindObjectOfType<TunnelMake>();
-        PrevSegmentDict = new Dictionary<Transform, GameObject>();
     }
 
     private void Start()
@@ -45,9 +45,8 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
     /// Create a Tunnel segment
     /// </summary>
     /// <param name="playerTransform">The transform of the player</param>
-    /// <param name="NewSegmentDict">Mapping of new segments</param>
     /// <param name="lastAction">The action preceding this Create action</param>
-	void CreateAction(Transform playerTransform, Dictionary<Transform, GameObject> NewSegmentDict, TunnelActionManager.Action lastAction)
+	void CreateAction(Transform playerTransform, TunnelActionManager.Action lastAction)
     {
         //if (lastAction == TunnelActionManager.Action.Intersect)
         //{
@@ -59,9 +58,12 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
         if (segment != null)
         {
             tunnelGrid.AddGameObject(playerTransform.position, segment);
+
+            GameObject prevSegment = TunnelManager.Instance.GetGameObjectSegment(playerTransform);
+            OnAddCreatedTunnel?.Invoke(segment, prevSegment, nextTunnels);
         }
 
-        NewSegmentDict[playerTransform] = segment;
+        TunnelManager.Instance.AddGameObjectSegment(playerTransform, segment);
     }
 
     // Update is called once per frame

@@ -24,7 +24,8 @@ public class TunnelDelete
     /// Deletes faces using a collider test, inverting faces if necessary to test collision
     /// </summary>
     /// <param name="invertFaces">flag to invert faces</param>
-    public virtual void DeleteTunnel()
+    /// returns true if deletion occurs
+    public virtual bool DeleteTunnel()
     {
         tunnel.AddComponent<MeshCollider>();
 
@@ -34,6 +35,8 @@ public class TunnelDelete
         //this.mesh.RecalculateNormals();
 
         ComponentUtils.removeMeshCollider(tunnel);
+
+        return removeFaceIdxArr.Length > 0;
     }
 
     void RemoveTriangles(int[] trianglesToRemove)

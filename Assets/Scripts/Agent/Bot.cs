@@ -1,32 +1,48 @@
 using UnityEngine;
 
-public class Bot : Agent
+public abstract class Bot : Agent
 {
-    public Transform goal;
-    public Transform start;
+    public Transform objective;
 
-    private Vector3 startLocation;
-    private Vector3 endLocation;
+    protected Vector3 startLocation;
+    protected Vector3 endLocation;
 
     public float velocity = 5f; // Configurable velocity
 
-    private float startTime;
+    protected float startTime;
 
-    bool reachedDestination;
+    protected bool reachedDestination;
+
+    protected Route route;
+
+    protected abstract void SetObjective();
 
     private void Awake()
     {
-        reachedDestination = false;
-
-        startLocation = start.position;
-        endLocation = goal.position;
-
-        transform.position = startLocation;
-
-        initFaceDirection();
+        reachedDestination = true;
+        SetObjective();
     }
 
-    void initFaceDirection()
+    public void setRoute(Route route)
+    {
+        this.route = route;
+
+        setNextDestination();        
+    }
+
+    public void setNextDestination()
+    {
+        Route.MiniRoute miniRoute = route.GetNewMiniRoute();
+
+        startLocation = miniRoute.start;
+        endLocation = miniRoute.end;
+        this.reachedDestination = false;
+    }
+
+    /// <summary>
+    /// Face the direction of travel
+    /// </summary>
+    void faceDirection()
     {
         Vector3 moveDirection = (endLocation - startLocation).normalized;
 
@@ -47,12 +63,31 @@ public class Bot : Agent
     {
         if (!reachedDestination)
         {
-            MoveBot();
+            if (route == null)
+            {
+                throw new System.Exception("Route is not available for bot");
+            }
+
+            Move(); 
+        }
+        else
+        {
+            Route.MiniRoute miniRoute = route.GetMiniRoute();
+            if (miniRoute.isFinalWaypoint)
+            {
+                Debug.Log("Reached Final Waypoint");
+                // emit event signalling Bot has reached destination, so it can be assigned a new destination
+            }
+            else
+            {
+                setNextDestination();
+            }
         }
     }
 
-    private void MoveBot()
+    private void Move()
     {
+         Debug.Log("Move bot");
         // Calculate the current progress based on time and velocity
         float journeyLength = Vector3.Distance(startLocation, endLocation);
         float journeyTime = journeyLength / velocity;

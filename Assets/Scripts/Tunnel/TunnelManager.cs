@@ -1,8 +1,13 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 
 public class TunnelManager : Singleton<TunnelManager>
 {
+    public Dictionary<Transform, GameObject> TransformSegmentDict; // <GameObject Transform, Enclosing Segment GameObject>
+    public Dictionary<string, Segment> SegmentDict; // <tunnel name, Segment)
+
 	public TunnelProps defaultProps;
 
     TunnelInsiderManager tunnelInsiderManager;
@@ -18,10 +23,60 @@ public class TunnelManager : Singleton<TunnelManager>
     const float tunnelRadius = 5.13f;
     const float noiseScale = .8f;
 
+    private void OnEnable()
+    {
+        TunnelCreatorManager.OnAddCreatedTunnel += OnAddCreatedTunnel;
+        TunnelIntersectorManager.OnAddIntersectedTunnel += OnAddCreatedTunnel;
+    }
+
     private void Awake()
     {
         defaultProps = new TunnelProps(tunnelSegments, segmentSpacing, tunnelRadius, noiseScale);
+		SegmentDict = new Dictionary<string, Segment>();
+
+		TransformSegmentDict = new Dictionary<Transform, GameObject>();
     }
+
+	public void AddGameObjectSegment(Transform transform, GameObject segmentGo)
+	{
+		TransformSegmentDict[transform] = segmentGo;
+	}
+
+	/// <summary>
+	/// Is the transform inside a tunnel
+	/// </summary>
+	/// <param name="transform">The object's transform</param>
+	/// <returns></returns>
+	public bool isInTunnel(Transform transform)
+	{
+		return TransformSegmentDict.ContainsKey(transform);
+    }
+
+	public GameObject GetGameObjectSegment(Transform transform)
+	{
+		if (TransformSegmentDict.ContainsKey(transform))
+		{
+            return TransformSegmentDict[transform];
+        }
+		else
+		{
+			return null;
+		}
+	}
+
+	void OnAddCreatedTunnel(GameObject tunnel, GameObject prevTunnel, List<GameObject> nextTunnels)
+	{
+		Segment segment = new Segment(tunnel, prevTunnel);
+
+		if (prevTunnel != null)
+		{
+            Segment prevSegment = SegmentDict[prevTunnel.name];
+            prevSegment.setNextTunnel(tunnel);
+        }
+
+		segment.setNextTunnels(nextTunnels);
+ 		SegmentDict.Add(tunnel.name, segment);
+	}
 
     // Use this for initialization
     void Start()
@@ -37,5 +92,11 @@ public class TunnelManager : Singleton<TunnelManager>
 	{
 			
 	}
+
+    private void OnDisable()
+    {
+        TunnelCreatorManager.OnAddCreatedTunnel -= OnAddCreatedTunnel;
+        TunnelIntersectorManager.OnAddIntersectedTunnel -= OnAddCreatedTunnel;
+    }
 }
 
