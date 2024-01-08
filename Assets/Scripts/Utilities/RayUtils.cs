@@ -6,22 +6,24 @@ public class RayUtils
     /// <summary>
     /// Create points 
     /// </summary>
-    /// <param name="center"></param>
+    /// <param name="position"></param>
+    /// <param name="forward"></param>
     /// <param name="ringVertexCount"></param>
     /// <param name="radius"></param>
     /// <param name="ringInterval"></param>
+    /// <param name="offsetMultiple"></param>
     /// <returns></returns>
-    public static List<Ray> CreateRays(Transform transform, int ringVertexCount, float radius, float ringInterval, int offsetMultiple)
+    public static List<Ray> CreateRays(Vector3 position, Vector3 forward, int ringVertexCount, float radius, float ringInterval, int offsetMultiple)
     {
         List<Ray> rays = new List<Ray>();
 
-        Vector3 offsetCenter = transform.position - transform.forward * offsetMultiple;// offset so the rays can intersect the mesh
+        Vector3 offsetCenter = position - forward * offsetMultiple;// offset so the rays can intersect the mesh
 
-        List<Vector3> ringOrigins = GetRingPoints(transform.forward, offsetCenter, ringVertexCount, radius, ringInterval);
+        List<Vector3> ringOrigins = GetRingPoints(forward, offsetCenter, ringVertexCount, radius, ringInterval);
 
         ringOrigins.ForEach((origin) =>
         {
-            Ray ray = new Ray(origin, transform.forward);
+            Ray ray = new Ray(origin, forward);
             rays.Add(ray);
         });
 

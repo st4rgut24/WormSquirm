@@ -49,31 +49,38 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
     /// <param name="transform">The transform of the tunnel end</param>
     /// <param name="otherTunnels">Other tunnels in the vicinity of the active tunnel</param>
     /// <param name="prevTunnel">Previous tunnel segment belonging to the active tunnel</param>
-    /// <param name="prevPos">Previoous position of the player </param>
+    /// <param name="prevHeading">Previous transform info of the player </param>
     /// <param name="lastAction">The last tunnel action taken prior to intersection</param>
-	void IntersectAction(Transform transform, GameObject prevTunnel, Vector3 prevPos, List<GameObject> otherTunnels, TunnelActionManager.Action lastAction) // todo: restore otherObjects list and call TunnelUtils.GetIntersectedObjects()
+	void IntersectAction(Transform transform, GameObject prevTunnel, Heading prevHeading, List<GameObject> otherTunnels, TunnelActionManager.Action lastAction) // todo: restore otherObjects list and call TunnelUtils.GetIntersectedObjects()
     {
+        List<Ray> rays;
+
         bool isInsideTunnel = lastAction == TunnelActionManager.Action.Follow;
 
         if (isInsideTunnel)
         {
             // use prev position of transform to get the last position INSIDE the tunnel
             // pass this in to the functions below
-            Ring insideRing = RingManager.Instance.Create(transform.forward, prevPos);
+            Ring insideRing = RingManager.Instance.Create(transform.forward, prevHeading.position);
             RingManager.Instance.UpdateEntry(transform, insideRing);
+
+            rays = RayUtils.CreateRays(prevHeading.position, prevHeading.forward, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
+        }
+        else
+        {
+            rays = RayUtils.CreateRays(transform.position, transform.forward, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
         }
 
-        Intersect(transform, prevTunnel, otherTunnels, isInsideTunnel);
+        Intersect(transform, prevTunnel, otherTunnels, isInsideTunnel, rays);
     }
 
-    void Intersect(Transform transform, GameObject prevTunnel, List<GameObject> otherTunnels, bool isInsideTunnel)
+    void Intersect(Transform transform, GameObject prevTunnel, List<GameObject> otherTunnels, bool isInsideTunnel, List<Ray> rays)
     {
         GameObject projectedSegment = tunnelMaker.GrowTunnel(transform);
 
         // get intersected tunnels (may be more than 1)
         otherTunnels.Remove(prevTunnel); // adjoining segment does not count as intersected object
         List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment, otherTunnels);
-        List<Ray> rays = RayUtils.CreateRays(transform, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
 
         List<GameObject> deletedTunnels = new List<GameObject>();
 

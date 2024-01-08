@@ -79,13 +79,13 @@ public class TunnelDelete
         RaycastHit hit;
 
         // Draw the ray in the Scene view regardless of whether it hits anything
-        //Debug.DrawRay(ray.origin, ray.direction * 1000f, Color.red, 10.0f);
+        Debug.DrawRay(ray.origin, ray.direction * 1f, Color.green, 10.0f);
 
         if (Physics.Raycast(ray.origin, ray.direction, out hit))
         {
-            if (hit.collider.gameObject == tunnel) // if tunnel was the hit gameobject, then add the triangle to removal set
+             if (hit.collider.gameObject == tunnel) // if tunnel was the hit gameobject, then add the triangle to removal set
             {
-                Debug.DrawRay(ray.origin, ray.direction * 1f, Color.red, 10.0f);
+                Debug.DrawRay(ray.origin, ray.direction * 2f, Color.red, 10.0f);
                 Debug.Log("Remove the triangle from Tunnel " + tunnel.name + " at index " + hit.triangleIndex);
                 removalIdxSet.Add(hit.triangleIndex);
             }

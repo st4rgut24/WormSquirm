@@ -75,7 +75,6 @@ public abstract class Bot : Agent
             Route.MiniRoute miniRoute = route.GetMiniRoute();
             if (miniRoute.isFinalWaypoint)
             {
-                Debug.Log("Reached Final Waypoint");
                 // emit event signalling Bot has reached destination, so it can be assigned a new destination
             }
             else
@@ -87,7 +86,6 @@ public abstract class Bot : Agent
 
     private void Move()
     {
-         Debug.Log("Move bot");
         faceDirection();
         // Calculate the current progress based on time and velocity
         float journeyLength = Vector3.Distance(startLocation, endLocation);
