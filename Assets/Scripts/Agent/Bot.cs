@@ -88,6 +88,7 @@ public abstract class Bot : Agent
     private void Move()
     {
          Debug.Log("Move bot");
+        faceDirection();
         // Calculate the current progress based on time and velocity
         float journeyLength = Vector3.Distance(startLocation, endLocation);
         float journeyTime = journeyLength / velocity;
