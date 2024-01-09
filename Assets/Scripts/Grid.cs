@@ -77,7 +77,14 @@ public class Grid
                         z >= 0 && z < grid.GetLength(2);
     }
 
-    public List<GameObject> GetGameObjects(Vector3 worldPos)
+    /// <summary>
+    /// Get GameObjects surrounding position
+    /// </summary>
+    /// <param name="worldPos">position</param>
+    /// <param name="searchMultiplier">factor to expand the search radius</param>
+    /// <returns>gameobjects within the search area</returns>
+    /// <exception cref="System.Exception">invalid position exception</exception>
+    public List<GameObject> GetGameObjects(Vector3 worldPos, int searchMultiplier)
     {
         if (!GameManager.Instance.isValidPos(worldPos))
         {
@@ -94,12 +101,14 @@ public class Grid
         int y = cellPos.y;
         int z = cellPos.z;
 
+        int buffer = this.searchBuffer * searchMultiplier;
+
         // Iterate through the cells in the specified buffer around the indexed cell
-        for (int i = x - this.searchBuffer; i <= x + this.searchBuffer; i++)
+        for (int i = x - buffer; i <= x + buffer; i++)
         {
-            for (int j = y - this.searchBuffer; j <= y + this.searchBuffer; j++)
+            for (int j = y - buffer; j <= y + buffer; j++)
             {
-                for (int k = z - this.searchBuffer; k <= z + this.searchBuffer; k++)
+                for (int k = z - buffer; k <= z + buffer; k++)
                 {
                     if (isWithinGrid(i,j,k) && grid[i, j, k] != null)
                     {

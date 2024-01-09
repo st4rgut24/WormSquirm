@@ -15,8 +15,10 @@ public class TunnelManager : Singleton<TunnelManager>
 	TunnelIntersectorManager tunnelIntersectorManager;
 	TunnelActionManager tunnelActionManager;
 
-	//todo: use separation value to calculate the tunnel segment's transform
-	float separation = 1f; // separation between the player and the end of the active tunnel
+    Disabler tunnelDisabler;
+
+    //todo: use separation value to calculate the tunnel segment's transform
+    float separation = 1f; // separation between the player and the end of the active tunnel
 
 	const int tunnelSegments = 7;
     const float segmentSpacing = 1.33f;
@@ -27,6 +29,8 @@ public class TunnelManager : Singleton<TunnelManager>
     {
         TunnelCreatorManager.OnAddCreatedTunnel += OnAddCreatedTunnel;
         TunnelIntersectorManager.OnAddIntersectedTunnel += OnAddCreatedTunnel;
+
+		Agent.OnMove += tunnelDisabler.Disable;
     }
 
     private void Awake()
@@ -35,6 +39,7 @@ public class TunnelManager : Singleton<TunnelManager>
 		SegmentDict = new Dictionary<string, Segment>();
 
 		TransformSegmentDict = new Dictionary<Transform, GameObject>();
+		tunnelDisabler = new Disabler(GameManager.Instance.GetGrid(GridType.Tunnel), 3);
     }
 
 	public void AddGameObjectSegment(Transform transform, GameObject segmentGo)
@@ -97,6 +102,8 @@ public class TunnelManager : Singleton<TunnelManager>
     {
         TunnelCreatorManager.OnAddCreatedTunnel -= OnAddCreatedTunnel;
         TunnelIntersectorManager.OnAddIntersectedTunnel -= OnAddCreatedTunnel;
+
+        Agent.OnMove -= tunnelDisabler.Disable;
     }
 }
 

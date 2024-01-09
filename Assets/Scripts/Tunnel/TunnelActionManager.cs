@@ -35,7 +35,6 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         LastTunnelActionDict = new Dictionary<Transform, Action>();
 
         tunnelGrid = GameManager.Instance.GetGrid(GridType.Tunnel);
-
     }
 
     // Start is called before the first frame update
@@ -49,7 +48,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     /// <param name="playerTransform">The projected location of the tunnel/player</param>
     void TunnelAction(Transform playerTransform)
     {
-        List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(playerTransform.position);
+        List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(playerTransform.position, 1);
 
         GameObject EnclosingTunnel = TunnelUtils.getEnclosingObject(playerTransform.position, otherTunnels);
 
