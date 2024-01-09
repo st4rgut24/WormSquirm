@@ -28,10 +28,10 @@ public class TunnelMake: MonoBehaviour
         _props = TunnelManager.Instance.defaultProps;
     }
 
-    public GameObject GrowTunnel(Transform transform)
+    public GameObject GrowTunnel(Transform transform, Heading heading)
     {
-        Vector3 position = transform.position;
-        Vector3 direction = transform.forward;
+        Vector3 direction = heading.forward;
+        Vector3 position = heading.position;
 
         GameObject tunnelObject = null;
 

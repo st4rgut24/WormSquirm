@@ -39,7 +39,7 @@ public class Disabler
         // Enable new proximal objects
         foreach (GameObject newObject in proximalObjects)
         {
-            if (!previousProximalObjects.Contains(newObject))
+            if (!newObject.activeSelf)
             {
                 newObject.SetActive(true);
             }

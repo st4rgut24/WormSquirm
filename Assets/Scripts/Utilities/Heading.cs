@@ -6,10 +6,10 @@ public class Heading
 	public Vector3 position;
 	public Vector3 forward;
 
-	public Heading(Transform transform)
+	public Heading(Vector3 pos, Vector3 forward)
 	{
-		this.position = transform.position;
-		this.forward = transform.forward;
+		this.position = pos;
+		this.forward = forward;
 	}
 }
 
