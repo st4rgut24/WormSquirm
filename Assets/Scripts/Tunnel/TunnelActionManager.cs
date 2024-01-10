@@ -57,7 +57,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
         if (IsIntersect(EnclosingTunnel, lastTunnelAction)) // intersect
         {
-            //Debug.Log("TunnelAction Intersect");
+            Debug.Log("TunnelAction Intersect");
             GameObject prevSegment = TunnelManager.Instance.GetGameObjectSegment(playerTransform);
             Heading PrevHeading = PrevHeadingDict[playerTransform];
             OnIntersectTunnel?.Invoke(playerTransform, prevSegment, TunnelHeading, PrevHeading, otherTunnels, lastTunnelAction);
