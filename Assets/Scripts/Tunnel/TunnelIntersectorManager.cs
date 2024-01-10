@@ -8,7 +8,7 @@ using System.Collections.Generic;
 /// </summary>
 public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 {
-    public static event Action<GameObject, GameObject, List<GameObject>> OnAddIntersectedTunnel;
+    public static event Action<Transform, SegmentGo, GameObject, List<GameObject>> OnAddIntersectedTunnel;
 
     public int rayRings = 3; // The bigger this number is, the smaller the interval
     public int offsetMultiple = 2; // How many units the intersection ray should be offset from the intersecting faces
@@ -77,11 +77,11 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 
     void Intersect(Transform transform, GameObject prevTunnel, List<GameObject> otherTunnels, bool isInsideTunnel, List<Ray> rays, Heading heading)
     {
-        GameObject projectedSegment = tunnelMaker.GrowTunnel(transform, heading);
+        SegmentGo projectedSegment = tunnelMaker.GrowTunnel(transform, heading, isInsideTunnel);
 
         // get intersected tunnels (may be more than 1)
         otherTunnels.Remove(prevTunnel); // adjoining segment does not count as intersected object
-        List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment, otherTunnels);
+        List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment.segment, otherTunnels);
 
         List<GameObject> deletedTunnels = new List<GameObject>();
 
@@ -96,7 +96,7 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
             }
         });
 
-        OnAddIntersectedTunnel?.Invoke(projectedSegment, prevTunnel, deletedTunnels);
+        OnAddIntersectedTunnel?.Invoke(transform, projectedSegment, prevTunnel, deletedTunnels);
     }
 
     // Update is called once per frame

@@ -8,6 +8,8 @@ public class GameManager : Singleton<GameManager>
 
     public int maxSegmentLength = 3; // the maximum length of a tunnel segment
 
+    public int agentOffset = 6; // how many units away from end of a newly created tunnel a player is
+
     public Vector3Int origin = new Vector3Int(0, 0, 0);
 
     public int xAxisLength = 100;

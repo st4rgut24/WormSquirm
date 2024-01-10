@@ -17,8 +17,6 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     public static event Action<Transform, Action, Heading> OnCreateTunnel; // create a new unobstructed tunnel
     public static event Action<Transform> OnFollowTunnel; // follow path of existing tunnel
 
-    public int tunnelOffsetFactor = 3;
-
     public enum Action {
         Follow,
         Intersect,
@@ -50,7 +48,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     /// <param name="playerTransform">The projected location of the tunnel/player</param>
     void TunnelAction(Transform playerTransform)
     {
-        Heading TunnelHeading = DirectionUtils.GetHeading(playerTransform, tunnelOffsetFactor);
+        Heading TunnelHeading = DirectionUtils.GetHeading(playerTransform, GameManager.Instance.agentOffset);
         List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(TunnelHeading.position, 1);
 
         GameObject EnclosingTunnel = TunnelUtils.getEnclosingObject(TunnelHeading.position, otherTunnels);
@@ -59,7 +57,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
         if (IsIntersect(EnclosingTunnel, lastTunnelAction)) // intersect
         {
-            Debug.Log("TunnelAction Intersect");
+            //Debug.Log("TunnelAction Intersect");
             GameObject prevSegment = TunnelManager.Instance.GetGameObjectSegment(playerTransform);
             Heading PrevHeading = PrevHeadingDict[playerTransform];
             OnIntersectTunnel?.Invoke(playerTransform, prevSegment, TunnelHeading, PrevHeading, otherTunnels, lastTunnelAction);
@@ -67,13 +65,13 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         }
         else if (EnclosingTunnel == null)
         {
-            Debug.Log("Tunnel Action Create");
+            //Debug.Log("Tunnel Action Create");
             OnCreateTunnel?.Invoke(playerTransform, lastTunnelAction, TunnelHeading);
             LastTunnelActionDict[playerTransform] = Action.Create;
         }
         else
         {
-            Debug.Log("Tunnel Action Follow");
+            //Debug.Log("Tunnel Action Follow");
             OnFollowTunnel?.Invoke(playerTransform);
             LastTunnelActionDict[playerTransform] = Action.Follow;
         }

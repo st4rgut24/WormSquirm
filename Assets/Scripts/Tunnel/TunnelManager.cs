@@ -5,10 +5,11 @@ using System.Collections.Generic;
 
 public class TunnelManager : Singleton<TunnelManager>
 {
+    public Dictionary<Transform, GameObject> EndCapDict; // <GameObject Transform, Enclosing Segment GameObject>
     public Dictionary<Transform, GameObject> TransformSegmentDict; // <GameObject Transform, Enclosing Segment GameObject>
     public Dictionary<string, Segment> SegmentDict; // <tunnel name, Segment)
 
-	public TunnelProps defaultProps;
+    public TunnelProps defaultProps;
 
     TunnelInsiderManager tunnelInsiderManager;
     TunnelCreatorManager tunnelCreatorManager;
@@ -38,7 +39,8 @@ public class TunnelManager : Singleton<TunnelManager>
         defaultProps = new TunnelProps(tunnelSegments, segmentSpacing, tunnelRadius, noiseScale);
 		SegmentDict = new Dictionary<string, Segment>();
 
-		TransformSegmentDict = new Dictionary<Transform, GameObject>();
+		EndCapDict = new Dictionary<Transform, GameObject>();
+        TransformSegmentDict = new Dictionary<Transform, GameObject>();
 		tunnelDisabler = new Disabler(GameManager.Instance.GetGrid(GridType.Tunnel), 3);
     }
 
@@ -69,9 +71,12 @@ public class TunnelManager : Singleton<TunnelManager>
 		}
 	}
 
-	void OnAddCreatedTunnel(GameObject tunnel, GameObject prevTunnel, List<GameObject> nextTunnels)
+	void OnAddCreatedTunnel(Transform transform, SegmentGo segmentGo, GameObject prevTunnel, List<GameObject> nextTunnels)
 	{
-		Segment segment = new Segment(tunnel, prevTunnel);
+		GameObject endCap = segmentGo.cap;
+		GameObject tunnel = segmentGo.segment;
+
+        Segment segment = new Segment(tunnel, prevTunnel);
 
 		if (prevTunnel != null)
 		{
@@ -81,6 +86,23 @@ public class TunnelManager : Singleton<TunnelManager>
 
 		segment.setNextTunnels(nextTunnels);
  		SegmentDict.Add(tunnel.name, segment);
+
+		ReplaceEndCap(transform, endCap);
+	}
+
+	void ReplaceEndCap(Transform transform, GameObject endCap)
+	{
+		if (EndCapDict.ContainsKey(transform))
+		{
+			GameObject prevCap = EndCapDict[transform];
+
+			if(prevCap != null)
+			{
+                Destroy(prevCap);
+            }
+        }
+
+		EndCapDict[transform] = endCap;
 	}
 
     // Use this for initialization

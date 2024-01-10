@@ -8,7 +8,7 @@ using System.Collections.Generic;
 /// </summary>
 public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
 {
-    public static event Action<GameObject, GameObject, List<GameObject>> OnAddCreatedTunnel; // <Prev GameObject, Cur GameObject>
+    public static event Action<Transform, SegmentGo, GameObject, List<GameObject>> OnAddCreatedTunnel; // <Prev GameObject, Cur GameObject>
 
     TunnelMake tunnelMaker;
     Grid tunnelGrid;
@@ -54,17 +54,17 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
         //    RingManager.Instance.Remove(playerTransform); // a new segment requires previous ring to be reset
         //}
 
-        GameObject segment = tunnelMaker.GrowTunnel(playerTransform, heading);
+        SegmentGo segmentGo = tunnelMaker.GrowTunnel(playerTransform, heading, true);
 
-        if (segment != null)
+        if (segmentGo != null)
         {
-            tunnelGrid.AddGameObject(heading.position, segment);
+            tunnelGrid.AddGameObject(heading.position, segmentGo.segment);
 
             GameObject prevSegment = TunnelManager.Instance.GetGameObjectSegment(playerTransform);
-            OnAddCreatedTunnel?.Invoke(segment, prevSegment, nextTunnels);
+            OnAddCreatedTunnel?.Invoke(playerTransform, segmentGo, prevSegment, nextTunnels);
         }
 
-        TunnelManager.Instance.AddGameObjectSegment(playerTransform, segment);
+        TunnelManager.Instance.AddGameObjectSegment(playerTransform, segmentGo?.segment);
     }
 
     // Update is called once per frame
@@ -72,5 +72,11 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
     {
 
     }
+
+    private void OnDisable()
+    {
+        TunnelActionManager.OnCreateTunnel -= CreateAction;
+    }
+
 }
 

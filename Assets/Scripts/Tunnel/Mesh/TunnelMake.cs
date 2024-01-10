@@ -7,6 +7,7 @@ using UnityEngine;
 public class TunnelMake: MonoBehaviour
 {
     public GameObject TunnelSegment;
+    public GameObject Cap;
 
     TunnelProps _props;
 
@@ -28,26 +29,53 @@ public class TunnelMake: MonoBehaviour
         _props = TunnelManager.Instance.defaultProps;
     }
 
-    public GameObject GrowTunnel(Transform transform, Heading heading)
+    /// <summary>
+    /// Create a Tunnel
+    /// </summary>
+    /// <param name="transform">The key used to look up previous segments</param>
+    /// <param name="heading">directional info</param>
+    /// <param name="isClosed">whether the tunnel is closed</param>
+    /// <returns></returns>
+    public SegmentGo GrowTunnel(Transform transform, Heading heading, bool isClosed)
     {
         Vector3 direction = heading.forward;
         Vector3 position = heading.position;
-
-        GameObject tunnelObject = null;
 
         if (!RingManager.Instance.ContainsRing(transform)) // initialize start of tunnel
         {
             Ring ring = RingManager.Instance.Create(direction, position);
             RingManager.Instance.Add(transform, ring); // update normal vector
+
+            return null;
         }
         else
         {
-            tunnelObject = GenerateTunnelMesh(transform, position, direction);
+            Ring ring = RingManager.Instance.Create(direction, position);
+
+            GameObject tunnelObject = GenerateTunnelMesh(transform, ring);
             tunnelObject.name = "Tunnel " + tunnelCounter;
             tunnelCounter++;
-        }
 
-        return tunnelObject;
+            GameObject capObject = isClosed ? GenerateEndCap(ring) : null;
+
+            return new SegmentGo(tunnelObject, capObject);
+        }
+    }
+
+    /// <summary>
+    /// Generate a cap for the end of the tunnel
+    /// </summary>
+    /// <param name="ring">the vertices of the cap</param>
+    /// <returns>An Cap GameObject</returns>
+    GameObject GenerateEndCap(Ring ring)
+    {
+        GameObject cap = Instantiate(Cap);
+        MeshFilter capFilter = cap.GetComponent<MeshFilter>();
+
+        EndCap endCap = new EndCap(ring);
+        capFilter.mesh = endCap.GetMesh();
+
+        return cap;
     }
 
     /// <summary>
@@ -57,7 +85,7 @@ public class TunnelMake: MonoBehaviour
     /// <param name="position">position of the ring</param>
     /// <param name="direction">direction the tunnel is growing</param>
     /// <returns></returns>
-    GameObject GenerateTunnelMesh(Transform transform, Vector3 position, Vector3 direction)
+    GameObject GenerateTunnelMesh(Transform transform, Ring ring)
     {
         GameObject segment = Instantiate(TunnelSegment);
         MeshFilter meshFilter = segment.GetComponent<MeshFilter>();
@@ -65,7 +93,6 @@ public class TunnelMake: MonoBehaviour
         Mesh tunnelMesh = new Mesh();
         meshFilter.mesh = tunnelMesh;
 
-        Ring ring = RingManager.Instance.Create(direction, position);
         Ring prevRing = RingManager.Instance.Get(transform);
 
         Vector3[] vertices = prevRing.vertices.Concat(ring.vertices).ToArray();
