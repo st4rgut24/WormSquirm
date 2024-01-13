@@ -8,5 +8,25 @@ public class MeshUtils
     {
         return mesh.triangles.Reverse().ToArray();
     }
+
+    public static void InvertFaces(Mesh mesh)
+    {
+        Vector3[] normals = mesh.normals;
+        for (int i = 0; i < normals.Length; i++)
+        {
+            normals[i] = -normals[i];
+        }
+        mesh.normals = normals;
+
+        // Flip triangles to maintain winding order
+        int[] triangles = mesh.triangles;
+        for (int i = 0; i < triangles.Length; i += 3)
+        {
+            int temp = triangles[i + 1];
+            triangles[i + 1] = triangles[i + 2];
+            triangles[i + 2] = temp;
+        }
+        mesh.triangles = triangles;
+    }
 }
 

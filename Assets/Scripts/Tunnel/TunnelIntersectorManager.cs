@@ -64,13 +64,8 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
             // pass this in to the functions below
             Ring insideRing = RingManager.Instance.Create(heading.forward, prevHeading.position);
             RingManager.Instance.UpdateEntry(transform, insideRing);
-
-            rays = RayUtils.CreateRays(prevHeading.position, prevHeading.forward, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
         }
-        else
-        {
-            rays = RayUtils.CreateRays(heading.position, heading.forward, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
-        }
+        rays = RayUtils.CreateRays(heading.position, -heading.forward, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
 
         Intersect(transform, prevTunnel, otherTunnels, isInsideTunnel, rays, heading);
     }

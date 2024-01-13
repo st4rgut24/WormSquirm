@@ -6,6 +6,9 @@ using UnityEngine;
 
 public class TunnelMake: MonoBehaviour
 {
+    // Rectangle GameObject to represent the UV mapping area
+    public GameObject rectangleGameObject;
+
     public GameObject TunnelSegment;
     public GameObject Cap;
 
@@ -52,11 +55,12 @@ public class TunnelMake: MonoBehaviour
         {
             Ring ring = RingManager.Instance.Create(direction, position);
 
-            GameObject tunnelObject = GenerateTunnelMesh(transform, ring);
+            GameObject tunnelObject = MeshObjectFactory.Get(MeshType.Tunnel, TunnelSegment, transform, ring, _props);
+
             tunnelObject.name = "Tunnel " + tunnelCounter;
             tunnelCounter++;
 
-            GameObject capObject = isClosed ? GenerateEndCap(ring) : null;
+            GameObject capObject = GetEndCap(ring, Cap, transform, isClosed);
 
             return new SegmentGo(tunnelObject, capObject);
         }
@@ -66,72 +70,17 @@ public class TunnelMake: MonoBehaviour
     /// Generate a cap for the end of the tunnel
     /// </summary>
     /// <param name="ring">the vertices of the cap</param>
+    /// <param name="isClosed">Whether the tunnel is closed off or not</param>
     /// <returns>An Cap GameObject</returns>
-    GameObject GenerateEndCap(Ring ring)
+    GameObject GetEndCap(Ring ring, GameObject prefab, Transform transform, bool isClosed)
     {
-        GameObject cap = Instantiate(Cap);
-        MeshFilter capFilter = cap.GetComponent<MeshFilter>();
-
-        EndCap endCap = new EndCap(ring);
-        capFilter.mesh = endCap.GetMesh();
-
-        return cap;
-    }
-
-    /// <summary>
-    /// Calculate a Tunnel's Mesh
-    /// </summary>
-    /// <param name="transform">Transform of the agent that created the mesh</param>
-    /// <param name="position">position of the ring</param>
-    /// <param name="direction">direction the tunnel is growing</param>
-    /// <returns></returns>
-    GameObject GenerateTunnelMesh(Transform transform, Ring ring)
-    {
-        GameObject segment = Instantiate(TunnelSegment);
-        MeshFilter meshFilter = segment.GetComponent<MeshFilter>();
-
-        Mesh tunnelMesh = new Mesh();
-        meshFilter.mesh = tunnelMesh;
-
-        Ring prevRing = RingManager.Instance.Get(transform);
-
-        Vector3[] vertices = prevRing.vertices.Concat(ring.vertices).ToArray();
-
-        int tunnelSegments = _props.TunnelSegments;
-
-        tunnelMesh.vertices = vertices;
-
-        int[] triangles = new int[6 * tunnelSegments];
-
-        for (int i = 0, ti = 0; i < tunnelSegments; i++, ti += 6)
+        if (isClosed)
         {
-            // last tunnel segment connects the first triangle to the last triangle
-            if (i == tunnelSegments - 1)
-            {
-                triangles[ti] = i;
-                triangles[ti + 1] = 0;
-                triangles[ti + 2] = tunnelSegments;
-
-                triangles[ti + 3] = tunnelSegments;
-                triangles[ti + 4] = i + tunnelSegments;
-                triangles[ti + 5] = i;
-            }
-            else
-            {
-                triangles[ti] = i;
-                triangles[ti + 1] = i + 1;
-                triangles[ti + 2] = i + tunnelSegments;
-
-                triangles[ti + 3] = i + 1;
-                triangles[ti + 4] = i + tunnelSegments + 1;
-                triangles[ti + 5] = i + tunnelSegments;
-            }
+            return MeshObjectFactory.Get(MeshType.EndCap, prefab, transform, ring, _props);
         }
-
-        tunnelMesh.triangles = triangles;
-
-        RingManager.Instance.UpdateEntry(transform, ring);
-
-        return segment;
+        else
+        {
+            return null;
+        }
     }
 }
