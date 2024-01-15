@@ -7,14 +7,12 @@ using System.Collections.Generic;
 /// </summary>
 public class Disabler
 {
-    Grid grid;
 	Dictionary<Transform, List<GameObject>> ProximalObjectDict;
-    int searchMultiplier;
+    int enabledCount;
 
-	public Disabler(Grid grid, int searchMultiplier)
+	public Disabler(int enabledCount)
 	{
-        this.grid = grid;
-        this.searchMultiplier = searchMultiplier;
+        this.enabledCount = enabledCount;
 		ProximalObjectDict = new Dictionary<Transform, List<GameObject>>();
 	}
 
@@ -23,7 +21,16 @@ public class Disabler
 	/// </summary>
 	public void Disable(Transform transform)
 	{
-        List<GameObject> proximalObjects = grid.GetGameObjects(transform.position, this.searchMultiplier);
+        Segment segment = SegmentManager.Instance.GetSegmentFromTransform(transform);
+
+        if (segment == null)
+        {
+            return;
+        }
+
+        List<GameObject> proximalObjects = SearchUtils.bfsSegments(segment, this.enabledCount);
+
+        //List<GameObject> proximalObjects = grid.GetGameObjects(transform.position, this.searchMultiplier);
 
         List<GameObject> previousProximalObjects = ProximalObjectDict.ContainsKey(transform) ? ProximalObjectDict[transform] : new List<GameObject>();
 

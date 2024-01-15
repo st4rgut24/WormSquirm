@@ -50,7 +50,7 @@ public class BotManager : Singleton<BotManager>
 
         if (type == BotType.Chaser)
         {
-            Bot = Instantiate(Chaser);
+            Bot = Instantiate(Chaser); 
         }
         else if (type == BotType.Simp)
         {
@@ -68,15 +68,18 @@ public class BotManager : Singleton<BotManager>
             {
                 //GameObject botGo = Spawn(BotType.Chaser);
                 GameObject botGo = Spawn(BotType.Simp);
+                Bot bot = botGo.GetComponent<Bot>();
+
                 try
-                {                    
-                    Bot bot = botGo.GetComponent<Bot>();
-                    Route route = GetBotRoute(bot.objective);
+                {
+                    //Route route = GetBotRoute(bot.objective, RouteStrat.FollowSegment);
+                    Route route = GetBotRoute(bot.objective, RouteStrat.StraightPath);
                     bot.setRoute(route);
                     bots.Add(bot);
                 }
                 catch (System.Exception error)
                 {
+                    bots.Remove(bot);
                     Destroy(botGo);
                     Debug.Log("Error creating bot: " + error.Message);
                     Debug.Log(error.StackTrace);
@@ -101,10 +104,9 @@ public class BotManager : Singleton<BotManager>
     /// Give the Bot an initial destination 
     /// </summary>
     /// <param name="bot">the bot</param>
-    Route GetBotRoute(Transform targetTransform)
+    Route GetBotRoute(Transform targetTransform, RouteStrat strat)
     {
-        //return RouteFactory.Get(RouteStrat.FollowSegment, targetTransform);
-        return RouteFactory.Get(RouteStrat.StraightPath, targetTransform);
+        return RouteFactory.Get(strat, targetTransform);
     }
 
     // Update is called once per frame

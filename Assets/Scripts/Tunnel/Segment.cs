@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Segment
 {
-	Vector3 center = DefaultUtils.DefaultVector3;
+    public GameObject tunnel;
 
-	GameObject tunnel;
+    Vector3 center = DefaultUtils.DefaultVector3;
 	List<GameObject> prevTunnel;
 	List<GameObject> nextTunnel;
 
@@ -20,7 +20,12 @@ public class Segment
 		setPrevTunnel(prev);
 	}
 
-	public List<GameObject> getPrevTunnels()
+    public List<GameObject> getNextTunnels()
+    {
+        return this.nextTunnel;
+    }
+
+    public List<GameObject> getPrevTunnels()
 	{
 		return this.prevTunnel;
 	}

@@ -37,7 +37,6 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
     // testing
     public void SetSpawnFlag()
     {
-        // Debug.Log("Set spawn flag");
         isSpawn = true;
     }
 
@@ -54,17 +53,17 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
         //    RingManager.Instance.Remove(playerTransform); // a new segment requires previous ring to be reset
         //}
 
+        GameObject prevSegment = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
         SegmentGo segmentGo = tunnelMaker.GrowTunnel(playerTransform, heading, true);
 
         if (segmentGo != null)
         {
             tunnelGrid.AddGameObject(heading.position, segmentGo.segment);
 
-            GameObject prevSegment = TunnelManager.Instance.GetGameObjectSegment(playerTransform);
             OnAddCreatedTunnel?.Invoke(playerTransform, segmentGo, prevSegment, nextTunnels);
         }
 
-        TunnelManager.Instance.AddGameObjectSegment(playerTransform, segmentGo?.segment);
+        //TunnelManager.Instance.AddGameObjectSegment(playerTransform, segmentGo?.segment);
     }
 
     // Update is called once per frame

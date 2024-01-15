@@ -58,9 +58,7 @@ public class RouteFactory
     /// <returns>a route</returns>
     public static Route FollowSegments(Transform targetTransform)
     {
-        GameObject tunnelGo = TunnelManager.Instance.GetGameObjectSegment(targetTransform);
-
-        Segment goalSegment = TunnelManager.Instance.SegmentDict[tunnelGo.name];
+        Segment goalSegment = SegmentManager.Instance.GetSegmentFromTransform(targetTransform);
 
         int dist = 1;
 
@@ -79,7 +77,7 @@ public class RouteFactory
                 }
 
                 GameObject firstPrevTunnel = prevTunnels[0];
-                segment = TunnelManager.Instance.SegmentDict[firstPrevTunnel.name];
+                segment = SegmentManager.Instance.GetSegmentFromObject(firstPrevTunnel);
             }
 
             dist++;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using static UnityEngine.Rendering.HableCurve;
 
 public class TunnelMake: MonoBehaviour
 {
@@ -62,7 +63,10 @@ public class TunnelMake: MonoBehaviour
 
             GameObject capObject = GetEndCap(ring, Cap, transform, isClosed);
 
-            return new SegmentGo(tunnelObject, capObject);
+            SegmentGo segmentGo = new SegmentGo(tunnelObject, capObject);
+            TunnelManager.Instance.AddGameObjectSegment(transform, segmentGo.segment);
+
+            return segmentGo;
         }
     }
 

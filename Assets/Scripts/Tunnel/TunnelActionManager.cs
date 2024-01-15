@@ -58,7 +58,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         if (IsIntersect(EnclosingTunnel, lastTunnelAction)) // intersect
         {
             Debug.Log("TunnelAction Intersect");
-            GameObject prevSegment = TunnelManager.Instance.GetGameObjectSegment(playerTransform);
+            GameObject prevSegment = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
             Heading PrevHeading = PrevHeadingDict[playerTransform];
             OnIntersectTunnel?.Invoke(playerTransform, prevSegment, TunnelHeading, PrevHeading, otherTunnels, lastTunnelAction);
             LastTunnelActionDict[playerTransform] = Action.Intersect;
@@ -79,9 +79,26 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         PrevHeadingDict[playerTransform] = TunnelHeading;
     }
 
-    bool IsIntersect(GameObject enclosingTunnel, Action lastTunnelAction)
+    /// <summary>
+    /// Detect if a player is leaving an existing tunnel, or entering a new tunnel
+    /// </summary>
+    /// <param name="nextTunnel"></param>
+    /// <param name="lastTunnelAction"></param>
+    /// <returns></returns>
+    bool IsIntersect(GameObject nextTunnel, Action lastTunnelAction)
     {
-        return enclosingTunnel == null ? lastTunnelAction == Action.Follow : lastTunnelAction == Action.Create;
+        bool isExitingTunnel = nextTunnel == null && lastTunnelAction == Action.Follow;
+        bool isEnteringTunnel = nextTunnel != null && lastTunnelAction == Action.Create;
+
+        if (isExitingTunnel)
+        {
+            Debug.Log("Exiting tunnel");
+        }
+        else if (isEnteringTunnel)
+        {
+            Debug.Log("Is Entering tunnel " + nextTunnel.name);
+        }
+        return isExitingTunnel || isEnteringTunnel;
     }
 
     // Update is called once per frame

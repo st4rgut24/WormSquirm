@@ -6,8 +6,7 @@ using System.Collections.Generic;
 public class TunnelManager : Singleton<TunnelManager>
 {
     public Dictionary<Transform, GameObject> EndCapDict; // <GameObject Transform, Enclosing Segment GameObject>
-    public Dictionary<Transform, GameObject> TransformSegmentDict; // <GameObject Transform, Enclosing Segment GameObject>
-    public Dictionary<string, Segment> SegmentDict; // <tunnel name, Segment)
+    public Dictionary<Transform, GameObject> TransformTunnelDict; // <GameObject Transform, Enclosing Segment GameObject>
 
     public TunnelProps defaultProps;
 
@@ -37,16 +36,15 @@ public class TunnelManager : Singleton<TunnelManager>
     private void Awake()
     {
         defaultProps = new TunnelProps(tunnelSegments, segmentSpacing, tunnelRadius, noiseScale);
-		SegmentDict = new Dictionary<string, Segment>();
 
 		EndCapDict = new Dictionary<Transform, GameObject>();
-        TransformSegmentDict = new Dictionary<Transform, GameObject>();
-		tunnelDisabler = new Disabler(GameManager.Instance.GetGrid(GridType.Tunnel), 3);
+        TransformTunnelDict = new Dictionary<Transform, GameObject>();
+		tunnelDisabler = new Disabler(5);
     }
 
 	public void AddGameObjectSegment(Transform transform, GameObject segmentGo)
 	{
-		TransformSegmentDict[transform] = segmentGo;
+		TransformTunnelDict[transform] = segmentGo;
 	}
 
 	/// <summary>
@@ -56,14 +54,14 @@ public class TunnelManager : Singleton<TunnelManager>
 	/// <returns></returns>
 	public bool isInTunnel(Transform transform)
 	{
-		return TransformSegmentDict.ContainsKey(transform);
+		return TransformTunnelDict.ContainsKey(transform);
     }
 
-	public GameObject GetGameObjectSegment(Transform transform)
+	public GameObject GetGameObjectTunnel(Transform transform)
 	{
-		if (TransformSegmentDict.ContainsKey(transform))
+		if (TransformTunnelDict.ContainsKey(transform))
 		{
-            return TransformSegmentDict[transform];
+            return TransformTunnelDict[transform];
         }
 		else
 		{
@@ -76,16 +74,7 @@ public class TunnelManager : Singleton<TunnelManager>
 		GameObject endCap = segmentGo.cap;
 		GameObject tunnel = segmentGo.segment;
 
-        Segment segment = new Segment(tunnel, prevTunnel);
-
-		if (prevTunnel != null)
-		{
-            Segment prevSegment = SegmentDict[prevTunnel.name];
-            prevSegment.setNextTunnel(tunnel);
-        }
-
-		segment.setNextTunnels(nextTunnels);
- 		SegmentDict.Add(tunnel.name, segment);
+        SegmentManager.Instance.AddTunnelSegment(tunnel, prevTunnel, nextTunnels);
 
 		ReplaceEndCap(transform, endCap);
 	}
