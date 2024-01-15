@@ -6,12 +6,18 @@ public class Segment
 {
     public GameObject tunnel;
 
+	public Ring endRing;
+	public Ring startRing;
+
     Vector3 center = DefaultUtils.DefaultVector3;
 	List<GameObject> prevTunnel;
 	List<GameObject> nextTunnel;
 
-	public Segment(GameObject cur, GameObject prev)
+	public Segment(GameObject cur, GameObject prev, Ring ring, Ring prevRing)
 	{
+		this.startRing = prevRing;
+		this.endRing = ring;
+
 		this.tunnel = cur;
 
 		this.prevTunnel = new List<GameObject>();

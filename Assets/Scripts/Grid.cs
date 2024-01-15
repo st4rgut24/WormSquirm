@@ -57,7 +57,7 @@ public class Grid
         {
             throw new System.Exception("GameObject is out of bounds");
         }
-
+            
         Vector3Int cellPos = ConvertWorldPosToGridPos(pos);
 
         List<GameObject> gameObjects = grid[cellPos.x, cellPos.y, cellPos.z];

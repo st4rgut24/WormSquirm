@@ -34,9 +34,9 @@ public class SegmentManager : Singleton<SegmentManager>
         }
     }
 
-    public void AddTunnelSegment(GameObject tunnel, GameObject prevTunnel, List<GameObject> nextTunnels)
+    public void AddTunnelSegment(GameObject tunnel, GameObject prevTunnel, List<GameObject> nextTunnels, Ring ring, Ring prevRing)
     {
-        Segment segment = new Segment(tunnel, prevTunnel);
+        Segment segment = new Segment(tunnel, prevTunnel, ring, prevRing);
 
         if (prevTunnel != null)
         {

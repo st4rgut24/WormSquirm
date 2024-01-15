@@ -42,11 +42,6 @@ public class TunnelManager : Singleton<TunnelManager>
 		tunnelDisabler = new Disabler(5);
     }
 
-	public void AddGameObjectSegment(Transform transform, GameObject segmentGo)
-	{
-		TransformTunnelDict[transform] = segmentGo;
-	}
-
 	/// <summary>
 	/// Is the transform inside a tunnel
 	/// </summary>
@@ -69,12 +64,16 @@ public class TunnelManager : Singleton<TunnelManager>
 		}
 	}
 
-	void OnAddCreatedTunnel(Transform transform, SegmentGo segmentGo, GameObject prevTunnel, List<GameObject> nextTunnels)
+	void OnAddCreatedTunnel(Transform transform, SegmentGo segment, GameObject prevTunnel, List<GameObject> nextTunnels)
 	{
-		GameObject endCap = segmentGo.cap;
-		GameObject tunnel = segmentGo.segment;
+		Corridor corridor = segment.corridor;
+		GameObject tunnel = segment.getTunnel();
 
-        SegmentManager.Instance.AddTunnelSegment(tunnel, prevTunnel, nextTunnels);
+        TransformTunnelDict[transform] = tunnel;
+
+        GameObject endCap = segment.cap;
+
+        SegmentManager.Instance.AddTunnelSegment(tunnel, prevTunnel, nextTunnels, corridor.ring, corridor.prevRing);
 
 		ReplaceEndCap(transform, endCap);
 	}

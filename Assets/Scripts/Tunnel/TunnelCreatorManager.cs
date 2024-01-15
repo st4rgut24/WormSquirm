@@ -58,7 +58,7 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
 
         if (segmentGo != null)
         {
-            tunnelGrid.AddGameObject(heading.position, segmentGo.segment);
+            tunnelGrid.AddGameObject(heading.position, segmentGo.getTunnel());
 
             OnAddCreatedTunnel?.Invoke(playerTransform, segmentGo, prevSegment, nextTunnels);
         }

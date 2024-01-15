@@ -4,6 +4,20 @@ using System.Net.NetworkInformation;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+public struct OptionalMeshProps
+{
+    public OptionalMeshProps(Transform transform, Ring prevRing, TunnelProps props)
+    {
+        this.transform = transform;
+        this.prevRing = prevRing;
+        this.props = props;
+    }
+
+    public Transform transform;
+    public Ring prevRing;
+    public TunnelProps props;
+}
+
 public enum MeshType
 {
 	EndCap,
@@ -23,7 +37,7 @@ public class MeshObjectFactory
 	/// <param name="transform">transform of player used for looking up meshes</param>
 	/// <param name="ring">Ring used to create mesh</param>
 	/// <returns></returns>
-	public static GameObject Get(MeshType type, GameObject prefab, Transform transform, Ring ring, TunnelProps props)
+	public static GameObject Get(MeshType type, GameObject prefab, Ring ring, OptionalMeshProps meshProps)
 	{
 		GameObject MeshObject = GameObject.Instantiate(prefab);
 
@@ -35,7 +49,7 @@ public class MeshObjectFactory
 				mesh = CreateEndCapMesh(ring);
 				break;
 			case MeshType.Tunnel:
-				mesh = CreateTunnelMesh(transform, ring, props);
+				mesh = CreateTunnelMesh(meshProps.transform, ring, meshProps.prevRing, meshProps.props);
 				break;
 			default:
 				throw new Exception("Not a valid mesh type: " + type);
@@ -65,11 +79,9 @@ public class MeshObjectFactory
     /// <param name="ring">The current tunnel ring</param>
     /// <param name="props">Props about the tunnel</param>
     /// <returns>Mesh for the tunnel</returns>
-	private static Mesh CreateTunnelMesh(Transform transform, Ring ring, TunnelProps props)
+	private static Mesh CreateTunnelMesh(Transform transform, Ring ring, Ring prevRing, TunnelProps props)
 	{
         Mesh tunnelMesh = new Mesh();
-
-        Ring prevRing = RingManager.Instance.Get(transform);
 
         Vector3[] vertices = prevRing.vertices.Concat(ring.vertices).ToArray();
 

@@ -1,14 +1,21 @@
 ﻿using System;
 using UnityEngine;
 
+
 public class SegmentGo
 {
-	public GameObject segment;
+	public Corridor corridor;
 	public GameObject cap;
 
-	public SegmentGo(GameObject segment, GameObject cap)
+
+	public GameObject getTunnel()
 	{
-		this.segment = segment;
+		return corridor.tunnel;
+	}
+
+	public SegmentGo(GameObject cap, Corridor corridor)
+	{
+		this.corridor = corridor;
 		this.cap = cap;
 	}
 }

@@ -55,18 +55,19 @@ public class TunnelMake: MonoBehaviour
         else
         {
             Ring ring = RingManager.Instance.Create(direction, position);
+            Ring prevRing = RingManager.Instance.Get(transform);
 
-            GameObject tunnelObject = MeshObjectFactory.Get(MeshType.Tunnel, TunnelSegment, transform, ring, _props);
+            OptionalMeshProps meshProps = new OptionalMeshProps(transform, prevRing, _props);
+
+            GameObject tunnelObject = MeshObjectFactory.Get(MeshType.Tunnel, TunnelSegment, ring, meshProps);
 
             tunnelObject.name = "Tunnel " + tunnelCounter;
             tunnelCounter++;
 
             GameObject capObject = GetEndCap(ring, Cap, transform, isClosed);
 
-            SegmentGo segmentGo = new SegmentGo(tunnelObject, capObject);
-            TunnelManager.Instance.AddGameObjectSegment(transform, segmentGo.segment);
-
-            return segmentGo;
+            Corridor corridor = new Corridor(tunnelObject, ring, prevRing);
+            return new SegmentGo(capObject, corridor);
         }
     }
 
@@ -80,7 +81,7 @@ public class TunnelMake: MonoBehaviour
     {
         if (isClosed)
         {
-            return MeshObjectFactory.Get(MeshType.EndCap, prefab, transform, ring, _props);
+            return MeshObjectFactory.Get(MeshType.EndCap, prefab, ring, new OptionalMeshProps());
         }
         else
         {

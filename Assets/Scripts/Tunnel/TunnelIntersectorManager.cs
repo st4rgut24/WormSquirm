@@ -76,7 +76,7 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 
         // get intersected tunnels (may be more than 1)
         otherTunnels.Remove(prevTunnel); // adjoining segment does not count as intersected object
-        List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment.segment, otherTunnels);
+        List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment.getTunnel(), otherTunnels);
 
         List<GameObject> deletedTunnels = new List<GameObject>();
 
