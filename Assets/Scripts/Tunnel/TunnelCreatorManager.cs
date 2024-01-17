@@ -44,9 +44,9 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
     /// Create a Tunnel segment
     /// </summary>
     /// <param name="playerTransform">The transform of the player</param>
-    /// <param name="lastAction">The action preceding this Create action</param>
+    /// <param name="extendsTunnel">The player is extending a tunnel, always true for Create Action</param>
     /// <param name="heading">The directional info of the tunnel</param>
-	void CreateAction(Transform playerTransform, TunnelActionManager.Action lastAction, Heading heading)
+	void CreateAction(Transform playerTransform, bool extendsTunnel, Heading heading, Ring prevRing)
     {
         //if (lastAction == TunnelActionManager.Action.Intersect)
         //{
@@ -54,14 +54,12 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
         //}
 
         GameObject prevSegment = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
-        SegmentGo segmentGo = tunnelMaker.GrowTunnel(playerTransform, heading, true);
+        
+        SegmentGo segmentGo = tunnelMaker.GrowTunnel(playerTransform, heading, true, prevRing);
 
-        if (segmentGo != null)
-        {
-            tunnelGrid.AddGameObject(heading.position, segmentGo.getTunnel());
+        tunnelGrid.AddGameObject(heading.position, segmentGo.getTunnel());
 
-            OnAddCreatedTunnel?.Invoke(playerTransform, segmentGo, prevSegment, nextTunnels);
-        }
+        OnAddCreatedTunnel?.Invoke(playerTransform, segmentGo, prevSegment, nextTunnels);
 
         //TunnelManager.Instance.AddGameObjectSegment(playerTransform, segmentGo?.segment);
     }

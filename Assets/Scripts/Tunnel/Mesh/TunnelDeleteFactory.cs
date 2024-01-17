@@ -8,16 +8,16 @@ public class TunnelDeleteFactory
 	{
 	}
 
-	public static TunnelDelete Get(GameObject tunnel, List<Ray> rays, bool isInside)
+	public static TunnelDelete Get(GameObject tunnel, List<Ray> rays, bool isExtend)
 	{
-		if (isInside)
+		if (isExtend)
 		{
-			return new InvertedTunnelDelete(tunnel, rays);
+            return new TunnelDelete(tunnel, rays);
 		}
 		else
 		{
-			return new TunnelDelete(tunnel, rays);
-		}
-	}
+            return new InvertedTunnelDelete(tunnel, rays);
+        }
+    }
 }
 

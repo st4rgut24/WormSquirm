@@ -1,7 +1,8 @@
 ﻿using System;
 using UnityEngine;
 
-public struct Control {
+public struct Control
+{
     float magnitude;
     Vector2 direction;
 }
@@ -10,8 +11,8 @@ public class Controller
 {
     Transform transform;
 
-    public float rotationSpeed = .1f;
-    public float acceleration = 5;
+    public float rotationSpeed = .5f;
+    public float acceleration = 1;
     public float deceleration = 2f; // Adjust the deceleration factor
     private float currentSpeed = 0f;
     private float maxSpeed = 5f;
@@ -23,26 +24,22 @@ public class Controller
         this.transform = transform;
     }
 
-    public void AccelerateInCurrentDirection()
+    /// <summary>
+    /// Get translation vector after accelerating
+    /// </summary>
+    /// <param name="forwardDirection">forward facing vector</param>
+    /// <returns>vector to translate player</returns>
+    public Vector3 GetAccelerateTranslation()
     {
-        // Get the forward direction of the player in world space
-        if (currentSpeed < maxSpeed)
-        {
-            Vector3 forwardDirection = transform.forward;
+        // Accelerate the player in the current direction
+        currentSpeed += acceleration * Time.deltaTime;
+        float moveDistance = currentSpeed * Time.deltaTime;
 
-            // Accelerate the player in the current direction
-            currentSpeed += acceleration * Time.deltaTime;
-            float moveDistance = currentSpeed * Time.deltaTime;
-            transform.Translate(forwardDirection * moveDistance, Space.World);
-        }
-        else {
-            Decelerate();
-        }
+        return transform.forward * moveDistance;
     }
 
-    void Decelerate()
+    Vector3 GetDecelerateTranslation()
     {
-        Debug.Log("Decelerate");
         // Decelerate the player when the spacebar is not pressed
         currentSpeed -= deceleration * Time.deltaTime;
         currentSpeed = Mathf.Max(currentSpeed, 0f); // Ensure speed doesn't go below zero
@@ -51,9 +48,11 @@ public class Controller
         // If the player is moving, translate the player to simulate deceleration
         if (currentSpeed > 0f)
         {
-            transform.Translate(transform.forward * moveDistance, Space.World);
-
-            // Notify subscribers about the move event
+            return transform.forward * moveDistance;
+        }
+        else
+        {
+            return DefaultUtils.DefaultVector3;
         }
     }
 
@@ -61,31 +60,58 @@ public class Controller
     /// Handle input via controls
     /// </summary>
     /// <param name="rawInput">unnormalized input</param>
-    public void HandleInput(Vector2 rawInput) {
-        if (rawInput.Equals(DefaultUtils.DefaultVector3))
+    public void HandleInput(Vector2 rawInput)
+    {
+        Rotate(rawInput);
+        Move(rawInput);
+    }
+
+    public void Move(Vector2 rawInput)
+    {
+        Vector3 translationVector = GetTranslation(rawInput);
+            
+        if (translationVector == DefaultUtils.DefaultVector3)
         {
-            Decelerate();
+            return;
         }
-        else {
-            Move(rawInput);
-            Rotate(rawInput);
+
+        Vector3 projectedPosition = transform.position + translationVector;
+
+        // TODO: need to update the segment the player is in if moving into a new segment
+
+        if (!ClampPosition(projectedPosition))
+        {
+            transform.Translate(translationVector, Space.World);
+        }
+        else // the position does not change because it has exceeded the bounds of the current segment
+        {
+            TunnelManager.Instance.UpdateTransformDict(transform);
         }
     }
 
     /// <summary>
-    /// Move the player forward
+    /// Get projected movement in the player's forward direction
     /// </summary>
     /// <param name="inputMovement">vector representing movement input</param>
-    public void Move(Vector2 inputMovement)
+    public Vector3 GetTranslation(Vector2 inputMovement)
     {
-        if (inputMovement.magnitude > movementThreshold)
+        if (currentSpeed < maxSpeed)
         {
-            AccelerateInCurrentDirection();
+            return GetAccelerateTranslation();
         }
         else
         {
-            Decelerate();
+            return GetDecelerateTranslation();
         }
+    }
+
+    /// <summary>   
+    /// If user surpasses the bounds of current tunnel segment, don't allow any movement
+    /// </summary>
+    /// <returns>whether position is clamped</returns>
+    public bool ClampPosition(Vector3 position)
+    {
+        return SegmentManager.Instance.IsSegmentBoundsExceeded(transform, position);
     }
 
     /// <summary>
@@ -116,11 +142,12 @@ public class Controller
     /// </summary>
     /// <param name="inputDirection">direction of the player via controls</param>
     public void Rotate(Vector2 inputDirection)
-	{
+    {
         float angle = GetAngleFromInput(inputDirection);
-        Quaternion rotation = Quaternion.AngleAxis(angle, transform.up);
+        Quaternion inputRotation = Quaternion.AngleAxis(angle, transform.up);
+        Quaternion targetRotation = transform.rotation * inputRotation;
+
         // TODO: Adjust rotation speed based on angle size
-        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, rotationSpeed * Time.deltaTime);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
 }
-

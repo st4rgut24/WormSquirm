@@ -4,11 +4,54 @@ using System.Collections.Generic;
 
 public class SegmentManager : Singleton<SegmentManager>
 {
+    public float MinDistFromCap;
+    public float MinDistFromCenterLine;
+
+    public const float SameDirAngleMargin = 30; // the margin of error for two gameobjects to be considered facing the same direction
+
     public Dictionary<string, Segment> SegmentDict; // <tunnel name, Segment)
 
     private void Awake()
     {
         SegmentDict = new Dictionary<string, Segment>();
+    }
+
+    private void Start()
+    {
+        float edgeDist = GameManager.Instance.agentOffset - TunnelManager.minSegmentLength - 1; // the min dist ensures the new tunnel will be at least minSegmentLength
+
+        MinDistFromCenterLine = TunnelManager.tunnelRadius / 2; // todo: tinker with this to find what number works with creating newly intersected tunnels
+        MinDistFromCap = edgeDist;
+    }   
+
+    public Segment UpdateSegmentFromTransform(Transform transform)
+    {
+        Segment curSegment = GetSegmentFromTransform(transform);
+
+        List<GameObject> tunnels = new List<GameObject> ( curSegment.getNextTunnels() );
+        tunnels.AddRange(curSegment.getPrevTunnels());
+
+        tunnels.Add(curSegment.tunnel);
+
+        GameObject enclosingTunnel = TunnelUtils.getEnclosingObject(transform.position, tunnels);
+
+        if (enclosingTunnel == null)
+        {
+            throw new System.Exception("No enclosing tunnel found at position " + transform.position);
+        }
+        else
+        {
+            if (curSegment.tunnel == enclosingTunnel)
+            {
+                Debug.Log("Player has not moved to a new segment. He is just stuck in segment " + enclosingTunnel.name);
+            }
+            else
+            {
+                Debug.Log("Player has moved to the new segment " + enclosingTunnel.name);
+            }
+
+            return GetSegmentFromObject(enclosingTunnel);
+        }
     }
 
     public Segment GetSegmentFromTransform(Transform transform)
@@ -31,6 +74,76 @@ public class SegmentManager : Singleton<SegmentManager>
         else
         {
             throw new System.Exception("No Segment matches tunnel named " + tunnel.name);
+        }
+    }
+
+    /// <summary>
+    /// Check whether a tunnel gameobject is linked to another tunnel
+    /// </summary>
+    /// <param name="tunnel"></param>
+    /// <param name="otherTunnel"></param>
+    /// <returns></returns>
+    public bool IsTunnelsConnected(GameObject tunnel, GameObject otherTunnel)
+    {
+        Segment segment = GetSegmentFromObject(tunnel);
+        List<GameObject> nextTunnels = segment.getNextTunnels();
+        return nextTunnels.Contains(otherTunnel);
+    }
+
+    /// <summary>
+    /// Check if the player's digging is extending the tunnel
+    /// </summary>
+    /// <param name="transform">transform of player</param>
+    /// <returns>true if digging extends rather than bisects tunnel</returns>
+    public bool IsExtendingTunnel(Transform transform)
+    {
+        Segment segment = GetSegmentFromTransform(transform);
+
+        if (segment == null) // start of game, start of a tunnel
+        {
+            return true;
+        }
+        else if (segment.hasEndCap())
+        {
+            float angle = Vector3.Angle(transform.forward, segment.forward);
+            return angle <= SameDirAngleMargin;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Check if the transform is outside segment bounds
+    /// </summary>
+    /// <param name="transform">transform</param>
+    /// <param name="position">position to check for bounds</param>
+    /// <returns>true if out of bounds</returns>
+    public bool  IsSegmentBoundsExceeded(Transform transform, Vector3 position)
+    {
+        Segment segment = GetSegmentFromTransform(transform);
+
+        if (segment != null)
+        {
+            if (segment.hasEndCap()) // check if player is close enough to the end of a tunnel
+            {
+                float distToEndCap = Vector3.Distance(position, segment.endRingCenter);
+
+                Debug.Log("Distance to end cap is " + distToEndCap + ". Min dist to end cap is " + MinDistFromCap);
+                if (distToEndCap <= MinDistFromCap)
+                {
+                    return true;
+                } 
+            }
+            float dist = segment.GetClosestDistanceToCenterLine(position);
+
+            Debug.Log("Distance to center line is " + dist + ". Max dist from center line to be mobile is " + (TunnelManager.tunnelRadius / 2));
+            return dist >= TunnelManager.tunnelRadius / 2; // divide by 2 because the moveable area is smaller on bottom plane of the tunnel
+        }
+        else
+        {
+            return false;
         }
     }
 

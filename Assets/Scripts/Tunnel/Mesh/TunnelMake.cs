@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.UIElements;
 using static UnityEngine.Rendering.HableCurve;
 
 public class TunnelMake: MonoBehaviour
@@ -36,39 +37,50 @@ public class TunnelMake: MonoBehaviour
     /// <summary>
     /// Create a Tunnel
     /// </summary>
-    /// <param name="transform">The key used to look up previous segments</param>
+    /// <param name="playerTransform">The key used to look up previous segments</param>
     /// <param name="heading">directional info</param>
-    /// <param name="isClosed">whether the tunnel is closed</param>
+    /// <param name="isClosed">whether the tunnel is closed/capped</param>
     /// <returns></returns>
-    public SegmentGo GrowTunnel(Transform transform, Heading heading, bool isClosed)
+    public SegmentGo GrowTunnel(Transform playerTransform, Heading heading, bool isClosed, Ring prevRing)
     {
         Vector3 direction = heading.forward;
         Vector3 position = heading.position;
 
-        if (!RingManager.Instance.ContainsRing(transform)) // initialize start of tunnel
-        {
-            Ring ring = RingManager.Instance.Create(direction, position);
-            RingManager.Instance.Add(transform, ring); // update normal vector
+        return CreateSegment(direction, position, playerTransform, isClosed, prevRing);
 
-            return null;
-        }
-        else
-        {
-            Ring ring = RingManager.Instance.Create(direction, position);
-            Ring prevRing = RingManager.Instance.Get(transform);
+    }
 
-            OptionalMeshProps meshProps = new OptionalMeshProps(transform, prevRing, _props);
+    private SegmentGo CreateSegment(Vector3 direction, Vector3 position, Transform playerTransform, bool isClosed, Ring prevRing)
+    {
+        Ring ring = RingManager.Instance.Create(direction, position);
+        //Ring prevRing = RingManager.Instance.Get(playerTransform);
 
-            GameObject tunnelObject = MeshObjectFactory.Get(MeshType.Tunnel, TunnelSegment, ring, meshProps);
+        OptionalMeshProps meshProps = new OptionalMeshProps(playerTransform, prevRing, _props);
 
-            tunnelObject.name = "Tunnel " + tunnelCounter;
-            tunnelCounter++;
+        GameObject tunnelObject = MeshObjectFactory.Get(MeshType.Tunnel, TunnelSegment, ring, meshProps);
 
-            GameObject capObject = GetEndCap(ring, Cap, transform, isClosed);
+        tunnelObject.name = "Tunnel " + tunnelCounter;
+        tunnelCounter++;
 
-            Corridor corridor = new Corridor(tunnelObject, ring, prevRing);
-            return new SegmentGo(capObject, corridor);
-        }
+        GameObject capObject = GetEndCap(ring, Cap, playerTransform, isClosed);
+
+        Corridor corridor = new Corridor(tunnelObject, ring, prevRing);
+        return new SegmentGo(capObject, corridor);
+    }
+
+    /// <summary>
+    /// If no tunnel exists, need to initialize the start ring of the tunnel
+    /// </summary>
+    /// <param name="direction">tunnel direction</param>
+    /// <param name="playerTransform">transform of player</param>
+    /// <returns>ring defining start of tunnel</returns>
+    private Ring InitTunnel(Vector3 direction, Transform playerTransform)
+    {
+        // the first ring should use player position to connect to the next ring with offset
+        Ring ring = RingManager.Instance.Create(direction, playerTransform.position);
+        RingManager.Instance.Add(playerTransform, ring); // update normal vector
+
+        return ring;
     }
 
     /// <summary>

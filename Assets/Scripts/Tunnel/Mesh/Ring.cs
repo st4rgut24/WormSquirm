@@ -20,6 +20,11 @@ public class Ring
         setVertices(vertexCount, normal, noiseScale);
     }
 
+    public Vector3 GetCenter()
+    {
+        return center;
+    }
+
     void setVertices(int vertexCount, Vector3 normal, float? noiseScale)
     {
         Vector3 vector2 = normal + new Vector3(1, 1, 1);

@@ -1,12 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using static UnityEngine.GraphicsBuffer;
 
 public class Agent : MonoBehaviour
 {
-    public static event Action<Transform> OnMove;
+    public static event Action<Transform, Vector3> OnDig;
 
     Vector3 prevPosition = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+
+    public bool isDigging;
+
+    Quaternion targetRotation;
+    Vector3 targetPosition;
 
     Vector3 startNotifyPosition;
 
@@ -19,21 +25,15 @@ public class Agent : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
 	{
-        float distance = Vector3.Distance(startNotifyPosition, transform.position);
-
-        if (distance >= GameManager.Instance.maxSegmentLength)
-        {
-            notifyPosition();
-            startNotifyPosition = transform.position;
-        }
 	}
 
-    private void notifyPosition()
+    protected void notifyDig(Vector3 digDirection)
     {
         if (transform.position != prevPosition)
         {
+            Debug.Log("Notify dig. Current position " + transform.position + " Previous position " + prevPosition);
             prevPosition = transform.position;
-            OnMove?.Invoke(transform);
+            OnDig?.Invoke(transform, digDirection);
         }
     }
 }

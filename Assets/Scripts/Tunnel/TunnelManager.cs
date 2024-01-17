@@ -17,12 +17,15 @@ public class TunnelManager : Singleton<TunnelManager>
 
     Disabler tunnelDisabler;
 
+    public const int minSegmentLength = 3; // the maximum length of a tunnel segment
+
     //todo: use separation value to calculate the tunnel segment's transform
     float separation = 1f; // separation between the player and the end of the active tunnel
 
+    public const float tunnelRadius = 5.13f;
+
 	const int tunnelSegments = 7;
     const float segmentSpacing = 1.33f;
-    const float tunnelRadius = 5.13f;
     const float noiseScale = .8f;
 
     private void OnEnable()
@@ -30,7 +33,7 @@ public class TunnelManager : Singleton<TunnelManager>
         TunnelCreatorManager.OnAddCreatedTunnel += OnAddCreatedTunnel;
         TunnelIntersectorManager.OnAddIntersectedTunnel += OnAddCreatedTunnel;
 
-		Agent.OnMove += tunnelDisabler.Disable;
+		Agent.OnDig += tunnelDisabler.Disable;
     }
 
     private void Awake()
@@ -40,16 +43,6 @@ public class TunnelManager : Singleton<TunnelManager>
 		EndCapDict = new Dictionary<Transform, GameObject>();
         TransformTunnelDict = new Dictionary<Transform, GameObject>();
 		tunnelDisabler = new Disabler(5);
-    }
-
-	/// <summary>
-	/// Is the transform inside a tunnel
-	/// </summary>
-	/// <param name="transform">The object's transform</param>
-	/// <returns></returns>
-	public bool isInTunnel(Transform transform)
-	{
-		return TransformTunnelDict.ContainsKey(transform);
     }
 
 	public GameObject GetGameObjectTunnel(Transform transform)
@@ -64,12 +57,21 @@ public class TunnelManager : Singleton<TunnelManager>
 		}
 	}
 
+	public bool ExceedsMinSegmentLength(float segmentLength)
+	{
+		Debug.Log("Segment has length " + segmentLength);
+		return segmentLength >= minSegmentLength;
+	}
+
 	void OnAddCreatedTunnel(Transform transform, SegmentGo segment, GameObject prevTunnel, List<GameObject> nextTunnels)
 	{
 		Corridor corridor = segment.corridor;
 		GameObject tunnel = segment.getTunnel();
 
-        TransformTunnelDict[transform] = tunnel;
+		if (!TransformTunnelDict.ContainsKey(transform))
+		{
+            TransformTunnelDict[transform] = tunnel;
+        }
 
         GameObject endCap = segment.cap;
 
@@ -77,6 +79,18 @@ public class TunnelManager : Singleton<TunnelManager>
 
 		ReplaceEndCap(transform, endCap);
 	}
+
+	/// <summary>
+	/// Update the mapping of players to tunnel gameobjects
+	/// </summary>
+	/// <param name="playerTransform"></param>
+	public void UpdateTransformDict(Transform playerTransform)
+	{
+		Vector3 playerPosition = playerTransform.position;
+
+		Segment UpdatedSegment = SegmentManager.Instance.UpdateSegmentFromTransform(playerTransform);
+		TransformTunnelDict[playerTransform] = UpdatedSegment.tunnel;
+    }
 
 	void ReplaceEndCap(Transform transform, GameObject endCap)
 	{
@@ -113,7 +127,7 @@ public class TunnelManager : Singleton<TunnelManager>
         TunnelCreatorManager.OnAddCreatedTunnel -= OnAddCreatedTunnel;
         TunnelIntersectorManager.OnAddIntersectedTunnel -= OnAddCreatedTunnel;
 
-        Agent.OnMove -= tunnelDisabler.Disable;
+        Agent.OnDig -= tunnelDisabler.Disable;
     }
 }
 

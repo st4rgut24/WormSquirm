@@ -19,7 +19,7 @@ public class Disabler
 	/// <summary>
 	/// Trigger the disable of surrounding gameobject
 	/// </summary>
-	public void Disable(Transform transform)
+	public void Disable(Transform transform, Vector3 direction)
 	{
         Segment segment = SegmentManager.Instance.GetSegmentFromTransform(transform);
 

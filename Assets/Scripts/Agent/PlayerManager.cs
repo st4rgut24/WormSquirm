@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,6 +8,8 @@ public class PlayerManager : Singleton<PlayerManager>
 	public GameObject MainPlayerGo;
 	public GameObject PlayerGo;
 
+	public GameObject MainPlayerInst;
+
     public List<GameObject> Players;
 
     Vector3 defaultSpawnLoc = new Vector3(12, 10, 7);
@@ -14,19 +17,23 @@ public class PlayerManager : Singleton<PlayerManager>
     private void Awake()
     {
 		Players = new List<GameObject>();
+        MainPlayerInst = Spawn(MainPlayerGo);
     }
+
+    public GameObject GetMainPlayer()
+	{
+		return MainPlayerInst;
+	}
 
     // Use this for initialization
     void Start()
 	{
-		GameObject PlayerGo = Spawn();
-		Ray ray = new Ray(PlayerGo.transform.position, PlayerGo.transform.forward);
-        Debug.DrawRay(ray.origin, ray.direction * 10f, Color.red, 50.0f);
+		Ray ray = new Ray(MainPlayerInst.transform.position, MainPlayerInst.transform.forward);
     }
 
-    GameObject Spawn()
+    GameObject Spawn(GameObject Player)
 	{
-		GameObject player = Instantiate(MainPlayerGo);
+		GameObject player = Instantiate(Player);
 		player.transform.position = defaultSpawnLoc;
 		Players.Add(player);
 
