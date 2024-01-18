@@ -17,7 +17,7 @@ public class TunnelManager : Singleton<TunnelManager>
 
     Disabler tunnelDisabler;
 
-    public const int minSegmentLength = 3; // the maximum length of a tunnel segment
+    public const int minSegmentLength = 5; // the maximum length of a tunnel segment
 
     //todo: use separation value to calculate the tunnel segment's transform
     float separation = 1f; // separation between the player and the end of the active tunnel
@@ -89,7 +89,15 @@ public class TunnelManager : Singleton<TunnelManager>
 		Vector3 playerPosition = playerTransform.position;
 
 		Segment UpdatedSegment = SegmentManager.Instance.UpdateSegmentFromTransform(playerTransform);
-		TransformTunnelDict[playerTransform] = UpdatedSegment.tunnel;
+
+		if (UpdatedSegment != null) // if the player entered a new segment
+		{
+            TransformTunnelDict[playerTransform] = UpdatedSegment.tunnel;
+        }
+		else
+		{
+            Debug.Log("Player has not moved to a new segment. He is just stuck in segment " + TransformTunnelDict[playerTransform].name);
+        }
     }
 
 	void ReplaceEndCap(Transform transform, GameObject endCap)

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public class SegmentManager : Singleton<SegmentManager>
 {
@@ -9,6 +10,7 @@ public class SegmentManager : Singleton<SegmentManager>
 
     public const float SameDirAngleMargin = 30; // the margin of error for two gameobjects to be considered facing the same direction
 
+    public static event Action<Transform, Segment> OnNewSegment;
     public Dictionary<string, Segment> SegmentDict; // <tunnel name, Segment)
 
     private void Awake()
@@ -18,7 +20,7 @@ public class SegmentManager : Singleton<SegmentManager>
 
     private void Start()
     {
-        float edgeDist = GameManager.Instance.agentOffset - TunnelManager.minSegmentLength - 1; // the min dist ensures the new tunnel will be at least minSegmentLength
+        float edgeDist = 5; // the distance from the edge of tunnel serves as a stopping point
 
         MinDistFromCenterLine = TunnelManager.tunnelRadius / 2; // todo: tinker with this to find what number works with creating newly intersected tunnels
         MinDistFromCap = edgeDist;
@@ -31,27 +33,17 @@ public class SegmentManager : Singleton<SegmentManager>
         List<GameObject> tunnels = new List<GameObject> ( curSegment.getNextTunnels() );
         tunnels.AddRange(curSegment.getPrevTunnels());
 
-        tunnels.Add(curSegment.tunnel);
+        GameObject enclosingTunnel = TunnelUtils.getClosestObject(transform.position, tunnels);
+        Segment UpdatedSegment = null;
 
-        GameObject enclosingTunnel = TunnelUtils.getEnclosingObject(transform.position, tunnels);
-
-        if (enclosingTunnel == null)
+        if (enclosingTunnel != null)
         {
-            throw new System.Exception("No enclosing tunnel found at position " + transform.position);
+            UpdatedSegment = GetSegmentFromObject(enclosingTunnel);
+            Debug.Log("Player has moved to the new segment " + enclosingTunnel.name);
+            OnNewSegment?.Invoke(transform, UpdatedSegment);
         }
-        else
-        {
-            if (curSegment.tunnel == enclosingTunnel)
-            {
-                Debug.Log("Player has not moved to a new segment. He is just stuck in segment " + enclosingTunnel.name);
-            }
-            else
-            {
-                Debug.Log("Player has moved to the new segment " + enclosingTunnel.name);
-            }
 
-            return GetSegmentFromObject(enclosingTunnel);
-        }
+        return UpdatedSegment;
     }
 
     public Segment GetSegmentFromTransform(Transform transform)

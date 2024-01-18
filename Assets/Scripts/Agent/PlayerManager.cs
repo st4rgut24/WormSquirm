@@ -14,6 +14,11 @@ public class PlayerManager : Singleton<PlayerManager>
 
     Vector3 defaultSpawnLoc = new Vector3(12, 10, 7);
 
+    private void OnEnable()
+    {
+		SegmentManager.OnNewSegment += OnEnterNewSegment;
+    }
+
     private void Awake()
     {
 		Players = new List<GameObject>();
@@ -40,14 +45,17 @@ public class PlayerManager : Singleton<PlayerManager>
 		return player;
 	}
 
-	//public void AcceleratePlayer()
-	//{
-	//	if (Players.Count > 0)
-	//	{
-	//		Players[0].GetComponent<Player>().AccelerateInCurrentDirection();
+	/// <summary>
+	/// Handle event where player enters a new segment
+	/// </summary>
+	/// <param name="transform"></param>
+	/// <param name="segment"></param>
+	public void OnEnterNewSegment(Transform transform, Segment segment)
+	{
+		Player movedAgent = transform.gameObject.GetComponent<Player>();
 
- //       }
- //   }
+		movedAgent.ChangeDirection(segment.forward);
+	}
 
 	public bool hasPlayers()
 	{
@@ -59,5 +67,10 @@ public class PlayerManager : Singleton<PlayerManager>
 	{
 			
 	}
+
+    private void OnDisable()
+    {
+        SegmentManager.OnNewSegment -= OnEnterNewSegment;
+    }
 }
 

@@ -37,12 +37,43 @@ public class TunnelUtils
     }
 
     /// <summary>
-    /// Get the object that contains the targetObject
+    /// Get the object closest to position
     /// </summary>
     /// <param name="targetPosition">The target GameObject</param>
     /// <param name="objectList">List of candidate GameObjects that may contain targetObject</param>
     /// <returns></returns>
-    public static GameObject getEnclosingObject(Vector3 targetPosition, List<GameObject> objectList)
+    public static GameObject getClosestObject(Vector3 targetPosition, List<GameObject> objectList)
+    {
+        float closestDist = Mathf.Infinity;
+        GameObject closestTunnel = null;
+
+        foreach (GameObject otherObject in objectList)
+        {
+            if (otherObject != null) // Ensure the GameObject in the list is not null
+            {
+                Bounds otherBounds = otherObject.GetComponent<Renderer>().bounds;
+
+                float dist = Vector3.Distance(otherBounds.center, targetPosition);
+
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                    closestTunnel = otherObject;
+                }
+            }
+        }
+
+        return closestTunnel;
+}
+
+
+/// <summary>
+/// Get the object that contains the targetObject
+/// </summary>
+/// <param name="targetPosition">The target GameObject</param>
+/// <param name="objectList">List of candidate GameObjects that may contain targetObject</param>
+/// <returns></returns>
+public static GameObject getEnclosingObject(Vector3 targetPosition, List<GameObject> objectList)
     {
         foreach (GameObject otherObject in objectList)
         {

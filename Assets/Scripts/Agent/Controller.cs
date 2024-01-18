@@ -83,10 +83,8 @@ public class Controller
         {
             transform.Translate(translationVector, Space.World);
         }
-        else // the position does not change because it has exceeded the bounds of the current segment
-        {
-            TunnelManager.Instance.UpdateTransformDict(transform);
-        }
+
+        TunnelManager.Instance.UpdateTransformDict(transform); // update whatever segment the player is in if necessary
     }
 
     /// <summary>

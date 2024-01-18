@@ -6,7 +6,7 @@ public class GameManager : Singleton<GameManager>
 
     TunnelManager tunnelManager;
 
-    public int agentOffset = 8; // how many units away from end of a newly created tunnel a player is
+    public int agentOffset = 12; // how many units away from end of a newly created tunnel a player is
 
     public Vector3Int origin = new Vector3Int(0, 0, 0);
 
