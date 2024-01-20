@@ -48,13 +48,14 @@ public class PlayerManager : Singleton<PlayerManager>
 	/// <summary>
 	/// When player enters new tunnel, adjust the player's angle of attack
 	/// </summary>
-	/// <param name="transform"></param>
-	/// <param name="segment"></param>
+	/// <param name="transform">player transform</param>
+	/// <param name="segment">segment of tunnel player is in</param>
+	/// // TODO: consider moving this callback to a new classs called AgentManager, since it should affect both bots and players
 	public void OnEnterNewSegment(Transform transform, Segment segment)
 	{
 		Player movedAgent = transform.gameObject.GetComponent<Player>();
-        Quaternion tunnelDirection = Quaternion.LookRotation(segment.forward);
-		Vector3 upDownRotation = new Vector3(tunnelDirection.eulerAngles.x, 0, 0);
+		movedAgent.UpdateSegment(segment);
+        Vector3 upDownRotation = DirectionUtils.GetUpDownRotation(transform.forward, movedAgent.curSegmentForward);
         movedAgent.ChangeRotation(upDownRotation, true);
 	}
 

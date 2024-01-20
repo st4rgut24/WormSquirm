@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.Rendering.HableCurve;
 
 public class Agent : MonoBehaviour
 {
@@ -9,7 +10,6 @@ public class Agent : MonoBehaviour
     public float rotationThreshold = 0.1f;
 
     Vector3 lookRotation = DefaultUtils.DefaultVector3;
-    //bool isLookComplete = true;
     bool isLookInProgress = true; // a look is in progress that must complete before any other looks can be processed
 
     public static event Action<Transform, Vector3> OnDig;
@@ -23,11 +23,15 @@ public class Agent : MonoBehaviour
 
     Vector3 startNotifyPosition;
 
+    public Segment curSegment;
+    public Vector3 curSegmentForward; // the direction of the tunnel the player is facing
+
     // Use this for initialization
     protected virtual void Start()
 	{
         startNotifyPosition = transform.position;
         isLookInProgress = false;
+        curSegmentForward = DefaultUtils.DefaultVector3;
     }
 
     // Update is called once per frame
@@ -36,24 +40,27 @@ public class Agent : MonoBehaviour
         if (isLookInProgress)
         {
             isLookInProgress = Rotate(lookRotation);
-
         }
-        //if (IsLooking(lookRotation))
-        //{
-        //    Debug.Log("Look in direction " + lookRotation);
-        //    SmoothLookAtDirection(lookRotation);
-        //}
+        else if (curSegment != null && !DirectionUtils.isDirectionsAligned(transform.forward, curSegmentForward)) // for ex. if player has turned around in the current tunnel
+        {
+            // if traveling to the other end of the segment, update the segment forward vector
+            curSegmentForward = -curSegmentForward;
+            Vector3 verticalRotate = DirectionUtils.GetUpDownRotation(transform.forward, curSegment.forward);
+            ChangeRotation(verticalRotate, true);
+        }
     }
 
+
     /// <summary>
-    /// Determine whether player has finished rotation to look in new direction
+    /// Update segment player is in
     /// </summary>
-    /// <param name="direction">new look direction</param>
-    /// <returns>true if done looking in direction</returns>
-    //bool IsLooking(Vector3 direction)
-    //{
-    //    return !direction.Equals(DefaultUtils.DefaultVector3) && !isLookComplete;
-    //}
+    /// <param name="segment">segment of tunnel</param>
+    public void UpdateSegment(Segment segment)
+    {
+        curSegment = segment;
+        curSegmentForward = DirectionUtils.isDirectionsAligned(transform.forward, curSegment.forward) ? segment.forward : -segment.forward;
+
+    }
 
     bool Rotate(Vector3 rotation)
     {
@@ -70,30 +77,7 @@ public class Agent : MonoBehaviour
         }
 
         return isInProgress;
-        //else
-        //{
-        //    //isLookComplete = true; // finished rotation
-        //    isBlockingLook = false;
-        //}
     }
-
-    //void SmoothLookAtDirection(Vector3 direction)
-    //{
-    //    // Create a rotation that points in the specified direction
-    //    Quaternion tunnelDirection = Quaternion.LookRotation(direction);
-    //    Quaternion targetRotation = Quaternion.Euler(tunnelDirection.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z);
-
-    //    // Check if the current rotation is close enough to the target rotation
-    //    if (Quaternion.Angle(transform.rotation, targetRotation) > rotationThreshold)
-    //    {
-    //        // Interpolate between the current rotation and the target rotation
-    //        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-    //    }
-    //    else
-    //    {
-    //        isLookComplete = true; // finished rotation
-    //    }
-    //}
 
     /// <summary>
     /// Change the target rotation
@@ -145,16 +129,6 @@ public class Agent : MonoBehaviour
 
         return lookRotation;
     }
-
-    ///// <summary>
-    ///// A change in the terrain causes a change in the direction agent is facing
-    ///// </summary>
-    ///// <param name="tunnelVector">forward vector of tunnel segment</param>
-    //public void ChangeDirection(Vector3 tunnelVector)
-    //{
-    //    lookDirection = tunnelVector;
-    //    isLookComplete = false;
-    //}
 
     protected void notifyDig(Vector3 digDirection)
     {

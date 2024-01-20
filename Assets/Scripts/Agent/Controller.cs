@@ -151,26 +151,7 @@ public class Controller
     public void Rotate(Vector3 rawInput)
     {
         float angle = GetAngleFromInput(rawInput);
-        Vector3 rotationDirection = new Vector3(0, transform.eulerAngles.y + angle, 0);
-        changeRotation(rotationDirection, false); 
+        Vector3 sideToSideRotation = new Vector3(0, transform.eulerAngles.y + angle, 0);
+        changeRotation(sideToSideRotation, false); 
     }
-
-    ///// <summary>
-    ///// Rotate the player in direction of input
-    ///// </summary>
-    ///// <param name="angle">angle of rotation</param>
-    ///// <returns>target rotation angle</returns>
-    //public float Rotate(Vector3 rawInput)
-    //{
-    //    float angle = GetAngleFromInput(rawInput);
-
-    //    Debug.Log("Rotate " + angle);
-    //    //Quaternion inputRotation = Quaternion.AngleAxis(angle, transform.up);
-    //    //Quaternion targetRotation = transform.rotation * inputRotation;
-    //    Quaternion targetRotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y + angle, transform.eulerAngles.z);
-    //    // TODO: Adjust rotation speed based on angle size
-    //    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-
-    //    return angle;
-    //}
 }
