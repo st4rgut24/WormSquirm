@@ -32,11 +32,12 @@ public class SegmentManager : Singleton<SegmentManager>
 
         List<GameObject> tunnels = new List<GameObject> ( curSegment.getNextTunnels() );
         tunnels.AddRange(curSegment.getPrevTunnels());
+        tunnels.Add(curSegment.tunnel);
 
         GameObject enclosingTunnel = TunnelUtils.getClosestObject(transform.position, tunnels);
         Segment UpdatedSegment = null;
 
-        if (enclosingTunnel != null)
+        if (enclosingTunnel != curSegment.tunnel) // another tunnel that is closer than the current tunnel
         {
             UpdatedSegment = GetSegmentFromObject(enclosingTunnel);
             Debug.Log("Player has moved to the new segment " + enclosingTunnel.name);
@@ -122,7 +123,7 @@ public class SegmentManager : Singleton<SegmentManager>
             {
                 float distToEndCap = Vector3.Distance(position, segment.endRingCenter);
 
-                Debug.Log("Distance to end cap is " + distToEndCap + ". Min dist to end cap is " + MinDistFromCap);
+                //Debug.Log("Distance to end cap is " + distToEndCap + ". Min dist to end cap is " + MinDistFromCap);
                 if (distToEndCap <= MinDistFromCap)
                 {
                     return true;
@@ -130,8 +131,8 @@ public class SegmentManager : Singleton<SegmentManager>
             }
             float dist = segment.GetClosestDistanceToCenterLine(position);
 
-            Debug.Log("Distance to center line is " + dist + ". Max dist from center line to be mobile is " + (TunnelManager.tunnelRadius / 2));
-            return dist >= TunnelManager.tunnelRadius / 2; // divide by 2 because the moveable area is smaller on bottom plane of the tunnel
+            //Debug.Log("Distance to center line is " + dist + ". Max dist from center line to be mobile is " + (TunnelManager.tunnelRadius / 2));
+            return dist >= MinDistFromCenterLine; // divide by 2 because the moveable area is smaller on bottom plane of the tunnel
         }
         else
         {

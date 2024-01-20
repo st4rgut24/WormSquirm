@@ -46,15 +46,16 @@ public class PlayerManager : Singleton<PlayerManager>
 	}
 
 	/// <summary>
-	/// Handle event where player enters a new segment
+	/// When player enters new tunnel, adjust the player's angle of attack
 	/// </summary>
 	/// <param name="transform"></param>
 	/// <param name="segment"></param>
 	public void OnEnterNewSegment(Transform transform, Segment segment)
 	{
 		Player movedAgent = transform.gameObject.GetComponent<Player>();
-
-		movedAgent.ChangeDirection(segment.forward);
+        Quaternion tunnelDirection = Quaternion.LookRotation(segment.forward);
+		Vector3 upDownRotation = new Vector3(tunnelDirection.eulerAngles.x, 0, 0);
+        movedAgent.ChangeRotation(upDownRotation, true);
 	}
 
 	public bool hasPlayers()

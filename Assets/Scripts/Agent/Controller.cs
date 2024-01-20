@@ -10,6 +10,7 @@ public struct Control
 public class Controller
 {
     Transform transform;
+    Player.ChangeRotationDelegate changeRotation;
 
     public float rotationSpeed = .5f;
     public float acceleration = 1;
@@ -18,10 +19,12 @@ public class Controller
     private float maxSpeed = 5f;
 
     public float movementThreshold = 1; // the minimum magnitude of vector to move a player
+    public float rotationThreshold = 30; // minimum rotation in degrees to throttle the movement speed of player
 
-    public Controller(Transform transform)
+    public Controller(Transform transform, Player.ChangeRotationDelegate changeRotation)
     {
         this.transform = transform;
+        this.changeRotation = changeRotation;
     }
 
     /// <summary>
@@ -62,6 +65,7 @@ public class Controller
     /// <param name="rawInput">unnormalized input</param>
     public void HandleInput(Vector2 rawInput)
     {
+
         Rotate(rawInput);
         Move(rawInput);
     }
@@ -82,6 +86,10 @@ public class Controller
         if (!ClampPosition(projectedPosition))
         {
             transform.Translate(translationVector, Space.World);
+        }
+        else
+        {
+            currentSpeed = 0;
         }
 
         TunnelManager.Instance.UpdateTransformDict(transform); // update whatever segment the player is in if necessary
@@ -138,14 +146,31 @@ public class Controller
     /// <summary>
     /// Rotate the player in direction of input
     /// </summary>
-    /// <param name="inputDirection">direction of the player via controls</param>
-    public void Rotate(Vector2 inputDirection)
+    /// <param name="angle">angle of rotation</param>
+    /// <returns>target rotation angle</returns>
+    public void Rotate(Vector3 rawInput)
     {
-        float angle = GetAngleFromInput(inputDirection);
-        Quaternion inputRotation = Quaternion.AngleAxis(angle, transform.up);
-        Quaternion targetRotation = transform.rotation * inputRotation;
-
-        // TODO: Adjust rotation speed based on angle size
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        float angle = GetAngleFromInput(rawInput);
+        Vector3 rotationDirection = new Vector3(0, transform.eulerAngles.y + angle, 0);
+        changeRotation(rotationDirection, false); 
     }
+
+    ///// <summary>
+    ///// Rotate the player in direction of input
+    ///// </summary>
+    ///// <param name="angle">angle of rotation</param>
+    ///// <returns>target rotation angle</returns>
+    //public float Rotate(Vector3 rawInput)
+    //{
+    //    float angle = GetAngleFromInput(rawInput);
+
+    //    Debug.Log("Rotate " + angle);
+    //    //Quaternion inputRotation = Quaternion.AngleAxis(angle, transform.up);
+    //    //Quaternion targetRotation = transform.rotation * inputRotation;
+    //    Quaternion targetRotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y + angle, transform.eulerAngles.z);
+    //    // TODO: Adjust rotation speed based on angle size
+    //    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+
+    //    return angle;
+    //}
 }
