@@ -81,6 +81,8 @@ public abstract class Bot : Agent
             {
                 setNextDestination();
             }
+
+            notifyDig(transform.forward);
         }
     }
 

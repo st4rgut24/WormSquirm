@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class PlayerManager : Singleton<PlayerManager>
+public class PlayerManager : AgentManager
 {
 	public GameObject MainPlayerGo;
 	public GameObject PlayerGo;
@@ -12,17 +12,17 @@ public class PlayerManager : Singleton<PlayerManager>
 
     public List<GameObject> Players;
 
-    Vector3 defaultSpawnLoc = new Vector3(12, 10, 7);
+    Vector3 defaultSpawnLoc = new Vector3(26, 10, 7);
 
     private void OnEnable()
     {
 		SegmentManager.OnNewSegment += OnEnterNewSegment;
     }
 
-    private void Awake()
+    protected override void Awake()
     {
+		base.Awake();
 		Players = new List<GameObject>();
-        MainPlayerInst = Spawn(MainPlayerGo);
     }
 
     public GameObject GetMainPlayer()
@@ -33,12 +33,14 @@ public class PlayerManager : Singleton<PlayerManager>
     // Use this for initialization
     void Start()
 	{
-		Ray ray = new Ray(MainPlayerInst.transform.position, MainPlayerInst.transform.forward);
+        MainPlayerInst = Spawn(MainPlayerGo);
+
+        Ray ray = new Ray(MainPlayerInst.transform.position, MainPlayerInst.transform.forward);
     }
 
     GameObject Spawn(GameObject Player)
 	{
-		GameObject player = Instantiate(Player);
+		GameObject player = CreateAgent(Player);
 		player.transform.position = defaultSpawnLoc;
 		Players.Add(player);
 

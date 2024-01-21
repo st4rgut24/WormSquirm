@@ -25,8 +25,9 @@ public class ToolManager : Singleton<ToolManager>
     {
         toolbox = new Dictionary<ToolType, GameObject>();
         tools = new List<GameObject>();
+        PlayerManager pm = AgentManager.Instance.playerManager;
 
-        GameObject mainPlayerGo = PlayerManager.Instance.GetMainPlayer();
+        GameObject mainPlayerGo = pm.GetMainPlayer();
         playerTransform = mainPlayerGo.transform;
         playerCamera = playerTransform.GetChild(0).GetComponent<Camera>();
 

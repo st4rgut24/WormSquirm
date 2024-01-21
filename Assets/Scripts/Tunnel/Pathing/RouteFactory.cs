@@ -45,7 +45,9 @@ public class RouteFactory
     public static Route CreateStraightPath(Transform targetTransform)
     {
         Route route = new Route();
-        route.AddWaypoint(BotManager.Instance.SimpStartBlock.transform.position);
+        Transform simpStartBlock = AgentManager.Instance.botManager.SimpStartBlock;
+
+        route.AddWaypoint(simpStartBlock.position);
         route.AddWaypoint(targetTransform.position);
 
         return route;

@@ -21,7 +21,8 @@ public class Chaser : Bot
         {
             case ChooseStrategy.Random:
             default:
-                List<GameObject> Players = PlayerManager.Instance.Players;
+                PlayerManager pm = AgentManager.Instance.playerManager;
+                List<GameObject> Players = pm.Players;
 
                 if (Players.Count == 0)
                 {

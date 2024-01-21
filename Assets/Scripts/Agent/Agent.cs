@@ -7,6 +7,8 @@ using static UnityEngine.Rendering.HableCurve;
 public class Agent : MonoBehaviour
 {
     float rotationSpeed = 1;
+    float continuousRotateSpeed = 2; // complete this rotation faster because it is an interrupting rotation
+
     public float rotationThreshold = 0.1f;
 
     Vector3 lookRotation = DefaultUtils.DefaultVector3;
@@ -39,7 +41,7 @@ public class Agent : MonoBehaviour
 	{
         if (isLookInProgress)
         {
-            isLookInProgress = Rotate(lookRotation);
+            isLookInProgress = Rotate(lookRotation, continuousRotateSpeed);
         }
         else if (curSegment != null && !DirectionUtils.isDirectionsAligned(transform.forward, curSegmentForward)) // for ex. if player has turned around in the current tunnel
         {
@@ -62,7 +64,7 @@ public class Agent : MonoBehaviour
 
     }
 
-    bool Rotate(Vector3 rotation)
+    bool Rotate(Vector3 rotation, float rotateSpeed)
     {
         // Create a rotation that points in the specified direction
         Quaternion targetRotation = Quaternion.Euler(rotation);
@@ -73,7 +75,7 @@ public class Agent : MonoBehaviour
         if (isInProgress)
         {
             // Interpolate between the current rotation and the target rotation
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
         }
 
         return isInProgress;
@@ -88,13 +90,13 @@ public class Agent : MonoBehaviour
     {
         if (isLookInProgress)
         {
-            Debug.Log("Look Rotation blocked because another look is in progress");
+            //Debug.Log("Look Rotation blocked because another look is in progress");
             return;
         }
 
         Vector3 targetRotation = SetLookRotation(rotation);
 
-        Debug.Log("Look Rotation change to " + targetRotation);
+        //Debug.Log("Look Rotation change to " + targetRotation);
 
         if (isContinuous) // a continuous rotation happens over multiple frames, until it is complete we set the block flag to true
         {
@@ -102,7 +104,7 @@ public class Agent : MonoBehaviour
         }
         else
         {
-            Rotate(lookRotation); // do a rotation in a single frame
+            Rotate(lookRotation, rotationSpeed); // do a rotation in a single frame
         }
     }
 

@@ -78,6 +78,11 @@ public class SegmentManager : Singleton<SegmentManager>
     /// <returns></returns>
     public bool IsTunnelsConnected(GameObject tunnel, GameObject otherTunnel)
     {
+        if (tunnel == null)
+        {
+            return false;
+        }
+
         Segment segment = GetSegmentFromObject(tunnel);
         List<GameObject> nextTunnels = segment.getNextTunnels();
         return nextTunnels.Contains(otherTunnel);

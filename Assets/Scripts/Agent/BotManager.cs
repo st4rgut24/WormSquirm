@@ -6,7 +6,7 @@ using static UnityEngine.GraphicsBuffer;
 /// <summary>
 /// Manages the creation, destruction and decision-making behavior Bots in the game. Operates the 'swarm'
 /// </summary>
-public class BotManager : Singleton<BotManager>
+public class BotManager : AgentManager
 {
     public GameObject Chaser;
     public GameObject SimpBot;
@@ -30,9 +30,10 @@ public class BotManager : Singleton<BotManager>
 
     public int spawnDistance = 13; // number of segments away from the player the bot should spawns
 
-    private void Awake()
+    protected override void Awake()
     {
-		bots = new List<Bot>();
+        base.Awake();
+        bots = new List<Bot>();
         ChasingDict = new Dictionary<Transform, List<Bot>>(); 
     }
 
@@ -50,11 +51,11 @@ public class BotManager : Singleton<BotManager>
 
         if (type == BotType.Chaser)
         {
-            Bot = Instantiate(Chaser); 
+            Bot = CreateAgent(Chaser); 
         }
         else if (type == BotType.Simp)
         {
-            Bot = Instantiate(SimpBot);
+            Bot = CreateAgent(SimpBot);
         }
 
         return Bot;

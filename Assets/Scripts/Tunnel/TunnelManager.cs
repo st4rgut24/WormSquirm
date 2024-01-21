@@ -94,10 +94,10 @@ public class TunnelManager : Singleton<TunnelManager>
 		{
             TransformTunnelDict[playerTransform] = UpdatedSegment.tunnel;
         }
-		else
-		{
-            Debug.Log("Player has not moved to a new segment. He is just stuck in segment " + TransformTunnelDict[playerTransform].name);
-        }
+		//else
+		//{
+  //          Debug.Log("Player has not moved to a new segment. He is just stuck in segment " + TransformTunnelDict[playerTransform].name);
+  //      }
     }
 
 	void ReplaceEndCap(Transform transform, GameObject endCap)

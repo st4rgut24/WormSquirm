@@ -29,6 +29,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     private void OnEnable()
     {
         Agent.OnDig += TunnelAction;
+        AgentManager.OnSpawn += OnSpawn;
     }
 
     private void Awake()
@@ -42,6 +43,16 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     // Start is called before the first frame update
     void Start()
     {
+    }
+
+    /// <summary>
+    /// Set a reference point for the creation of the first tunnel when an agent is spawned
+    /// </summary>
+    /// <param name="transform">agent transform</param>
+    public void OnSpawn(Transform transform)
+    {
+        Heading initHeading = DirectionUtils.GetHeading(transform.position, transform.forward, 0);
+        PrevHeadingDict[transform] = initHeading;
     }
 
     /// <summary>
@@ -69,7 +80,8 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     /// <summary>
     /// Create Tunnel Segments
     /// </summary>
-    /// <param name="playerTransform"></param>
+    /// <param name="playerTransform">transform of the player</param>
+    /// <param name="TunnelHeading">Head of the projected tunnel using player coordinates as reference</param>
     public bool CreateTunnel(Transform playerTransform, Heading TunnelHeading)
     {
         bool extendsTunnel = SegmentManager.Instance.IsExtendingTunnel(playerTransform);
@@ -167,11 +179,14 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
         if (nextTunnel != null)
         {
-            // next tunnel segment is a new intersecting segment that is not already connected to current tunnel player is in
+            // intersects is true, if next tunnel segment is a new intersecting segment that is not already connected to current tunnel player is in
             return curTunnel != nextTunnel && !SegmentManager.Instance.IsTunnelsConnected(curTunnel, nextTunnel);
         }
         else
         {
+            // if there is no tunnel in the projected next segment location,
+            // intersection occurs if leaving an existing segment (T shape),
+            // when not extending the current tunnel
             return !extendsTunnel;
         }
     }
@@ -179,5 +194,6 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     private void OnDisable()
     {
         Agent.OnDig -= TunnelAction;
+        AgentManager.OnSpawn -= OnSpawn;
     }
 }
