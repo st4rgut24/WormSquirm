@@ -6,6 +6,12 @@ public class DirectionUtils
 {
     const float RightAngle = 90;
 
+    public static Vector3 GetNormalizedDirection(Vector3 startPos, Vector3 endPos)
+    {
+        Vector3 translation = endPos - startPos;
+        return Vector3.Normalize(translation);
+    }
+
     /// <summary>
     /// Get a position relative to some transform
     /// </summary>

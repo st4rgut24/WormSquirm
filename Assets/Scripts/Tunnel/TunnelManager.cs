@@ -31,7 +31,7 @@ public class TunnelManager : Singleton<TunnelManager>
     private void OnEnable()
     {
         TunnelCreatorManager.OnAddCreatedTunnel += OnAddCreatedTunnel;
-        TunnelIntersectorManager.OnAddIntersectedTunnel += OnAddCreatedTunnel;
+        TunnelIntersectorManager.OnAddIntersectedTunnel += OnAddIntersectedTunnel;
 
 		Agent.OnDig += tunnelDisabler.Disable;
     }
@@ -65,26 +65,36 @@ public class TunnelManager : Singleton<TunnelManager>
 
 	void OnAddCreatedTunnel(Transform transform, SegmentGo segment, GameObject prevTunnel, List<GameObject> nextTunnels)
 	{
-		Corridor corridor = segment.corridor;
-		GameObject tunnel = segment.getTunnel();
-
-		if (!TransformTunnelDict.ContainsKey(transform))
-		{
-            TransformTunnelDict[transform] = tunnel;
-        }
-
         GameObject endCap = segment.cap;
-
-        SegmentManager.Instance.AddTunnelSegment(tunnel, prevTunnel, nextTunnels, corridor.ring, corridor.prevRing);
-
+		AddTunnel(transform, segment, prevTunnel, nextTunnels);
 		ReplaceEndCap(transform, endCap);
 	}
 
-	/// <summary>
-	/// Update the mapping of players to tunnel gameobjects
-	/// </summary>
-	/// <param name="playerTransform"></param>
-	public void UpdateTransformDict(Transform playerTransform)
+	void OnAddIntersectedTunnel(Transform transform, SegmentGo segment, GameObject prevTunnel, List<GameObject> nextTunnels)
+	{
+        GameObject endCap = segment.cap;
+        AddTunnel(transform, segment, prevTunnel, nextTunnels);
+        segment.DestroyCap();
+    }
+
+    void AddTunnel(Transform transform, SegmentGo segment, GameObject prevTunnel, List<GameObject> nextTunnels)
+	{
+        Corridor corridor = segment.corridor;
+        GameObject tunnel = segment.getTunnel();
+
+        if (!TransformTunnelDict.ContainsKey(transform))
+        {
+            TransformTunnelDict[transform] = tunnel;
+        }
+
+        SegmentManager.Instance.AddTunnelSegment(tunnel, prevTunnel, nextTunnels, corridor.ring, corridor.prevRing);
+    }
+
+    /// <summary>
+    /// Update the mapping of players to tunnel gameobjects
+    /// </summary>
+    /// <param name="playerTransform"></param>
+    public void UpdateTransformDict(Transform playerTransform)
 	{
 		Vector3 playerPosition = playerTransform.position;
 
@@ -93,11 +103,12 @@ public class TunnelManager : Singleton<TunnelManager>
 		if (UpdatedSegment != null) // if the player entered a new segment
 		{
             TransformTunnelDict[playerTransform] = UpdatedSegment.tunnel;
+            Debug.Log("Player has not moved to a new segment " + UpdatedSegment.tunnel.name);
         }
-		//else
-		//{
-  //          Debug.Log("Player has not moved to a new segment. He is just stuck in segment " + TransformTunnelDict[playerTransform].name);
-  //      }
+        else
+        {
+            Debug.Log("Player has not moved to a new segment. Stuck in " + TransformTunnelDict[playerTransform]?.name);
+        }
     }
 
 	void ReplaceEndCap(Transform transform, GameObject endCap)
@@ -133,7 +144,7 @@ public class TunnelManager : Singleton<TunnelManager>
     private void OnDisable()
     {
         TunnelCreatorManager.OnAddCreatedTunnel -= OnAddCreatedTunnel;
-        TunnelIntersectorManager.OnAddIntersectedTunnel -= OnAddCreatedTunnel;
+        TunnelIntersectorManager.OnAddIntersectedTunnel -= OnAddIntersectedTunnel;
 
         Agent.OnDig -= tunnelDisabler.Disable;
     }

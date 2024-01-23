@@ -153,7 +153,7 @@ public class SegmentManager : Singleton<SegmentManager>
         {
             Segment prevSegment = SegmentDict[prevTunnel.name];
             prevSegment.setNextTunnel(tunnel);
-        }
+        }       
 
         segment.setNextTunnels(nextTunnels);
         SegmentDict.Add(tunnel.name, segment);

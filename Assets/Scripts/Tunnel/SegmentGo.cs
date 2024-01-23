@@ -24,10 +24,15 @@ public class SegmentGo
 		this.cap = cap;
 	}
 
+	public void DestroyCap()
+	{
+        GameObject.Destroy(cap);
+    }
+
 	public void Destroy()
 	{
 		GameObject.Destroy(corridor.tunnel);
-		GameObject.Destroy(cap);
+		DestroyCap();
 	}
 }
 
