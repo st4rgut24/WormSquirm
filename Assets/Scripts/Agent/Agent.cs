@@ -1,9 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
-using static UnityEngine.GraphicsBuffer;
-using static UnityEngine.Rendering.HableCurve;
-using static UnityEditor.FilePathAttribute;
 
 public class Agent : MonoBehaviour
 {
@@ -16,7 +13,7 @@ public class Agent : MonoBehaviour
 
     Vector3 lookRotation = DefaultUtils.DefaultVector3;
     bool isLookInProgress; // a look is in progress that must complete before any other looks can be processed
-    bool isMoveInProgress; // a move is in progress that must complete before any other movements can be processed
+    protected bool isMoveInProgress; // a move is in progress that must complete before any other movements can be processed
 
     public static event Action<Transform, Vector3> OnDig;
 

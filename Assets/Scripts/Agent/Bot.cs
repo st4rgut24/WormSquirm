@@ -4,10 +4,10 @@ public abstract class Bot : Agent
 {
     public Transform objective;
 
-    protected Vector3 startLocation;
+    protected Vector3 startLocation = DefaultUtils.DefaultVector3;
     protected Vector3 endLocation;
 
-    public float velocity = 5f; // Configurable velocity
+    public float velocity = .5f; // Configurable velocity
 
     protected float startTime;
 
@@ -21,6 +21,7 @@ public abstract class Bot : Agent
     {
         reachedDestination = true;
         SetObjective();
+        transform.position = startLocation;
     }
 
     public void setRoute(Route route)
@@ -34,9 +35,13 @@ public abstract class Bot : Agent
     {
         Route.MiniRoute miniRoute = route.GetNewMiniRoute();
 
+        if (startLocation == DefaultUtils.DefaultVector3)
+        {
+            transform.position = miniRoute.start; // initialize bot position
+        }
+
         startLocation = miniRoute.start;
         endLocation = miniRoute.end;
-        this.reachedDestination = false;
     }
 
     /// <summary>
@@ -61,7 +66,7 @@ public abstract class Bot : Agent
 
     private void FixedUpdate()
     {
-        if (!reachedDestination)
+        if (!isMoveInProgress)
         {
             if (route == null)
             {
@@ -70,7 +75,7 @@ public abstract class Bot : Agent
 
             Move(); 
         }
-        else
+        else if (transform.position == endLocation) // reached destination
         {
             Route.MiniRoute miniRoute = route.GetMiniRoute();
             if (miniRoute.isFinalWaypoint)
@@ -89,19 +94,6 @@ public abstract class Bot : Agent
     private void Move()
     {
         faceDirection();
-        // Calculate the current progress based on time and velocity
-        float journeyLength = Vector3.Distance(startLocation, endLocation);
-        float journeyTime = journeyLength / velocity;
-        float fractionOfJourney = (Time.time - startTime) / journeyTime;
-
-        // Move the bot towards the destination
-        transform.position = Vector3.Lerp(startLocation, endLocation, fractionOfJourney);
-
-        // If the bot reaches the destination, reset the start time for future movements
-        if (fractionOfJourney >= 1.0f)
-        {
-            startTime = Time.time;
-            reachedDestination = true;
-        }
+        ChangeMovement(endLocation, true, velocity);
     }
 }
