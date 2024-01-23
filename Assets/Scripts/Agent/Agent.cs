@@ -3,16 +3,20 @@ using System.Collections;
 using System;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.Rendering.HableCurve;
+using static UnityEditor.FilePathAttribute;
 
 public class Agent : MonoBehaviour
 {
     float rotationSpeed = 1;
+    float movementSpeed = 1;
     float continuousRotateSpeed = 2; // complete this rotation faster because it is an interrupting rotation
 
     public float rotationThreshold = 0.1f;
+    public float distanceThreshold = 0.1f;
 
     Vector3 lookRotation = DefaultUtils.DefaultVector3;
-    bool isLookInProgress = true; // a look is in progress that must complete before any other looks can be processed
+    bool isLookInProgress; // a look is in progress that must complete before any other looks can be processed
+    bool isMoveInProgress; // a move is in progress that must complete before any other movements can be processed
 
     public static event Action<Transform, Vector3> OnDig;
 
@@ -33,6 +37,7 @@ public class Agent : MonoBehaviour
 	{
         startNotifyPosition = transform.position;
         isLookInProgress = false;
+        isMoveInProgress = false;
         curSegmentForward = DefaultUtils.DefaultVector3;
     }
 
@@ -52,6 +57,22 @@ public class Agent : MonoBehaviour
         }
     }
 
+    IEnumerator MoveToDestination(Vector3 targetPosition, float speed)
+    {
+        float startTime = Time.time;
+        Vector3 startPosition = transform.position;
+
+        while (Time.time - startTime < 1.0f / speed)
+        {
+            float t = (Time.time - startTime) * speed;
+            transform.position = Vector3.Lerp(startPosition, targetPosition, t);
+            yield return null;
+        }
+
+        isMoveInProgress = false;
+        // Ensure the object reaches the exact destination
+        transform.position = targetPosition;
+    }
 
     /// <summary>
     /// Update segment player is in
@@ -61,7 +82,6 @@ public class Agent : MonoBehaviour
     {
         curSegment = segment;
         curSegmentForward = DirectionUtils.isDirectionsAligned(transform.forward, curSegment.forward) ? segment.forward : -segment.forward;
-
     }
 
     bool Rotate(Vector3 rotation, float rotateSpeed)
@@ -79,6 +99,28 @@ public class Agent : MonoBehaviour
         }
 
         return isInProgress;
+    }
+
+    /// <summary>
+    /// Move in a direction
+    /// </summary>
+    /// <param name="destination">final destination</param>
+    /// <param name="isContinuous">Will this movement happen over multiple frames</param>
+    public void ChangeMovement(Vector3 destination, bool isContinuous, float speed)
+    {
+        if (isMoveInProgress)
+        {
+            return;
+        }
+        if (isContinuous)
+        {
+            isMoveInProgress = true;
+            StartCoroutine(MoveToDestination(destination, speed));
+        }
+        else
+        {
+            transform.position = destination;
+        }
     }
 
     /// <summary>

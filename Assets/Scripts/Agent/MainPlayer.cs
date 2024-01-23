@@ -31,7 +31,7 @@ public class MainPlayer : Player
         GameObject joystickGo = GameObject.Find("Variable Joystick");
         joystick = joystickGo.GetComponent<Joystick>();
 
-        controller = new Controller(transform, new ChangeRotationDelegate(ChangeRotation));
+        controller = new Controller(transform, new ChangeRotationDelegate(ChangeRotation), new ChangeMoveDelegate(ChangeMovement));
 
         isPositionClamped = false;
     }

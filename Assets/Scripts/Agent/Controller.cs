@@ -11,6 +11,7 @@ public class Controller
 {
     Transform transform;
     Player.ChangeRotationDelegate changeRotation;
+    Player.ChangeMoveDelegate changeMovement;
 
     public float rotationSpeed = .5f;
     public float acceleration = 1;
@@ -21,17 +22,18 @@ public class Controller
     public float movementThreshold = 1; // the minimum magnitude of vector to move a player
     public float rotationThreshold = 30; // minimum rotation in degrees to throttle the movement speed of player
 
-    public Controller(Transform transform, Player.ChangeRotationDelegate changeRotation)
+    public Controller(Transform transform, Player.ChangeRotationDelegate changeRotation, Player.ChangeMoveDelegate changeMovement)
     {
         this.transform = transform;
         this.changeRotation = changeRotation;
+        this.changeMovement = changeMovement;
     }
 
     /// <summary>
     /// Get translation vector after accelerating
     /// </summary>
     /// <param name="forwardDirection">forward facing vector</param>
-    /// <returns>vector to translate player</returns>
+    /// <returns>normalized vector to translate player</returns>
     public Vector3 GetAccelerateTranslation()
     {
         // Accelerate the player in the current direction
@@ -39,6 +41,7 @@ public class Controller
         float moveDistance = currentSpeed * Time.deltaTime;
 
         return transform.forward * moveDistance;
+        //return transform.forward * currentSpeed;
     }
 
     Vector3 GetDecelerateTranslation()
@@ -52,6 +55,7 @@ public class Controller
         if (currentSpeed > 0f)
         {
             return transform.forward * moveDistance;
+            //return transform.forward * currentSpeed;
         }
         else
         {
@@ -81,11 +85,10 @@ public class Controller
 
         Vector3 projectedPosition = transform.position + translationVector;
 
-        // TODO: need to update the segment the player is in if moving into a new segment
-
         if (!ClampPosition(projectedPosition))
         {
-            transform.Translate(translationVector, Space.World);
+            changeMovement(projectedPosition, false, 1);
+            //transform.Translate(translationVector, Space.World);
         }
         else
         {
