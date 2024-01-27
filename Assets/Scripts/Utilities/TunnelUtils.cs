@@ -36,6 +36,11 @@ public class TunnelUtils
         return intersectingObjects; // Bounds do not intersect with any GameObject in the list
     }
 
+    public static Vector3 GetCenterPoint(Vector3 point1, Vector3 point2)
+    {
+        return (point1 + point2) / 2;
+    }
+
     /// <summary>
     /// Get the object closest to position
     /// </summary>

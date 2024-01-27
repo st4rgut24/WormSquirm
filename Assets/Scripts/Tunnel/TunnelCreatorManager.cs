@@ -11,7 +11,7 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
     public static event Action<Transform, SegmentGo, GameObject> OnAddCreatedTunnel; // <Prev GameObject, Cur GameObject>
 
     TunnelMake tunnelMaker;
-    Grid tunnelGrid;
+    //Grid tunnelGrid;
 
     int cubeCount = 0;
 
@@ -30,7 +30,7 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
 
     private void Start()
     {
-        tunnelGrid = GameManager.Instance.GetGrid(GridType.Tunnel);
+        //tunnelGrid = GameManager.Instance.GetGrid(GridType.Tunnel);
     }
 
     // testing
@@ -56,7 +56,7 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
         
         SegmentGo segmentGo = tunnelMaker.GrowTunnel(playerTransform, heading, true, prevRing);
 
-        tunnelGrid.AddGameObject(heading.position, segmentGo.getTunnel());
+        //tunnelGrid.AddGameObject(heading.position, segmentGo.getTunnel());
 
         OnAddCreatedTunnel?.Invoke(playerTransform, segmentGo, prevSegment);
 

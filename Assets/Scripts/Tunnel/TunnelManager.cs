@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UIElements.Experimental;
 
 public class TunnelManager : Singleton<TunnelManager>
 {
@@ -20,6 +21,8 @@ public class TunnelManager : Singleton<TunnelManager>
     TunnelCreatorManager tunnelCreatorManager;
 	TunnelIntersectorManager tunnelIntersectorManager;
 	TunnelActionManager tunnelActionManager;
+
+    Grid tunnelGrid;
 
     Disabler tunnelDisabler;
 
@@ -70,14 +73,14 @@ public class TunnelManager : Singleton<TunnelManager>
 		return segmentLength >= minSegmentLength;
 	}
 
-	void OnAddCreatedTunnel(Transform transform, SegmentGo segment, GameObject prevTunnel)
+	void OnAddCreatedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel)
 	{
         GameObject endCap = segment.cap;
-		AddTunnel(transform, segment, prevTunnel, new List<GameObject>());
-		ReplaceEndCap(transform, endCap);
+		AddTunnel(playerTransform, segment, prevTunnel, new List<GameObject>());
+		ReplaceEndCap(playerTransform, endCap);
 	}
 
-	void OnAddIntersectedTunnel(Transform transform, SegmentGo segment, GameObject prevTunnel, List<GameObject> intersectedTunnels)
+	void OnAddIntersectedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel, List<GameObject> intersectedTunnels)
 	{
         GameObject endCap = segment.cap;
 
@@ -90,7 +93,7 @@ public class TunnelManager : Singleton<TunnelManager>
             nextTunnels.Remove(prevTunnel);
         }
 
-        AddTunnel(transform, segment, prevTunnel, nextTunnels);
+        AddTunnel(playerTransform, segment, prevTunnel, nextTunnels);
         segment.DestroyCap();
     }
 
@@ -129,30 +132,24 @@ public class TunnelManager : Singleton<TunnelManager>
         {
             IntersectedTunnelDict[tunnel] = intersectedTunnels;
         }
-
-        //intersectedTunnels.ForEach((intersectedTunnel) => // map each of the intersected tunnels back to the current tunnel
-        //{
-        //    if (!IntersectedTunnelDict.ContainsKey(intersectedTunnel))
-        //    {
-        //        IntersectedTunnelDict[intersectedTunnel] = new List<GameObject>();
-        //    }
-
-        //    IntersectedTunnelDict[intersectedTunnel].Add(tunnel);
-        //});
     }
 
-    void AddTunnel(Transform transform, SegmentGo segmentGo, GameObject prevTunnel, List<GameObject> nextTunnels)
+    void AddTunnel(Transform playerTransform, SegmentGo segmentGo, GameObject prevTunnel, List<GameObject> nextTunnels)
 	{
+
         Corridor corridor = segmentGo.corridor;
         GameObject tunnel = segmentGo.getTunnel();
 
-        if (!TransformCreatedTunnelDict.ContainsKey(transform))
+        if (!TransformCreatedTunnelDict.ContainsKey(playerTransform))
         {
-            TransformCreatedTunnelDict[transform] = tunnel;
+            TransformCreatedTunnelDict[playerTransform] = tunnel;
         }
 
         Segment segment = SegmentManager.Instance.AddTunnelSegment(tunnel, prevTunnel, nextTunnels, corridor.ring, corridor.prevRing);
-        AgentManager.Instance.InitTransformSegmentDict(transform, segment);
+        AgentManager.Instance.InitTransformSegmentDict(playerTransform, segment);
+
+        Debug.Log("Add segment to grid at position " + segment.getCenter());
+        tunnelGrid.AddGameObject(segment.getCenter(), segmentGo.getTunnel());
     }
 
     /// <summary>
@@ -198,10 +195,12 @@ public class TunnelManager : Singleton<TunnelManager>
 		tunnelCreatorManager = TunnelCreatorManager.Instance;
 		tunnelActionManager = TunnelActionManager.Instance;
 		tunnelIntersectorManager = TunnelIntersectorManager.Instance;
-	}
 
-	// Update is called once per frame
-	void Update()
+        tunnelGrid = GameManager.Instance.GetGrid(GridType.Tunnel);
+    }
+
+    // Update is called once per frame
+    void Update()
 	{
 			
 	}

@@ -51,14 +51,19 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
     /// <param name="transform">The transform of the tunnel end</param>
     /// <param name="otherTunnels">Other tunnels in the vicinity of the active tunnel</param>
     /// <param name="prevTunnel">Previous tunnel segment belonging to the active tunnel</param>
-    /// <param name="prevHeading">Previous transform info of the player </param>
     /// <param name="extendsTunnel">The player is extending a tunnel</param>
     /// <param name="heading">The directional info of the tunnel</param>
-    void IntersectAction(Transform transform, GameObject prevTunnel, Heading heading, Heading prevHeading, List<GameObject> otherTunnels, bool extendsTunnel, Ring prevRing) // todo: restore otherObjects list and call TunnelUtils.GetIntersectedObjects()
+    void IntersectAction(Transform transform, GameObject prevTunnel, Heading heading, List<GameObject> otherTunnels, bool extendsTunnel, Ring prevRing)
     {
-        List<Ray> rays;
+        List<Ray> endRingRays = RayUtils.CreateRays(heading.position, -heading.forward, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
 
-        rays = RayUtils.CreateRays(heading.position, -heading.forward, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
+        List<Ray> rays = new List<Ray>(endRingRays);
+
+        if (!extendsTunnel) // tunnel faces may be deleted from the start of a segment if the intersecting segment bisects the current segment
+        {
+            List<Ray> startRingRays = RayUtils.CreateRays(prevRing.GetCenter(), heading.forward, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
+            rays.AddRange(startRingRays);
+        }
 
         Intersect(transform, prevTunnel, otherTunnels, extendsTunnel, rays, heading, prevRing);
     }
@@ -79,7 +84,7 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 
         intersectedTunnels.ForEach((tunnel) =>
         {
-            TunnelDelete tunnelDelete = TunnelDeleteFactory.Get(tunnel, rays, extendsTunnel);
+            TunnelDelete tunnelDelete = new TunnelDelete(tunnel, rays);
             bool isDeleted = tunnelDelete.DeleteTunnel();
 
             if (isDeleted)

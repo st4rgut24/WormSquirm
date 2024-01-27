@@ -92,7 +92,7 @@ public class Grid
         }
 
         List<GameObject> result = new List<GameObject>();
-
+         
         Vector3Int cellPos = ConvertWorldPosToGridPos(worldPos);
 
         //Debug.Log("Get GameObjects at cell position " + cellPos + " world Pos " + worldPos);

@@ -120,6 +120,14 @@ public class Segment
 		return center;
 	}
 
+    // TODO: Get the center of a ring that will be the start ring of a bisecting segment
+    // involves getting the closest point on centerline to otherPosition,
+    // then finding location on segment edge along the path of the intersecting segment
+    public Vector3 GetCenteredIntersectionPoint(Heading intersectHeading)
+    {
+        return DefaultUtils.DefaultVector3;
+    } 
+
     /// <summary>
     /// Get the closest distance between point and centered line segment(s)
     /// </summary>

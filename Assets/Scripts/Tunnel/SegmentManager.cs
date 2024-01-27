@@ -41,7 +41,7 @@ public class SegmentManager : Singleton<SegmentManager>
         return UpdatedSegment;
     }
 
-        public Segment GetSegmentFromTransform(Transform transform)
+    public Segment GetSegmentFromTransform(Transform transform)
     {
         GameObject tunnelGo = TunnelManager.Instance.GetGameObjectTunnel(transform);
 

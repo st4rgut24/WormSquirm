@@ -13,9 +13,9 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     Grid tunnelGrid;
 
     Dictionary<Transform, Action> LastTunnelActionDict; // <Player Transform, the last tunnel action>
-    Dictionary<Transform, Heading> PrevHeadingDict; // <Player Transform, the player's previous position>
+    //Dictionary<Transform, Heading> PrevHeadingDict; // <Player Transform, the player's previous position>
 
-    public static event Action<Transform, GameObject, Heading, Heading, List<GameObject>, bool, Ring> OnIntersectTunnel; // intersect an existing tunnel
+    public static event Action<Transform, GameObject, Heading, List<GameObject>, bool, Ring> OnIntersectTunnel; // intersect an existing tunnel
     public static event Action<Transform, bool, Heading, Ring> OnCreateTunnel; // create a new unobstructed tunnel
     public static event Action<Transform> OnFollowTunnel; // follow path of existing tunnel
 
@@ -34,7 +34,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
     private void Awake()
     {
-        PrevHeadingDict = new Dictionary<Transform, Heading>();
+        //PrevHeadingDict = new Dictionary<Transform, Heading>();
         LastTunnelActionDict = new Dictionary<Transform, Action>();
 
         tunnelGrid = GameManager.Instance.GetGrid(GridType.Tunnel);
@@ -52,7 +52,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     public void OnSpawn(Transform transform)
     {
         Heading initHeading = DirectionUtils.GetHeading(transform.position, transform.forward, 0);
-        PrevHeadingDict[transform] = initHeading;
+        //PrevHeadingDict[transform] = initHeading;
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
             LastTunnelActionDict[playerTransform] = Action.Follow;
         }
 
-        PrevHeadingDict[playerTransform] = TunnelHeading;
+        //PrevHeadingDict[playerTransform] = TunnelHeading;
     }
 
     /// <summary>
@@ -88,6 +88,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
         List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(TunnelHeading.position, 1);
 
+        // TODO: find out why this doesn't work: GameObject EnclosingTunnel = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
         GameObject EnclosingTunnel = TunnelUtils.getEnclosingObject(TunnelHeading.position, otherTunnels);
 
         Ray ray = new Ray(playerTransform.position, TunnelHeading.forward);
@@ -107,17 +108,21 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         }
         else
         {
-            Ring prevRing = GetPrevRing(extendsTunnel, playerTransform, TunnelHeading);
+            // TODO: prev ring is not always the end of an existing segment
+            Ring prevRing = GetPrevRing(extendsTunnel, playerTransform, TunnelHeading); 
 
             if (IsCreationValid(TunnelHeading, prevRing))
             {
                 if (isIntersecting) // intersect
                 {
-                    Heading PrevHeading = PrevHeadingDict[playerTransform];
+                    //Heading PrevHeading = PrevHeadingDict[playerTransform];
+                    Vector3 center = TunnelUtils.GetCenterPoint(prevRing.GetCenter(), TunnelHeading.position);
+                    List<GameObject> nearbyTunnels = tunnelGrid.GetGameObjects(center, 1);
+                    Debug.Log("There are " + nearbyTunnels.Count + " tunnels with the viciting of position " + center);
 
                     Debug.Log("TunnelAction Intersect");
                     GameObject prevSegment = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
-                    OnIntersectTunnel?.Invoke(playerTransform, prevSegment, TunnelHeading, PrevHeading, otherTunnels, extendsTunnel, prevRing);
+                    OnIntersectTunnel?.Invoke(playerTransform, prevSegment, TunnelHeading, nearbyTunnels, extendsTunnel, prevRing);
                     LastTunnelActionDict[playerTransform] = Action.Intersect;
                     return true;
                 }
@@ -147,10 +152,11 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     Ring GetPrevRing(bool extendsTunnel, Transform playerTransform, Heading TunnelHeading)
     {
         Ring prevRing;
+        Segment segment = SegmentManager.Instance.GetSegmentFromTransform(playerTransform);
 
         if (extendsTunnel)
         {
-            prevRing = SegmentManager.Instance.GetSegmentFromTransform(playerTransform)?.GetEndRing();
+            prevRing = segment?.GetEndRing();
 
             if (prevRing == null) // initialize the previous Ring
             {
@@ -159,9 +165,10 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         }
         else
         {
-            Heading PrevHeading = PrevHeadingDict[playerTransform];
+            //Heading PrevHeading = PrevHeadingDict[playerTransform];
 
-            prevRing = RingManager.Instance.Create(TunnelHeading.forward, PrevHeading.position);
+            // TODO: Use Segment's GetCenteredIntersectionPoint method to calculate previous ring
+            prevRing = RingManager.Instance.Create(TunnelHeading.forward, playerTransform.position);
         }
 
         return prevRing;
