@@ -8,11 +8,10 @@ using System.Collections.Generic;
 /// </summary>
 public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
 {
-    public static event Action<Transform, SegmentGo, GameObject, List<GameObject>> OnAddCreatedTunnel; // <Prev GameObject, Cur GameObject>
+    public static event Action<Transform, SegmentGo, GameObject> OnAddCreatedTunnel; // <Prev GameObject, Cur GameObject>
 
     TunnelMake tunnelMaker;
     Grid tunnelGrid;
-    List<GameObject> nextTunnels = new List<GameObject>();
 
     int cubeCount = 0;
 
@@ -59,7 +58,7 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
 
         tunnelGrid.AddGameObject(heading.position, segmentGo.getTunnel());
 
-        OnAddCreatedTunnel?.Invoke(playerTransform, segmentGo, prevSegment, nextTunnels);
+        OnAddCreatedTunnel?.Invoke(playerTransform, segmentGo, prevSegment);
 
         //TunnelManager.Instance.AddGameObjectSegment(playerTransform, segmentGo?.segment);
     }

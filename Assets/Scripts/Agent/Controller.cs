@@ -1,5 +1,7 @@
 ﻿using System;
 using UnityEngine;
+using static UnityEngine.Rendering.HableCurve;
+using UnityEngine.UIElements;
 
 public struct Control
 {
@@ -10,6 +12,8 @@ public struct Control
 public class Controller
 {
     Transform transform;
+    MainPlayer player;
+
     Player.ChangeRotationDelegate changeRotation;
     Player.ChangeMoveDelegate changeMovement;
 
@@ -22,9 +26,10 @@ public class Controller
     public float movementThreshold = 1; // the minimum magnitude of vector to move a player
     public float rotationThreshold = 30; // minimum rotation in degrees to throttle the movement speed of player
 
-    public Controller(Transform transform, Player.ChangeRotationDelegate changeRotation, Player.ChangeMoveDelegate changeMovement)
+    public Controller(GameObject playerGo, Player.ChangeRotationDelegate changeRotation, Player.ChangeMoveDelegate changeMovement)
     {
-        this.transform = transform;
+        this.transform = playerGo.transform;
+        this.player = playerGo.GetComponent<MainPlayer>();
         this.changeRotation = changeRotation;
         this.changeMovement = changeMovement;
     }
@@ -84,14 +89,14 @@ public class Controller
         }
 
         Vector3 projectedPosition = transform.position + translationVector;
-
-        if (!ClampPosition(projectedPosition))
+        if (!player.isOutOfBounds(transform, projectedPosition))
         {
             changeMovement(projectedPosition, false, 1);
             //transform.Translate(translationVector, Space.World);
         }
         else
         {
+            Debug.Log("Clamp position");
             currentSpeed = 0;
         }
 
@@ -112,15 +117,6 @@ public class Controller
         {
             return GetDecelerateTranslation();
         }
-    }
-
-    /// <summary>   
-    /// If user surpasses the bounds of current tunnel segment, don't allow any movement
-    /// </summary>
-    /// <returns>whether position is clamped</returns>
-    public bool ClampPosition(Vector3 position)
-    {
-        return SegmentManager.Instance.IsSegmentBoundsExceeded(transform, position);
     }
 
     /// <summary>

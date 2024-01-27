@@ -6,7 +6,13 @@ using System.Collections.Generic;
 public class TunnelManager : Singleton<TunnelManager>
 {
     public Dictionary<Transform, GameObject> EndCapDict; // <GameObject Transform, Enclosing Segment GameObject>
-    public Dictionary<Transform, GameObject> TransformTunnelDict; // <GameObject Transform, Enclosing Segment GameObject>
+    public Dictionary<Transform, GameObject> TransformCreatedTunnelDict; // <GameObject Transform, Last Created Segment GameObject>
+
+    // The intersection relationship is not bidirectional.
+    // The key should be the tunnel that initiates the intersection.
+    // For ex. Tunnel A intersects Tunnel B when Tunnel A is created.
+    // The new mapping will look like <Tunnel A, [Tunnel B]>
+    public Dictionary<GameObject, List<GameObject>> IntersectedTunnelDict;
 
     public TunnelProps defaultProps;
 
@@ -41,15 +47,16 @@ public class TunnelManager : Singleton<TunnelManager>
         defaultProps = new TunnelProps(tunnelSegments, segmentSpacing, tunnelRadius, noiseScale);
 
 		EndCapDict = new Dictionary<Transform, GameObject>();
-        TransformTunnelDict = new Dictionary<Transform, GameObject>();
-		tunnelDisabler = new Disabler(5);
+        TransformCreatedTunnelDict = new Dictionary<Transform, GameObject>();
+        IntersectedTunnelDict = new Dictionary<GameObject, List<GameObject>>();
+        tunnelDisabler = new Disabler(5);
     }
 
 	public GameObject GetGameObjectTunnel(Transform transform)
 	{
-		if (TransformTunnelDict.ContainsKey(transform))
+		if (TransformCreatedTunnelDict.ContainsKey(transform))
 		{
-            return TransformTunnelDict[transform];
+            return TransformCreatedTunnelDict[transform];
         }
 		else
 		{
@@ -63,31 +70,89 @@ public class TunnelManager : Singleton<TunnelManager>
 		return segmentLength >= minSegmentLength;
 	}
 
-	void OnAddCreatedTunnel(Transform transform, SegmentGo segment, GameObject prevTunnel, List<GameObject> nextTunnels)
+	void OnAddCreatedTunnel(Transform transform, SegmentGo segment, GameObject prevTunnel)
 	{
         GameObject endCap = segment.cap;
-		AddTunnel(transform, segment, prevTunnel, nextTunnels);
+		AddTunnel(transform, segment, prevTunnel, new List<GameObject>());
 		ReplaceEndCap(transform, endCap);
 	}
 
-	void OnAddIntersectedTunnel(Transform transform, SegmentGo segment, GameObject prevTunnel, List<GameObject> nextTunnels)
+	void OnAddIntersectedTunnel(Transform transform, SegmentGo segment, GameObject prevTunnel, List<GameObject> intersectedTunnels)
 	{
         GameObject endCap = segment.cap;
+
+        MapIntersectingTunnels(segment.getTunnel(), intersectedTunnels);
+
+        // exclude the previous tunnel from the list of intersected tunnels if it exists
+        List<GameObject> nextTunnels = new List<GameObject>(intersectedTunnels);
+        if (intersectedTunnels.Contains(prevTunnel))
+        {
+            nextTunnels.Remove(prevTunnel);
+        }
+
         AddTunnel(transform, segment, prevTunnel, nextTunnels);
         segment.DestroyCap();
     }
 
-    void AddTunnel(Transform transform, SegmentGo segment, GameObject prevTunnel, List<GameObject> nextTunnels)
-	{
-        Corridor corridor = segment.corridor;
-        GameObject tunnel = segment.getTunnel();
-
-        if (!TransformTunnelDict.ContainsKey(transform))
+    public bool IsIntersectingInitiator(GameObject initiatorTunnel, GameObject otherTunnel)
+    {
+        if (IntersectedTunnelDict.ContainsKey(initiatorTunnel))
         {
-            TransformTunnelDict[transform] = tunnel;
+            return IntersectedTunnelDict[initiatorTunnel].Contains(otherTunnel);
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Check if two tunnels intersect
+    /// </summary>
+    public bool IsIntersectingTunnel(GameObject tunnel, GameObject otherTunnel)
+    {
+        return IsIntersectingInitiator(tunnel, otherTunnel) || IsIntersectingInitiator(otherTunnel, tunnel);
+    }
+
+    /// <summary>
+    /// Update mapping of tunnels to the tunnels they intersect
+    /// </summary>
+    /// <param name="tunnel">the tunnel</param>
+    /// <param name="intersectedTunnels">the tunnels that 'tunnel' intersect</param>
+    void MapIntersectingTunnels(GameObject tunnel, List<GameObject> intersectedTunnels)
+    {
+        if (IntersectedTunnelDict.ContainsKey(tunnel)) // map the current tunnel to the intersected tunnels
+        {
+            IntersectedTunnelDict[tunnel].AddRange(intersectedTunnels);
+        }
+        else
+        {
+            IntersectedTunnelDict[tunnel] = intersectedTunnels;
         }
 
-        SegmentManager.Instance.AddTunnelSegment(tunnel, prevTunnel, nextTunnels, corridor.ring, corridor.prevRing);
+        //intersectedTunnels.ForEach((intersectedTunnel) => // map each of the intersected tunnels back to the current tunnel
+        //{
+        //    if (!IntersectedTunnelDict.ContainsKey(intersectedTunnel))
+        //    {
+        //        IntersectedTunnelDict[intersectedTunnel] = new List<GameObject>();
+        //    }
+
+        //    IntersectedTunnelDict[intersectedTunnel].Add(tunnel);
+        //});
+    }
+
+    void AddTunnel(Transform transform, SegmentGo segmentGo, GameObject prevTunnel, List<GameObject> nextTunnels)
+	{
+        Corridor corridor = segmentGo.corridor;
+        GameObject tunnel = segmentGo.getTunnel();
+
+        if (!TransformCreatedTunnelDict.ContainsKey(transform))
+        {
+            TransformCreatedTunnelDict[transform] = tunnel;
+        }
+
+        Segment segment = SegmentManager.Instance.AddTunnelSegment(tunnel, prevTunnel, nextTunnels, corridor.ring, corridor.prevRing);
+        AgentManager.Instance.InitTransformSegmentDict(transform, segment);
     }
 
     /// <summary>
@@ -102,12 +167,12 @@ public class TunnelManager : Singleton<TunnelManager>
 
 		if (UpdatedSegment != null) // if the player entered a new segment
 		{
-            TransformTunnelDict[playerTransform] = UpdatedSegment.tunnel;
+            TransformCreatedTunnelDict[playerTransform] = UpdatedSegment.tunnel;
             Debug.Log("Player has not moved to a new segment " + UpdatedSegment.tunnel.name);
         }
         else
         {
-            Debug.Log("Player has not moved to a new segment. Stuck in " + TransformTunnelDict[playerTransform]?.name);
+            Debug.Log("Player has not moved to a new segment. Stuck in " + TransformCreatedTunnelDict[playerTransform]?.name);
         }
     }
 

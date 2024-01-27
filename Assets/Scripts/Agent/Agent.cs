@@ -56,6 +56,7 @@ public class Agent : MonoBehaviour
 
     IEnumerator MoveToDestination(Vector3 targetPosition, float speed)
     {
+        Debug.Log("Move to destination " + targetPosition);
         float startTime = Time.time;
         Vector3 startPosition = transform.position;
 

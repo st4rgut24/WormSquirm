@@ -64,17 +64,29 @@ public class TunnelUtils
         }
 
         return closestTunnel;
-}
+    }
 
-
-/// <summary>
-/// Get the object that contains the targetObject
-/// </summary>
-/// <param name="targetPosition">The target GameObject</param>
-/// <param name="objectList">List of candidate GameObjects that may contain targetObject</param>
-/// <returns></returns>
-public static GameObject getEnclosingObject(Vector3 targetPosition, List<GameObject> objectList)
+    public static List<GameObject> GetAdjoiningTunnels(Segment segment)
     {
+        List<GameObject> TunnelGoList = new List<GameObject>();
+        TunnelGoList.Add(segment.tunnel);
+
+        TunnelGoList.AddRange(segment.getNextTunnels());
+        TunnelGoList.AddRange(segment.getPrevTunnels());
+
+        return TunnelGoList;
+    }
+
+    /// <summary>
+    /// Get the object that contains the targetObject
+    /// </summary>
+    /// <param name="targetPosition">The target GameObject</param>
+    /// <param name="objectList">List of candidate GameObjects that may contain targetObject</param>
+    /// <returns>null if no enclosing object</returns>
+    public static GameObject getEnclosingObject(Vector3 targetPosition, List<GameObject> objectList)
+    {
+        GameObject enclosingObject = null;
+
         foreach (GameObject otherObject in objectList)
         {
             if (otherObject != null) // Ensure the GameObject in the list is not null
@@ -83,12 +95,19 @@ public static GameObject getEnclosingObject(Vector3 targetPosition, List<GameObj
 
                 if (otherBounds.Contains(targetPosition))
                 {
-                    return otherObject;
+                    if (enclosingObject == null)
+                    {
+                        enclosingObject = otherObject;
+                    }
+                    else
+                    {
+                        throw new Exception("There is more than one enclosing object for a transform.position " + targetPosition);
+                    }
                 }
             }
         }
 
-        return null;
+        return enclosingObject;
     }
 
 }

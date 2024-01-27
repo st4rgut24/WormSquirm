@@ -24,30 +24,24 @@ public class SegmentManager : Singleton<SegmentManager>
 
         MinDistFromCenterLine = TunnelManager.tunnelRadius / 2; // todo: tinker with this to find what number works with creating newly intersected tunnels
         MinDistFromCap = edgeDist;
-    }   
+    }
 
     public Segment UpdateSegmentFromTransform(Transform transform)
     {
-        Segment curSegment = GetSegmentFromTransform(transform);
-
-        List<GameObject> tunnels = new List<GameObject> ( curSegment.getNextTunnels() );
-        tunnels.AddRange(curSegment.getPrevTunnels());
-        tunnels.Add(curSegment.tunnel);
-
-        GameObject enclosingTunnel = TunnelUtils.getClosestObject(transform.position, tunnels);
+        Segment curSegment = GetSegmentFromTransform(transform);        
         Segment UpdatedSegment = null;
 
-        if (enclosingTunnel != curSegment.tunnel) // another tunnel that is closer than the current tunnel
+        if (!curSegment.ContainsTransform(transform)) // another tunnel that is closer than the current tunnel
         {
-            UpdatedSegment = GetSegmentFromObject(enclosingTunnel);
-            Debug.Log("Player has moved to the new segment " + enclosingTunnel.name);
+            UpdatedSegment = GetEnclosingSegment(curSegment, transform);
+            Debug.Log("Player has moved to the new segment " + UpdatedSegment.tunnel.name);
             OnNewSegment?.Invoke(transform, UpdatedSegment);
         }
 
         return UpdatedSegment;
     }
 
-    public Segment GetSegmentFromTransform(Transform transform)
+        public Segment GetSegmentFromTransform(Transform transform)
     {
         GameObject tunnelGo = TunnelManager.Instance.GetGameObjectTunnel(transform);
 
@@ -68,6 +62,36 @@ public class SegmentManager : Singleton<SegmentManager>
         {
             throw new System.Exception("No Segment matches tunnel named " + tunnel.name);
         }
+    }
+
+    /// <summary>
+    /// Get the segment that encloses a transform
+    /// </summary>
+    /// <param name="transform">enclosed transform</param>
+    /// <returns>enclosing segment</returns>
+    public Segment GetEnclosingSegment(Segment curSegment, Transform transform)
+    {
+        Segment enclosingSegment = null;
+        List<GameObject> segmentObjects = TunnelUtils.GetAdjoiningTunnels(curSegment);
+
+        segmentObjects.ForEach((segmentObj) =>
+        {
+            Segment segment = GetSegmentFromObject(segmentObj);
+
+            if (segment.ContainsTransform(transform))
+            {
+                if (enclosingSegment == null)
+                {
+                    enclosingSegment = segment;
+                }
+                else
+                {
+                    throw new Exception("Multiple enclosing segments found that contain transform at position " + transform.position);
+                }
+            }
+        });
+
+        return enclosingSegment;
     }
 
     /// <summary>
@@ -113,39 +137,55 @@ public class SegmentManager : Singleton<SegmentManager>
     }
 
     /// <summary>
-    /// Check if the transform is outside segment bounds
+    /// Create a line inside the intersected object that connects to the initiator
     /// </summary>
-    /// <param name="transform">transform</param>
-    /// <param name="position">position to check for bounds</param>
-    /// <returns>true if out of bounds</returns>
-    public bool  IsSegmentBoundsExceeded(Transform transform, Vector3 position)
+    /// <param name="intersectorInitiator">the object that caused the intersection</param>
+    /// <param name="intersectedObject">the object that was intersected</param>
+    public void AddIntersectingLineToSegment(GameObject intersectorInitiator, GameObject intersectedObject)
     {
-        Segment segment = GetSegmentFromTransform(transform);
+        Segment intersectingSegment = GetSegmentFromObject(intersectorInitiator);
+        Segment intersectedSegment = GetSegmentFromObject(intersectedObject);
 
-        if (segment != null)
+        Vector3 lineEnd = intersectingSegment.endRingCenter; // the end of the intersecting segment is what intersects the segment
+        Vector3 lineStart = intersectedSegment.GetClosestPointToCenterline(lineEnd); // use the guideline to find closest point
+        Guideline intersectingGuideline = new Guideline(lineStart, lineEnd);
+
+        Debug.DrawRay(lineStart, lineEnd - lineStart, Color.green, 100);
+        intersectedSegment.AddGuideline(intersectingGuideline);
+    }
+
+    /// <summary>
+    /// Add guidelines between intersecting tunnels
+    /// </summary>
+    public void AddIntersectingLine(GameObject tunnel, GameObject otherTunnel)
+    {
+        if (tunnel == null || otherTunnel == null)
         {
-            if (segment.hasEndCap()) // check if player is close enough to the end of a tunnel
-            {
-                float distToEndCap = Vector3.Distance(position, segment.endRingCenter);
-
-                //Debug.Log("Distance to end cap is " + distToEndCap + ". Min dist to end cap is " + MinDistFromCap);
-                if (distToEndCap <= MinDistFromCap)
-                {
-                    return true;
-                } 
-            }
-            float dist = segment.GetClosestDistanceToCenterLine(position);
-
-            //Debug.Log("Distance to center line is " + dist + ". Max dist from center line to be mobile is " + (TunnelManager.tunnelRadius / 2));
-            return dist >= MinDistFromCenterLine; // divide by 2 because the moveable area is smaller on bottom plane of the tunnel
+            return;
         }
-        else
+        if (TunnelManager.Instance.IsIntersectingInitiator(tunnel, otherTunnel))
         {
-            return false;
+            AddIntersectingLineToSegment(tunnel, otherTunnel);
+        }
+        else if (TunnelManager.Instance.IsIntersectingInitiator(otherTunnel, tunnel))
+        {
+            AddIntersectingLineToSegment(otherTunnel, tunnel);
         }
     }
 
-    public void AddTunnelSegment(GameObject tunnel, GameObject prevTunnel, List<GameObject> nextTunnels, Ring ring, Ring prevRing)
+    public void UpdateConnectingSegmentGuidelines(GameObject curTunnel, GameObject prevTunnel, List<GameObject> nextTunnels)
+    {
+        // from prev to cur
+        AddIntersectingLine(curTunnel, prevTunnel);
+
+        // from cur to each next tunnel
+        nextTunnels.ForEach((nextTunnel) =>
+        {
+            AddIntersectingLine(curTunnel, nextTunnel);
+        });
+    }
+
+    public Segment AddTunnelSegment(GameObject tunnel, GameObject prevTunnel, List<GameObject> nextTunnels, Ring ring, Ring prevRing)
     {
         Segment segment = new Segment(tunnel, prevTunnel, ring, prevRing);
 
@@ -157,6 +197,9 @@ public class SegmentManager : Singleton<SegmentManager>
 
         segment.setNextTunnels(nextTunnels);
         SegmentDict.Add(tunnel.name, segment);
+
+        UpdateConnectingSegmentGuidelines(tunnel, prevTunnel, nextTunnels);
+        return segment;
     }
 }
 

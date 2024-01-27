@@ -66,20 +66,12 @@ public abstract class Bot : Agent
 
     private void FixedUpdate()
     {
-        if (!isMoveInProgress)
-        {
-            if (route == null)
-            {
-                throw new System.Exception("Route is not available for bot");
-            }
-
-            Move(); 
-        }
-        else if (transform.position == endLocation) // reached destination
+        if (transform.position == endLocation) // reached destination
         {
             Route.MiniRoute miniRoute = route.GetMiniRoute();
             if (miniRoute.isFinalWaypoint)
             {
+                Debug.Log("Reached final waypoint");
                 // emit event signalling Bot has reached destination, so it can be assigned a new destination
             }
             else
@@ -88,6 +80,10 @@ public abstract class Bot : Agent
             }
 
             notifyDig(transform.forward);
+        }
+        else
+        {
+            Move();
         }
     }
 
