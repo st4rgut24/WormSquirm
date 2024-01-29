@@ -145,7 +145,7 @@ public class TunnelManager : Singleton<TunnelManager>
             TransformCreatedTunnelDict[playerTransform] = tunnel;
         }
 
-        Segment segment = SegmentManager.Instance.AddTunnelSegment(tunnel, prevTunnel, nextTunnels, corridor.ring, corridor.prevRing);
+        Segment segment = SegmentManager.Instance.AddTunnelSegment(segmentGo, prevTunnel, nextTunnels, corridor.ring, corridor.prevRing);
         AgentManager.Instance.InitTransformSegmentDict(playerTransform, segment);
 
         Debug.Log("Add segment to grid at position " + segment.getCenter());
@@ -165,12 +165,12 @@ public class TunnelManager : Singleton<TunnelManager>
 		if (UpdatedSegment != null) // if the player entered a new segment
 		{
             TransformCreatedTunnelDict[playerTransform] = UpdatedSegment.tunnel;
-            Debug.Log("Player has not moved to a new segment " + UpdatedSegment.tunnel.name);
+            Debug.Log("Player has moved to a new segment " + UpdatedSegment.tunnel.name);
         }
-        else
-        {
-            Debug.Log("Player has not moved to a new segment. Stuck in " + TransformCreatedTunnelDict[playerTransform]?.name);
-        }
+        //else
+        //{
+        //    Debug.Log("Player has not moved to a new segment. Stuck in " + TransformCreatedTunnelDict[playerTransform]?.name);
+        //}
     }
 
 	void ReplaceEndCap(Transform transform, GameObject endCap)

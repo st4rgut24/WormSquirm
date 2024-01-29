@@ -8,6 +8,11 @@ public class SegmentGo
 	public GameObject cap;
 
 
+	public bool hasCap()
+	{
+		return cap != null;
+	}
+
 	public GameObject getTunnel()
 	{
 		return corridor.tunnel;

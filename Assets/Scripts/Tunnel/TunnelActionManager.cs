@@ -165,10 +165,9 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         }
         else
         {
-            //Heading PrevHeading = PrevHeadingDict[playerTransform];
-
-            // TODO: Use Segment's GetCenteredIntersectionPoint method to calculate previous ring
-            prevRing = RingManager.Instance.Create(TunnelHeading.forward, playerTransform.position);
+            Heading playerHeading = new Heading(playerTransform.position, TunnelHeading.forward);
+            Vector3 intersectionPoint = segment.GetIntersectionPoint(playerHeading);
+            prevRing = RingManager.Instance.Create(TunnelHeading.forward, intersectionPoint);
         }
 
         return prevRing;

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using static UnityEngine.Rendering.HableCurve;
 
 public class SegmentManager : Singleton<SegmentManager>
 {
@@ -146,11 +147,17 @@ public class SegmentManager : Singleton<SegmentManager>
         Segment intersectingSegment = GetSegmentFromObject(intersectorInitiator);
         Segment intersectedSegment = GetSegmentFromObject(intersectedObject);
 
-        Vector3 lineEnd = intersectingSegment.endRingCenter; // the end of the intersecting segment is what intersects the segment
-        Vector3 lineStart = intersectedSegment.GetClosestPointToCenterline(lineEnd); // use the guideline to find closest point
-        Guideline intersectingGuideline = new Guideline(lineStart, lineEnd);
+        Vector3 intersectingEndRing = intersectingSegment.endRingCenter;
+        Vector3 intersectingStartRing = intersectingSegment.startRingCenter;
 
-        Debug.DrawRay(lineStart, lineEnd - lineStart, Color.green, 100);
+        // end ring center and start ring center have same direction wrt intersected center line
+        Vector3 closestPointToEndRing = intersectedSegment.GetClosestPointToCenterline(intersectingEndRing); // use the guideline to find closest point
+        Vector3 closestPointToStartRing = intersectedSegment.GetClosestPointToCenterline(intersectingStartRing); // use the guideline to find closest point
+
+        bool isEndRingCloser = Vector3.Distance(intersectingEndRing, closestPointToEndRing) < Vector3.Distance(intersectingStartRing, closestPointToStartRing);
+        Guideline intersectingGuideline = isEndRingCloser ? new Guideline(closestPointToEndRing, intersectingEndRing) : new Guideline(closestPointToStartRing, intersectingStartRing);
+
+        Debug.DrawRay(intersectingGuideline.start, intersectingGuideline.end - intersectingGuideline.start, Color.green, 100);
         intersectedSegment.AddGuideline(intersectingGuideline);
     }
 
@@ -185,21 +192,41 @@ public class SegmentManager : Singleton<SegmentManager>
         });
     }
 
-    public Segment AddTunnelSegment(GameObject tunnel, GameObject prevTunnel, List<GameObject> nextTunnels, Ring ring, Ring prevRing)
+    public Segment AddTunnelSegment(SegmentGo segmentGo, GameObject prevTunnel, List<GameObject> nextTunnels, Ring ring, Ring prevRing)
     {
-        Segment segment = new Segment(tunnel, prevTunnel, ring, prevRing);
+        Segment segment = new Segment(segmentGo, prevTunnel, ring, prevRing);
+        GameObject tunnel = segment.tunnel;
 
         if (prevTunnel != null)
         {
             Segment prevSegment = SegmentDict[prevTunnel.name];
             prevSegment.setNextTunnel(tunnel);
-        }       
+        }
+        if (nextTunnels.Count > 0)
+        {
+            SetIntersectedSegments(segment, nextTunnels);
+        }
 
-        segment.setNextTunnels(nextTunnels);
         SegmentDict.Add(tunnel.name, segment);
 
         UpdateConnectingSegmentGuidelines(tunnel, prevTunnel, nextTunnels);
         return segment;
+    }
+
+    /// <summary>
+    /// On intersection, intersecting segments will add each other as next tunnels. Creating bidirectional path in tunnel
+    /// </summary>
+    /// <param name="intersectingSegment">segment that initiated intersection</param>
+    /// <param name="nextTunnels">tunnels that were intersected</param>
+    public void SetIntersectedSegments(Segment intersectingSegment, List<GameObject> nextTunnels)
+    {
+        intersectingSegment.setNextTunnels(nextTunnels);
+
+        nextTunnels.ForEach((tunnel) =>
+        {
+            Segment nextSegment = GetSegmentFromObject(tunnel);
+            nextSegment.setNextTunnel(intersectingSegment.tunnel);
+        });
     }
 }
 

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Segment
 {
+    public SegmentGo segmentGo;
     public GameObject tunnel;
 
     public Guideline centerLine;
@@ -13,19 +14,21 @@ public class Segment
     public Vector3 forward;
 
     Vector3 center = DefaultUtils.DefaultVector3;
+    // TODO: we only need nextTunnels list, prevTunnels list complicates things and is unnecessary
 	List<GameObject> prevTunnel;
 	List<GameObject> nextTunnel;
 
     List<Guideline> guidelineList;
 
-	public Segment(GameObject cur, GameObject prev, Ring ring, Ring prevRing)
+	public Segment(SegmentGo segmentGo, GameObject prev, Ring ring, Ring prevRing)
 	{
 		this.startRingCenter = prevRing.GetCenter();
 		this.endRingCenter = ring.GetCenter();
         this.endRing = ring;
         this.forward = (this.endRingCenter - this.startRingCenter).normalized;
 
-		this.tunnel = cur;
+        this.segmentGo = segmentGo;
+        this.tunnel = this.segmentGo.getTunnel();
 
 		this.prevTunnel = new List<GameObject>();
 		this.nextTunnel = new List<GameObject>();
@@ -73,7 +76,7 @@ public class Segment
     /// <returns>true if is a leading tunnel, false otherwise</returns>
     public bool hasEndCap()
     {
-        return this.nextTunnel.Count == 0;
+        return segmentGo.hasCap();
     }
 
     public void setPrevTunnel(GameObject prev)
@@ -120,21 +123,37 @@ public class Segment
 		return center;
 	}
 
-    // TODO: Get the center of a ring that will be the start ring of a bisecting segment
-    // involves getting the closest point on centerline to otherPosition,
-    // then finding location on segment edge along the path of the intersecting segment
-    public Vector3 GetCenteredIntersectionPoint(Heading intersectHeading)
+    /// <summary>
+    /// Get a point on edge of tunnel that will be the start ring of a bisecting segment
+    /// </summary>
+    /// <param name="heading">position and direction of bisecting transform</param>
+    /// <returns>point of intersection</returns>
+    public Vector3 GetIntersectionPoint(Heading heading)
     {
-        return DefaultUtils.DefaultVector3;
-    } 
+        Vector3 centerPoint = GetClosestPointToCenterline(heading.position);
+        Vector3 edgePoint = centerPoint + heading.forward.normalized * TunnelManager.tunnelRadius;
+
+        return edgePoint;
+    }
 
     /// <summary>
-    /// Get the closest distance between point and centered line segment(s)
+    /// Get the closest distance between point and centered line segment
     /// </summary>
     /// <param name="point">a point in world space</param>
     /// <returns>closest distance to line segment</returns>
-	public float GetClosestDistance(Vector3 point)
-	{
+	public float GetDistanceToCenterLine(Vector3 point)
+    {
+        Vector3 segmentPoint = centerLine.GetClosestPoint(point);
+        return Vector3.Distance(point, segmentPoint);
+    }
+
+    /// <summary>
+    /// Get the closest distance to any guideline in the segment
+    /// </summary>
+    /// <param name="point">point</param>
+    /// <returns></returns>
+    public float GetClosestDistance(Vector3 point)
+    {
         float closestDist = Mathf.Infinity;
         Vector3 closestSegmentPoint = DefaultUtils.DefaultVector3;
 
@@ -187,7 +206,10 @@ public class Segment
     {
         bool behindStart = Vector3.Dot(forward, transform.position - startRingCenter) < 0;
         bool aheadOfEnd = Vector3.Dot(forward, transform.position - endRingCenter) > 0;
-        return !behindStart && !aheadOfEnd;
+        // TODO: inbounds is not a good indicator because guidelines may not be centered in the tunnel
+        bool isInbounds = GetDistanceToCenterLine(transform.position) < TunnelManager.tunnelRadius;
+
+        return !behindStart && !aheadOfEnd && isInbounds;
     }
 }
 
