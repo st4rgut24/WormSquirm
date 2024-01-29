@@ -15,12 +15,12 @@ public class Segment
 
     Vector3 center = DefaultUtils.DefaultVector3;
     // TODO: we only need nextTunnels list, prevTunnels list complicates things and is unnecessary
-	List<GameObject> prevTunnel;
+	//List<GameObject> prevTunnel;
 	List<GameObject> nextTunnel;
 
     List<Guideline> guidelineList;
 
-	public Segment(SegmentGo segmentGo, GameObject prev, Ring ring, Ring prevRing)
+	public Segment(SegmentGo segmentGo, Ring ring, Ring prevRing)
 	{
 		this.startRingCenter = prevRing.GetCenter();
 		this.endRingCenter = ring.GetCenter();
@@ -30,7 +30,6 @@ public class Segment
         this.segmentGo = segmentGo;
         this.tunnel = this.segmentGo.getTunnel();
 
-		this.prevTunnel = new List<GameObject>();
 		this.nextTunnel = new List<GameObject>();
 
         this.guidelineList = new List<Guideline>();
@@ -38,11 +37,6 @@ public class Segment
         Debug.DrawRay(centerLine.start, centerLine.end - centerLine.start, Color.green, 100);
 
         this.guidelineList.Add(centerLine);
-
-        if (prev != null)
-        {
-            setPrevTunnel(prev);
-        }
     }
 
     public void AddGuideline(Guideline line)
@@ -60,11 +54,6 @@ public class Segment
         return this.nextTunnel;
     }
 
-    public List<GameObject> getPrevTunnels()
-	{
-		return this.prevTunnel;
-	}
-
     public Ring GetEndRing()
     {
         return endRing;
@@ -79,14 +68,14 @@ public class Segment
         return segmentGo.hasCap();
     }
 
-    public void setPrevTunnel(GameObject prev)
-    {
-        if (prev == null)
-        {
-            throw new Exception("A null object is added to list of previous tunnels");
-        }
-        this.prevTunnel.Add(prev);
-    }
+    //public void setPrevTunnel(GameObject prev)
+    //{
+    //    if (prev == null)
+    //    {
+    //        throw new Exception("A null object is added to list of previous tunnels");
+    //    }
+    //    this.prevTunnel.Add(prev);
+    //}
 
     public void setNextTunnels(List<GameObject> nexts)
     {

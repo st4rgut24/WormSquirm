@@ -77,7 +77,6 @@ public class TunnelUtils
         TunnelGoList.Add(segment.tunnel);
 
         TunnelGoList.AddRange(segment.getNextTunnels());
-        TunnelGoList.AddRange(segment.getPrevTunnels());
 
         return TunnelGoList;
     }

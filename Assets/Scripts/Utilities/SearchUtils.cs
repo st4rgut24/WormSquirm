@@ -29,12 +29,6 @@ public class SearchUtils
             {
                 Segment currentSegment = queue.Dequeue();
 
-                // Find previous segments
-                foreach (var prevSegmentGo in currentSegment.getPrevTunnels())
-                {
-                    RecordSegment(prevSegmentGo, visited, queue, adjacentSegments);
-                }
-
                 // Find next segments
                 foreach (var nextSegmentGo in currentSegment.getNextTunnels())
                 {

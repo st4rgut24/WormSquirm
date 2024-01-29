@@ -76,7 +76,8 @@ public class TunnelManager : Singleton<TunnelManager>
 	void OnAddCreatedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel)
 	{
         GameObject endCap = segment.cap;
-		AddTunnel(playerTransform, segment, prevTunnel, new List<GameObject>());
+        List<GameObject> neighborTunnels = InitTunnelList(prevTunnel);
+		AddTunnel(playerTransform, segment, neighborTunnels);
 		ReplaceEndCap(playerTransform, endCap);
 	}
 
@@ -93,8 +94,23 @@ public class TunnelManager : Singleton<TunnelManager>
             nextTunnels.Remove(prevTunnel);
         }
 
-        AddTunnel(playerTransform, segment, prevTunnel, nextTunnels);
+        List<GameObject> connectingTunnels = InitTunnelList(prevTunnel);
+        connectingTunnels.AddRange(nextTunnels);
+
+        AddTunnel(playerTransform, segment, connectingTunnels);
         segment.DestroyCap();
+    }
+
+    public List<GameObject> InitTunnelList(GameObject InitTunnel)
+    {
+        List<GameObject> tunnelList = new List<GameObject>();
+
+        if (InitTunnel != null)
+        {
+            tunnelList.Add(InitTunnel);
+        }
+
+        return tunnelList;
     }
 
     public bool IsIntersectingInitiator(GameObject initiatorTunnel, GameObject otherTunnel)
@@ -134,7 +150,7 @@ public class TunnelManager : Singleton<TunnelManager>
         }
     }
 
-    void AddTunnel(Transform playerTransform, SegmentGo segmentGo, GameObject prevTunnel, List<GameObject> nextTunnels)
+    void AddTunnel(Transform playerTransform, SegmentGo segmentGo, List<GameObject> nextTunnels)
 	{
 
         Corridor corridor = segmentGo.corridor;
@@ -145,7 +161,7 @@ public class TunnelManager : Singleton<TunnelManager>
             TransformCreatedTunnelDict[playerTransform] = tunnel;
         }
 
-        Segment segment = SegmentManager.Instance.AddTunnelSegment(segmentGo, prevTunnel, nextTunnels, corridor.ring, corridor.prevRing);
+        Segment segment = SegmentManager.Instance.AddTunnelSegment(segmentGo, nextTunnels, corridor.ring, corridor.prevRing);
         AgentManager.Instance.InitTransformSegmentDict(playerTransform, segment);
 
         Debug.Log("Add segment to grid at position " + segment.getCenter());

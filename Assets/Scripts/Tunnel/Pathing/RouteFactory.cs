@@ -71,14 +71,14 @@ public class RouteFactory
             if (dist % waypointInterval == 0)
             {
                 route.AddWaypoint(segment.getCenter());
-                List<GameObject> prevTunnels = segment.getPrevTunnels();
+                List<GameObject> neighborTunnels = segment.getNextTunnels();
 
-                if (prevTunnels.Count == 0)
+                if (neighborTunnels.Count == 0)
                 {
                     throw new Exception("Cannot follow segment, because missing previous tunnels");
                 }
 
-                GameObject firstPrevTunnel = prevTunnels[0];
+                GameObject firstPrevTunnel = neighborTunnels[0];
                 segment = SegmentManager.Instance.GetSegmentFromObject(firstPrevTunnel);
             }
 

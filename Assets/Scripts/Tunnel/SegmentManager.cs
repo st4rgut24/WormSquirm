@@ -180,10 +180,10 @@ public class SegmentManager : Singleton<SegmentManager>
         }
     }
 
-    public void UpdateConnectingSegmentGuidelines(GameObject curTunnel, GameObject prevTunnel, List<GameObject> nextTunnels)
+    public void UpdateConnectingSegmentGuidelines(GameObject curTunnel, List<GameObject> nextTunnels)
     {
         // from prev to cur
-        AddIntersectingLine(curTunnel, prevTunnel);
+        //AddIntersectingLine(curTunnel, prevTunnel);
 
         // from cur to each next tunnel
         nextTunnels.ForEach((nextTunnel) =>
@@ -192,16 +192,16 @@ public class SegmentManager : Singleton<SegmentManager>
         });
     }
 
-    public Segment AddTunnelSegment(SegmentGo segmentGo, GameObject prevTunnel, List<GameObject> nextTunnels, Ring ring, Ring prevRing)
+    public Segment AddTunnelSegment(SegmentGo segmentGo, List<GameObject> nextTunnels, Ring ring, Ring prevRing)
     {
-        Segment segment = new Segment(segmentGo, prevTunnel, ring, prevRing);
+        Segment segment = new Segment(segmentGo, ring, prevRing);
         GameObject tunnel = segment.tunnel;
 
-        if (prevTunnel != null)
-        {
-            Segment prevSegment = SegmentDict[prevTunnel.name];
-            prevSegment.setNextTunnel(tunnel);
-        }
+        //if (prevTunnel != null)
+        //{
+        //    Segment prevSegment = SegmentDict[prevTunnel.name];
+        //    prevSegment.setNextTunnel(tunnel);
+        //}
         if (nextTunnels.Count > 0)
         {
             SetIntersectedSegments(segment, nextTunnels);
@@ -209,7 +209,7 @@ public class SegmentManager : Singleton<SegmentManager>
 
         SegmentDict.Add(tunnel.name, segment);
 
-        UpdateConnectingSegmentGuidelines(tunnel, prevTunnel, nextTunnels);
+        UpdateConnectingSegmentGuidelines(tunnel, nextTunnels);
         return segment;
     }
 
