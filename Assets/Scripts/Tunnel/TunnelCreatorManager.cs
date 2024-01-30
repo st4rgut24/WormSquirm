@@ -54,7 +54,7 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
 
         GameObject prevSegment = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
         
-        SegmentGo segmentGo = tunnelMaker.GrowTunnel(playerTransform, heading, true, prevRing);
+        SegmentGo segmentGo = tunnelMaker.GrowTunnel(playerTransform, heading, prevRing);
 
         //tunnelGrid.AddGameObject(heading.position, segmentGo.getTunnel());
 

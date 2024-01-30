@@ -39,18 +39,17 @@ public class TunnelMake: MonoBehaviour
     /// </summary>
     /// <param name="playerTransform">The key used to look up previous segments</param>
     /// <param name="heading">directional info</param>
-    /// <param name="isClosed">whether the tunnel is closed/capped</param>
     /// <returns></returns>
-    public SegmentGo GrowTunnel(Transform playerTransform, Heading heading, bool isClosed, Ring prevRing)
+    public SegmentGo GrowTunnel(Transform playerTransform, Heading heading, Ring prevRing)
     {
         Vector3 direction = heading.forward;
         Vector3 position = heading.position;
 
-        return CreateSegment(direction, position, playerTransform, isClosed, prevRing);
+        return CreateSegment(direction, position, playerTransform, prevRing);
 
     }
 
-    private SegmentGo CreateSegment(Vector3 direction, Vector3 position, Transform playerTransform, bool isClosed, Ring prevRing)
+    private SegmentGo CreateSegment(Vector3 direction, Vector3 position, Transform playerTransform, Ring prevRing)
     {
         Ring endRing = RingManager.Instance.Create(direction, position);
         //Ring prevRing = RingManager.Instance.Get(playerTransform);
@@ -62,7 +61,7 @@ public class TunnelMake: MonoBehaviour
         tunnelObject.name = "Tunnel " + tunnelCounter;
         tunnelCounter++;
 
-        GameObject capObject = GetEndCap(endRing, Cap, playerTransform, isClosed);
+        GameObject capObject = MeshObjectFactory.Get(MeshType.EndCap, Cap, endRing, new OptionalMeshProps());
 
         Corridor corridor = new Corridor(tunnelObject, endRing, prevRing);
         return new SegmentGo(capObject, corridor);
@@ -81,23 +80,5 @@ public class TunnelMake: MonoBehaviour
         RingManager.Instance.Add(playerTransform, ring); // update normal vector
 
         return ring;
-    }
-
-    /// <summary>
-    /// Generate a cap for the end of the tunnel
-    /// </summary>
-    /// <param name="ring">the vertices of the cap</param>
-    /// <param name="isClosed">Whether the tunnel is closed off or not</param>
-    /// <returns>An Cap GameObject</returns>
-    GameObject GetEndCap(Ring ring, GameObject prefab, Transform transform, bool isClosed)
-    {
-        if (isClosed)
-        {
-            return MeshObjectFactory.Get(MeshType.EndCap, prefab, ring, new OptionalMeshProps());
-        }
-        else
-        {
-            return null;
-        }
     }
 }

@@ -65,12 +65,12 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
             rays.AddRange(startRingRays);
         }
 
-        Intersect(transform, prevTunnel, otherTunnels, extendsTunnel, rays, heading, prevRing);
+        Intersect(transform, prevTunnel, otherTunnels, rays, heading, prevRing);
     }
 
-    void Intersect(Transform transform, GameObject prevTunnel, List<GameObject> otherTunnels, bool extendsTunnel, List<Ray> rays, Heading heading, Ring prevRing)
+    void Intersect(Transform transform, GameObject prevTunnel, List<GameObject> otherTunnels, List<Ray> rays, Heading heading, Ring prevRing)
     {
-        SegmentGo projectedSegment = tunnelMaker.GrowTunnel(transform, heading, extendsTunnel, prevRing);
+        SegmentGo projectedSegment = tunnelMaker.GrowTunnel(transform, heading, prevRing);
 
 
         // get intersected tunnels (may be more than 1)

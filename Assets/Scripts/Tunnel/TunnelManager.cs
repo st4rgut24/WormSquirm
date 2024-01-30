@@ -81,6 +81,13 @@ public class TunnelManager : Singleton<TunnelManager>
 		ReplaceEndCap(playerTransform, endCap);
 	}
 
+    /// <summary>
+    /// Add intersecting tunnels info
+    /// </summary>
+    /// <param name="playerTransform">player pos</param>
+    /// <param name="segment">new tunnel segment that intersects others</param>
+    /// <param name="prevTunnel">tunnel from which the player dug the intersected segment</param>
+    /// <param name="intersectedTunnels">a list of intersected tunnel segments</param>
 	void OnAddIntersectedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel, List<GameObject> intersectedTunnels)
 	{
         GameObject endCap = segment.cap;
@@ -98,7 +105,13 @@ public class TunnelManager : Singleton<TunnelManager>
         connectingTunnels.AddRange(nextTunnels);
 
         AddTunnel(playerTransform, segment, connectingTunnels);
-        segment.DestroyCap();
+
+        Debug.Log("There are " + connectingTunnels.Count + " intersecting tunnels");
+
+        if (connectingTunnels.Count > 1 || prevTunnel == null) // the new segment intersects the previous and another tunnel in front, creating a corridor (no need for cap)
+        {
+            segment.DestroyCap();
+        }
     }
 
     public List<GameObject> InitTunnelList(GameObject InitTunnel)
