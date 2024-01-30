@@ -182,10 +182,6 @@ public class SegmentManager : Singleton<SegmentManager>
 
     public void UpdateConnectingSegmentGuidelines(GameObject curTunnel, List<GameObject> nextTunnels)
     {
-        // from prev to cur
-        //AddIntersectingLine(curTunnel, prevTunnel);
-
-        // from cur to each next tunnel
         nextTunnels.ForEach((nextTunnel) =>
         {
             AddIntersectingLine(curTunnel, nextTunnel);
@@ -197,11 +193,6 @@ public class SegmentManager : Singleton<SegmentManager>
         Segment segment = new Segment(segmentGo, ring, prevRing);
         GameObject tunnel = segment.tunnel;
 
-        //if (prevTunnel != null)
-        //{
-        //    Segment prevSegment = SegmentDict[prevTunnel.name];
-        //    prevSegment.setNextTunnel(tunnel);
-        //}
         if (nextTunnels.Count > 0)
         {
             SetIntersectedSegments(segment, nextTunnels);

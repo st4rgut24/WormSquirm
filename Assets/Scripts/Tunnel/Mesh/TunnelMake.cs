@@ -52,19 +52,19 @@ public class TunnelMake: MonoBehaviour
 
     private SegmentGo CreateSegment(Vector3 direction, Vector3 position, Transform playerTransform, bool isClosed, Ring prevRing)
     {
-        Ring ring = RingManager.Instance.Create(direction, position);
+        Ring endRing = RingManager.Instance.Create(direction, position);
         //Ring prevRing = RingManager.Instance.Get(playerTransform);
 
         OptionalMeshProps meshProps = new OptionalMeshProps(playerTransform, prevRing, _props);
 
-        GameObject tunnelObject = MeshObjectFactory.Get(MeshType.Tunnel, TunnelSegment, ring, meshProps);
+        GameObject tunnelObject = MeshObjectFactory.Get(MeshType.Tunnel, TunnelSegment, endRing, meshProps);
 
         tunnelObject.name = "Tunnel " + tunnelCounter;
         tunnelCounter++;
 
-        GameObject capObject = GetEndCap(ring, Cap, playerTransform, isClosed);
+        GameObject capObject = GetEndCap(endRing, Cap, playerTransform, isClosed);
 
-        Corridor corridor = new Corridor(tunnelObject, ring, prevRing);
+        Corridor corridor = new Corridor(tunnelObject, endRing, prevRing);
         return new SegmentGo(capObject, corridor);
     }
 

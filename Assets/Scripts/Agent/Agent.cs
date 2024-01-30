@@ -6,7 +6,7 @@ public class Agent : MonoBehaviour
 {
     float rotationSpeed = 1;
     float movementSpeed = 1;
-    float continuousRotateSpeed = 2; // complete this rotation faster because it is an interrupting rotation
+    float continuousRotateSpeed = 10; // complete this rotation faster because it is an interrupting rotation
 
     public float rotationThreshold = 0.1f;
     public float distanceThreshold = 0.1f;

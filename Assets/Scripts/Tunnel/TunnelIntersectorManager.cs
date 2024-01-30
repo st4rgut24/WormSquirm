@@ -13,7 +13,7 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
     public static event Action<Transform, SegmentGo, GameObject, List<GameObject>> OnAddIntersectedTunnel;
 
     public int rayRings = 3; // The bigger this number is, the smaller the interval
-    public int offsetMultiple = 2; // How many units the intersection ray should be offset from the intersecting faces
+    public int offsetMultiple = 3; // How many units the intersection ray should be offset from the intersecting faces
 
     TunnelMake tunnelMaker;
     Grid tunnelGrid;

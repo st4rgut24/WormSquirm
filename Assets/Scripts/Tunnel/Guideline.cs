@@ -30,11 +30,11 @@ public class Guideline
         float t = Vector3.Dot(v, line);
 
         // Check if the point is beyond the line segment
-        //if (t <= 0.0f)
-        //    return Vector3.Distance(point, startRingCenter);
+        if (t <= 0.0f)
+            return start;
 
-        //if (t >= lineLength)
-        //    return Vector3.Distance(point, endRingCenter);
+        if (t >= lineLength)
+            return end;
 
         // Calculate the closest point on the line segment
         Vector3 closestPoint = start + t * line;
