@@ -34,7 +34,7 @@ public class Segment
 
         this.guidelineList = new List<Guideline>();
         centerLine = new Guideline(this.startRingCenter, this.endRingCenter);
-        Debug.DrawRay(centerLine.start, centerLine.end - centerLine.start, Color.green, 100);
+        //Debug.DrawRay(centerLine.start, centerLine.end - centerLine.start, Color.green, 100);
 
         this.guidelineList.Add(centerLine);
     }
@@ -150,14 +150,12 @@ public class Segment
         {
             Vector3 segmentPoint = guideline.GetClosestPoint(point);
             float dist = Vector3.Distance(point, segmentPoint);
-            Debug.Log("distance between point " + point + " and segment point " + segmentPoint + " is " + dist);
             if (dist < closestDist)
             {
                 closestSegmentPoint = segmentPoint;
                 closestDist = dist;
             }
         });
-        Debug.Log("Closest distance to center lines is " + closestDist);
         // Return the distance between the point and the closest point on the line segment
         return closestDist;
     }
@@ -174,7 +172,7 @@ public class Segment
         {
             float distToEndCap = Vector3.Distance(position, endRingCenter);
 
-            Debug.Log("Distance to end cap is " + distToEndCap + ". Min dist to end cap is " + SegmentManager.Instance.MinDistFromCap);
+            //Debug.Log("Distance to end cap is " + distToEndCap + ". Min dist to end cap is " + SegmentManager.Instance.MinDistFromCap);
             // TODO: There is a situation where an intersecting tunnel is within the min distance from cap, which immobilizes the player
             // to remedy this, and situations like this, certain intersections should not be possible (perhaps by creating a unbreakable endcap?)
             if (distToEndCap <= SegmentManager.Instance.MinDistFromCap)
@@ -200,7 +198,10 @@ public class Segment
         // TODO: inbounds is not a good indicator because guidelines may not be centered in the tunnel
         bool isInbounds = GetDistanceToCenterLine(transform.position) < TunnelManager.tunnelRadius;
 
+        Debug.Log("Check if segment " + tunnel.name + " contains player. BehindStart is " + behindStart + " aheadOfEnd is " + aheadOfEnd + " isInbounds is " + isInbounds);
+
         return !behindStart && !aheadOfEnd && isInbounds;
+
     }
 }
 

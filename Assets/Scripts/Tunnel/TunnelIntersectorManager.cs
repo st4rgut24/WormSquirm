@@ -53,8 +53,19 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
     /// <param name="prevTunnel">Previous tunnel segment belonging to the active tunnel</param>
     /// <param name="extendsTunnel">The player is extending a tunnel</param>
     /// <param name="heading">The directional info of the tunnel</param>
-    void IntersectAction(Transform transform, GameObject prevTunnel, Heading heading, List<GameObject> otherTunnels, bool extendsTunnel, Ring prevRing)
+    /// <param name="hitInfo">info about the hit object</param>
+    void IntersectAction(Transform transform, GameObject prevTunnel, Heading heading, bool extendsTunnel, Ring prevRing, HitInfo hitInfo)
     {
+        if (hitInfo != null)
+        {
+            heading.position = hitInfo.hitCoord; // the end of the intersecting segment will be the point of intersection obtained from hit info
+        }
+
+        Vector3 center = TunnelUtils.GetCenterPoint(prevRing.GetCenter(), heading.position);
+        List<GameObject> nearbyTunnels = tunnelGrid.GetGameObjects(center, 1);
+        Debug.Log("There are " + nearbyTunnels.Count + " tunnels with the viciting of position " + center);
+
+
         List<Ray> endRingRays = RayUtils.CreateRays(heading.position, -heading.forward, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
 
         List<Ray> rays = new List<Ray>(endRingRays);
@@ -65,7 +76,8 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
             rays.AddRange(startRingRays);
         }
 
-        Intersect(transform, prevTunnel, otherTunnels, rays, heading, prevRing);
+
+        Intersect(transform, prevTunnel, nearbyTunnels, rays, heading, prevRing);
     }
 
     void Intersect(Transform transform, GameObject prevTunnel, List<GameObject> otherTunnels, List<Ray> rays, Heading heading, Ring prevRing)

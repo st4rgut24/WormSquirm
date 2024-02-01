@@ -21,7 +21,7 @@ public class Disabler
 	/// </summary>
 	public void Disable(Transform transform, Vector3 direction)
 	{
-        Segment segment = SegmentManager.Instance.GetSegmentFromTransform(transform);
+        Segment segment = AgentManager.Instance.GetSegment(transform);
 
         if (segment == null)
         {

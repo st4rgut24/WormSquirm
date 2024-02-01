@@ -71,7 +71,7 @@ public abstract class Bot : Agent
             Route.MiniRoute miniRoute = route.GetMiniRoute();
             if (miniRoute.isFinalWaypoint)
             {
-                Debug.Log("Reached final waypoint");
+                //Debug.Log("Reached final waypoint");
                 // emit event signalling Bot has reached destination, so it can be assigned a new destination
             }
             else

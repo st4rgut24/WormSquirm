@@ -60,7 +60,7 @@ public class RouteFactory
     /// <returns>a route</returns>
     public static Route FollowSegments(Transform targetTransform)
     {
-        Segment goalSegment = SegmentManager.Instance.GetSegmentFromTransform(targetTransform);
+        Segment goalSegment = AgentManager.Instance.GetSegment(targetTransform);
 
         int dist = 1;
 

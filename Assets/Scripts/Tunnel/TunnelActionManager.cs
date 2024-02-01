@@ -12,10 +12,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 {
     Grid tunnelGrid;
 
-    Dictionary<Transform, Action> LastTunnelActionDict; // <Player Transform, the last tunnel action>
-    //Dictionary<Transform, Heading> PrevHeadingDict; // <Player Transform, the player's previous position>
-
-    public static event Action<Transform, GameObject, Heading, List<GameObject>, bool, Ring> OnIntersectTunnel; // intersect an existing tunnel
+    public static event Action<Transform, GameObject, Heading, bool, Ring, HitInfo> OnIntersectTunnel; // intersect an existing tunnel
     public static event Action<Transform, bool, Heading, Ring> OnCreateTunnel; // create a new unobstructed tunnel
     public static event Action<Transform> OnFollowTunnel; // follow path of existing tunnel
 
@@ -34,9 +31,6 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
     private void Awake()
     {
-        //PrevHeadingDict = new Dictionary<Transform, Heading>();
-        LastTunnelActionDict = new Dictionary<Transform, Action>();
-
         tunnelGrid = GameManager.Instance.GetGrid(GridType.Tunnel);
     }
 
@@ -62,8 +56,6 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     void TunnelAction(Transform playerTransform, Vector3 direction)
     {
         Heading TunnelHeading = DirectionUtils.GetHeading(playerTransform.position, direction, GameManager.Instance.agentOffset);
-
-
         bool IsTunnelCreated = CreateTunnel(playerTransform, TunnelHeading);
 
         if (!IsTunnelCreated)
@@ -71,10 +63,8 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
             // TODO: this case should not exist
             Debug.Log("Tunnel Action Follow");
             OnFollowTunnel?.Invoke(playerTransform);
-            LastTunnelActionDict[playerTransform] = Action.Follow;
         }
 
-        //PrevHeadingDict[playerTransform] = TunnelHeading;
     }
 
     /// <summary>
@@ -88,18 +78,12 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
         List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(TunnelHeading.position, 1);
 
-        // TODO: find out why this doesn't work: GameObject EnclosingTunnel = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
-        GameObject EnclosingTunnel = TunnelUtils.getEnclosingObject(TunnelHeading.position, otherTunnels);
+        HitInfo hitInfo = TunnelUtils.getHitObject(playerTransform, otherTunnels);
 
-        Ray ray = new Ray(playerTransform.position, TunnelHeading.forward);
-        Debug.DrawRay(ray.origin, ray.direction * 10f, Color.red, 10);
+        //Ray ray = new Ray(playerTransform.position, playerTransform.forward);
+        //Debug.DrawRay(ray.origin, ray.direction * GameManager.Instance.agentOffset, Color.red, 100);
 
-        // TODO: dont use last tunnel action to determine the current tunnel action anymore.
-        // if (!isMovingIntoEndCap && EnclosingTunnel == null) || (isMovingIntoEndCap && EnclosingTunnel != null) 
-        Action lastTunnelAction = LastTunnelActionDict.ContainsKey(playerTransform) ? LastTunnelActionDict[playerTransform] : Action.None;
-
-
-        bool isIntersecting = IsIntersect(EnclosingTunnel, lastTunnelAction, extendsTunnel, playerTransform);
+        bool isIntersecting = IsIntersect(hitInfo, extendsTunnel, playerTransform);
         bool isFollowing = !isIntersecting && !extendsTunnel;
 
         if (isFollowing)
@@ -108,38 +92,23 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         }
         else
         {
-            // TODO: prev ring is not always the end of an existing segment
-            Ring prevRing = GetPrevRing(extendsTunnel, playerTransform, TunnelHeading); 
+            Ring prevRing = GetPrevRing(extendsTunnel, playerTransform); 
 
-            if (IsCreationValid(TunnelHeading, prevRing))
+            if (isIntersecting) // intersect
             {
-                if (isIntersecting) // intersect
-                {
-                    //Heading PrevHeading = PrevHeadingDict[playerTransform];
-                    Vector3 center = TunnelUtils.GetCenterPoint(prevRing.GetCenter(), TunnelHeading.position);
-                    List<GameObject> nearbyTunnels = tunnelGrid.GetGameObjects(center, 1);
-                    Debug.Log("There are " + nearbyTunnels.Count + " tunnels with the viciting of position " + center);
 
-                    Debug.Log("TunnelAction Intersect");
-                    GameObject prevSegment = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
-                    OnIntersectTunnel?.Invoke(playerTransform, prevSegment, TunnelHeading, nearbyTunnels, extendsTunnel, prevRing);
-                    LastTunnelActionDict[playerTransform] = Action.Intersect;
-                    return true;
-                }
-                else
-                {
-                    Debug.Log("Tunnel Action Create");
-                    OnCreateTunnel?.Invoke(playerTransform, extendsTunnel, TunnelHeading, prevRing);
-                    LastTunnelActionDict[playerTransform] = Action.Create;
-                    return true;
-                }
+                Debug.Log("TunnelAction Intersect");
+                GameObject prevSegment = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
+                OnIntersectTunnel?.Invoke(playerTransform, prevSegment, TunnelHeading, extendsTunnel, prevRing, hitInfo);
             }
             else
             {
-                Debug.Log("Tunnel segment is not long enough");
+                Debug.Log("Tunnel Action Create");
+                OnCreateTunnel?.Invoke(playerTransform, extendsTunnel, TunnelHeading, prevRing);
             }
+
+            return true;
         }
-        return false;
     }
 
     public bool IsCreationValid(Heading TunnelHeading, Ring prevRing)
@@ -149,10 +118,10 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         return dist >= TunnelManager.minSegmentLength;
     }
 
-    Ring GetPrevRing(bool extendsTunnel, Transform playerTransform, Heading TunnelHeading)
+    Ring GetPrevRing(bool extendsTunnel, Transform playerTransform)
     {
         Ring prevRing;
-        Segment segment = SegmentManager.Instance.GetSegmentFromTransform(playerTransform);
+        Segment segment = AgentManager.Instance.GetSegment(playerTransform);
 
         if (extendsTunnel)
         {
@@ -160,14 +129,14 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
             if (prevRing == null) // initialize the previous Ring
             {
-                prevRing = RingManager.Instance.Create(TunnelHeading.forward, playerTransform.position);
+                prevRing = RingManager.Instance.Create(playerTransform.forward, playerTransform.position);
             }
         }
         else
         {
-            Heading playerHeading = new Heading(playerTransform.position, TunnelHeading.forward);
+            Heading playerHeading = new Heading(playerTransform.position, playerTransform.forward);
             Vector3 intersectionPoint = segment.GetIntersectionPoint(playerHeading);
-            prevRing = RingManager.Instance.Create(TunnelHeading.forward, intersectionPoint);
+            prevRing = RingManager.Instance.Create(playerTransform.forward, intersectionPoint);
         }
 
         return prevRing;
@@ -179,12 +148,13 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     /// <param name="nextTunnel"></param>
     /// <param name="lastTunnelAction"></param>
     /// <returns></returns>
-    bool IsIntersect(GameObject nextTunnel, Action lastTunnelAction, bool extendsTunnel, Transform playerTransform)
+    bool IsIntersect(HitInfo hitInfo, bool extendsTunnel, Transform playerTransform)
     {
         GameObject curTunnel = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
 
-        if (nextTunnel != null)
+        if (hitInfo != null)
         {
+            GameObject nextTunnel = hitInfo.hitGo;
             // intersects is true, if next tunnel segment is a new intersecting segment that is not already connected to current tunnel player is in
             return curTunnel != nextTunnel && !SegmentManager.Instance.IsTunnelsConnected(curTunnel, nextTunnel);
         }

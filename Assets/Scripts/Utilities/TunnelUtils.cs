@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 public class TunnelUtils
@@ -87,31 +88,53 @@ public class TunnelUtils
     /// <param name="targetPosition">The target GameObject</param>
     /// <param name="objectList">List of candidate GameObjects that may contain targetObject</param>
     /// <returns>null if no enclosing object</returns>
-    public static GameObject getEnclosingObject(Vector3 targetPosition, List<GameObject> objectList)
+    //public static GameObject getEnclosingObject(Vector3 targetPosition, List<GameObject> objectList)
+    //{
+    //    GameObject enclosingObject = null;
+
+    //    foreach (GameObject otherObject in objectList)
+    //    {
+    //        if (otherObject != null) // Ensure the GameObject in the list is not null
+    //        {
+    //            Bounds otherBounds = otherObject.GetComponent<Renderer>().bounds;
+
+    //            if (otherBounds.Contains(targetPosition))
+    //            {
+    //                if (enclosingObject == null)
+    //                {
+    //                    enclosingObject = otherObject;
+    //                }
+    //                else
+    //                {
+    //                    throw new Exception("There is more than one enclosing object for a transform.position " + targetPosition);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    return enclosingObject;
+    //}
+
+    public static HitInfo getHitObject(Transform transform, List<GameObject> objectList)
     {
-        GameObject enclosingObject = null;
+        RaycastHit hit;
+        ComponentUtils.addBoxColliders(objectList);
 
-        foreach (GameObject otherObject in objectList)
+        Ray ray = new Ray(transform.position, transform.forward);
+
+        Debug.DrawRay(ray.origin, ray.direction * GameManager.Instance.agentOffset, Color.green, 100.0f);
+        bool didHit = Physics.Raycast(ray.origin, ray.direction, out hit, GameManager.Instance.agentOffset);
+
+        ComponentUtils.removeBoxColliders(objectList);
+
+        if (didHit)
         {
-            if (otherObject != null) // Ensure the GameObject in the list is not null
-            {
-                Bounds otherBounds = otherObject.GetComponent<Renderer>().bounds;
-
-                if (otherBounds.Contains(targetPosition))
-                {
-                    if (enclosingObject == null)
-                    {
-                        enclosingObject = otherObject;
-                    }
-                    else
-                    {
-                        throw new Exception("There is more than one enclosing object for a transform.position " + targetPosition);
-                    }
-                }
-            }
+            return new HitInfo(hit.collider.gameObject, hit.point);
         }
-
-        return enclosingObject;
+        else
+        {
+            return null;
+        }
     }
 
 }

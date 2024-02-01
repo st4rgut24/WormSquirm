@@ -11,12 +11,12 @@ public class SegmentManager : Singleton<SegmentManager>
 
     public const float SameDirAngleMargin = 30; // the margin of error for two gameobjects to be considered facing the same direction
 
-    public static event Action<Transform, Segment> OnNewSegment;
-    public Dictionary<string, Segment> SegmentDict; // <tunnel name, Segment)
+    public static event Action<Transform, Segment> OnEnterNewSegment;
+    public Dictionary<string, Segment> SegmentGoDict; // <tunnel name, Segment>
 
     private void Awake()
     {
-        SegmentDict = new Dictionary<string, Segment>();
+        SegmentGoDict = new Dictionary<string, Segment>();
     }
 
     private void Start()
@@ -29,25 +29,25 @@ public class SegmentManager : Singleton<SegmentManager>
 
     public Segment UpdateSegmentFromTransform(Transform transform)
     {
-        Segment curSegment = GetSegmentFromTransform(transform);        
+        Segment curSegment = AgentManager.Instance.GetSegment(transform);        
         Segment UpdatedSegment = null;
 
         if (!curSegment.ContainsTransform(transform)) // another tunnel that is closer than the current tunnel
         {
             UpdatedSegment = GetEnclosingSegment(curSegment, transform);
             Debug.Log("Player has moved to the new segment " + UpdatedSegment.tunnel.name);
-            OnNewSegment?.Invoke(transform, UpdatedSegment);
+            OnEnterNewSegment?.Invoke(transform, UpdatedSegment);
         }
 
         return UpdatedSegment;
     }
 
-    public Segment GetSegmentFromTransform(Transform transform)
-    {
-        GameObject tunnelGo = TunnelManager.Instance.GetGameObjectTunnel(transform);
+    //public Segment GetSegmentFromTransform(Transform transform)
+    //{
+    //    GameObject tunnelGo = TunnelManager.Instance.GetGameObjectTunnel(transform);
 
-        return GetSegmentFromObject(tunnelGo);
-    }
+    //    return GetSegmentFromObject(tunnelGo);
+    //}
 
     public Segment GetSegmentFromObject(GameObject tunnel)
     {
@@ -55,9 +55,9 @@ public class SegmentManager : Singleton<SegmentManager>
         {
             return null;
         }
-        else if (SegmentDict.ContainsKey(tunnel.name))
+        else if (SegmentGoDict.ContainsKey(tunnel.name))
         {
-            return SegmentDict[tunnel.name];
+            return SegmentGoDict[tunnel.name];
         }
         else
         {
@@ -120,7 +120,7 @@ public class SegmentManager : Singleton<SegmentManager>
     /// <returns>true if digging extends rather than bisects tunnel</returns>
     public bool IsExtendingTunnel(Transform transform)
     {
-        Segment segment = GetSegmentFromTransform(transform);
+        Segment segment = AgentManager.Instance.GetSegment(transform);
 
         if (segment == null) // start of game, start of a tunnel
         {
@@ -157,7 +157,7 @@ public class SegmentManager : Singleton<SegmentManager>
         bool isEndRingCloser = Vector3.Distance(intersectingEndRing, closestPointToEndRing) < Vector3.Distance(intersectingStartRing, closestPointToStartRing);
         Guideline intersectingGuideline = isEndRingCloser ? new Guideline(closestPointToEndRing, intersectingEndRing) : new Guideline(closestPointToStartRing, intersectingStartRing);
 
-        Debug.DrawRay(intersectingGuideline.start, intersectingGuideline.end - intersectingGuideline.start, Color.green, 100);
+        //Debug.DrawRay(intersectingGuideline.start, intersectingGuideline.end - intersectingGuideline.start, Color.green, 100);
         intersectedSegment.AddGuideline(intersectingGuideline);
     }
 
@@ -198,7 +198,7 @@ public class SegmentManager : Singleton<SegmentManager>
             SetIntersectedSegments(segment, nextTunnels);
         }
 
-        SegmentDict.Add(tunnel.name, segment);
+        SegmentGoDict.Add(tunnel.name, segment);
 
         UpdateConnectingSegmentGuidelines(tunnel, nextTunnels);
         return segment;

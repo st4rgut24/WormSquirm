@@ -14,7 +14,7 @@ public class AgentManager : Singleton<AgentManager>
 
     private void OnEnable()
     {
-        SegmentManager.OnNewSegment += OnEnterNewSegment;
+        SegmentManager.OnEnterNewSegment += OnEnterNewSegment;
     }
 
     protected virtual void Awake()
@@ -37,6 +37,18 @@ public class AgentManager : Singleton<AgentManager>
 
             agent.curSegment = segment; 
             TransformSegmentDict[transform] = segment;
+        }
+    }
+
+    public Segment GetSegment(Transform transform)
+    {
+        if (TransformSegmentDict.ContainsKey(transform))
+        {
+            return TransformSegmentDict[transform];
+        }
+        else
+        {
+            return null;
         }
     }
 
@@ -87,7 +99,7 @@ public class AgentManager : Singleton<AgentManager>
 
     private void OnDisable()
     {
-        SegmentManager.OnNewSegment -= OnEnterNewSegment;
+        SegmentManager.OnEnterNewSegment -= OnEnterNewSegment;
     }
 }
 

@@ -57,5 +57,30 @@ public class ComponentUtils: MonoBehaviour
             }
         });
     }
+
+    public static void removeBoxColliders(List<GameObject> objects)
+    {
+        objects.ForEach((obj) =>
+        {
+            BoxCollider boxCollider = obj.GetComponent<BoxCollider>();
+            if (boxCollider != null)
+            {
+                Destroy(boxCollider);
+            }
+        });
+    }
+
+    public static void addBoxColliders(List<GameObject> objects)
+    {
+        objects.ForEach((obj) =>
+        {
+            BoxCollider boxCollider = obj.GetComponent<BoxCollider>();
+
+            if (boxCollider == null)
+            {
+                obj.AddComponent<BoxCollider>();
+            }
+        });
+    }
 }
 

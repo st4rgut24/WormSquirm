@@ -6,8 +6,7 @@ using UnityEngine.UIElements.Experimental;
 
 public class TunnelManager : Singleton<TunnelManager>
 {
-    public Dictionary<Transform, GameObject> EndCapDict; // <GameObject Transform, Enclosing Segment GameObject>
-    public Dictionary<Transform, GameObject> TransformCreatedTunnelDict; // <GameObject Transform, Last Created Segment GameObject>
+    //public Dictionary<Transform, GameObject> EndCapDict; // <GameObject Transform, Enclosing Segment GameObject>
 
     // The intersection relationship is not bidirectional.
     // The key should be the tunnel that initiates the intersection.
@@ -49,17 +48,18 @@ public class TunnelManager : Singleton<TunnelManager>
     {
         defaultProps = new TunnelProps(tunnelSegments, segmentSpacing, tunnelRadius, noiseScale);
 
-		EndCapDict = new Dictionary<Transform, GameObject>();
-        TransformCreatedTunnelDict = new Dictionary<Transform, GameObject>();
+		//EndCapDict = new Dictionary<Transform, GameObject>();
         IntersectedTunnelDict = new Dictionary<GameObject, List<GameObject>>();
         tunnelDisabler = new Disabler(5);
     }
 
-	public GameObject GetGameObjectTunnel(Transform transform)
+	public GameObject GetGameObjectTunnel(Transform playerTransform)
 	{
-		if (TransformCreatedTunnelDict.ContainsKey(transform))
+        Segment segment = AgentManager.Instance.GetSegment(playerTransform);
+
+		if (segment != null)
 		{
-            return TransformCreatedTunnelDict[transform];
+            return segment.tunnel;
         }
 		else
 		{
@@ -77,8 +77,9 @@ public class TunnelManager : Singleton<TunnelManager>
 	{
         GameObject endCap = segment.cap;
         List<GameObject> neighborTunnels = InitTunnelList(prevTunnel);
-		AddTunnel(playerTransform, segment, neighborTunnels);
-		ReplaceEndCap(playerTransform, endCap);
+		AddTunnel(playerTransform, segment, neighborTunnels, prevTunnel);
+		//ReplaceEndCap(playerTransform, endCap);
+        
 	}
 
     /// <summary>
@@ -104,7 +105,7 @@ public class TunnelManager : Singleton<TunnelManager>
         List<GameObject> connectingTunnels = InitTunnelList(prevTunnel);
         connectingTunnels.AddRange(nextTunnels);
 
-        AddTunnel(playerTransform, segment, connectingTunnels);
+        AddTunnel(playerTransform, segment, connectingTunnels, prevTunnel);
 
         Debug.Log("There are " + connectingTunnels.Count + " intersecting tunnels");
 
@@ -163,22 +164,34 @@ public class TunnelManager : Singleton<TunnelManager>
         }
     }
 
-    void AddTunnel(Transform playerTransform, SegmentGo segmentGo, List<GameObject> nextTunnels)
+    void AddTunnel(Transform playerTransform, SegmentGo segmentGo, List<GameObject> nextTunnels, GameObject prevTunnel)
 	{
 
         Corridor corridor = segmentGo.corridor;
         GameObject tunnel = segmentGo.getTunnel();
-
-        if (!TransformCreatedTunnelDict.ContainsKey(playerTransform))
-        {
-            TransformCreatedTunnelDict[playerTransform] = tunnel;
-        }
 
         Segment segment = SegmentManager.Instance.AddTunnelSegment(segmentGo, nextTunnels, corridor.ring, corridor.prevRing);
         AgentManager.Instance.InitTransformSegmentDict(playerTransform, segment);
 
         Debug.Log("Add segment to grid at position " + segment.getCenter());
         tunnelGrid.AddGameObject(segment.getCenter(), segmentGo.getTunnel());
+
+        if (prevTunnel != null)
+        {
+            RemovePrevTunnelCap(prevTunnel);
+        }
+    }
+
+    void RemovePrevTunnelCap(GameObject prevTunnel)
+    {
+        Segment prevSegment = SegmentManager.Instance.GetSegmentFromObject(prevTunnel);
+
+        if (prevSegment.hasEndCap())
+        {
+            SegmentGo segmentGo = prevSegment.segmentGo;
+            GameObject cap = segmentGo.cap;
+            Destroy(cap);
+        }
     }
 
     /// <summary>
@@ -193,7 +206,6 @@ public class TunnelManager : Singleton<TunnelManager>
 
 		if (UpdatedSegment != null) // if the player entered a new segment
 		{
-            TransformCreatedTunnelDict[playerTransform] = UpdatedSegment.tunnel;
             Debug.Log("Player has moved to a new segment " + UpdatedSegment.tunnel.name);
         }
         //else
@@ -202,20 +214,20 @@ public class TunnelManager : Singleton<TunnelManager>
         //}
     }
 
-	void ReplaceEndCap(Transform transform, GameObject endCap)
-	{
-		if (EndCapDict.ContainsKey(transform))
-		{
-			GameObject prevCap = EndCapDict[transform];
+	//void ReplaceEndCap(Transform transform, GameObject endCap)
+	//{
+	//	if (EndCapDict.ContainsKey(transform))
+	//	{
+	//		GameObject prevCap = EndCapDict[transform];
 
-			if(prevCap != null)
-			{
-                Destroy(prevCap);
-            }
-        }
+	//		if(prevCap != null)
+	//		{
+ //               Destroy(prevCap);
+ //           }
+ //       }
 
-		EndCapDict[transform] = endCap;
-	}
+	//	EndCapDict[transform] = endCap;
+	//}
 
     // Use this for initialization
     void Start()

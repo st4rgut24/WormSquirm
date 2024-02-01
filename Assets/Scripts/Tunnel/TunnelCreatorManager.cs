@@ -47,20 +47,11 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
     /// <param name="heading">The directional info of the tunnel</param>
 	void CreateAction(Transform playerTransform, bool extendsTunnel, Heading heading, Ring prevRing)
     {
-        //if (lastAction == TunnelActionManager.Action.Intersect)
-        //{
-        //    RingManager.Instance.Remove(playerTransform); // a new segment requires previous ring to be reset
-        //}
-
         GameObject prevSegment = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
         
         SegmentGo segmentGo = tunnelMaker.GrowTunnel(playerTransform, heading, prevRing);
 
-        //tunnelGrid.AddGameObject(heading.position, segmentGo.getTunnel());
-
         OnAddCreatedTunnel?.Invoke(playerTransform, segmentGo, prevSegment);
-
-        //TunnelManager.Instance.AddGameObjectSegment(playerTransform, segmentGo?.segment);
     }
 
     // Update is called once per frame
