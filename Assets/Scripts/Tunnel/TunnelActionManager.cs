@@ -129,14 +129,14 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
             if (prevRing == null) // initialize the previous Ring
             {
-                prevRing = RingManager.Instance.Create(playerTransform.forward, playerTransform.position);
+                prevRing = RingFactory.Create(playerTransform.forward, playerTransform.position);
             }
         }
         else
         {
             Heading playerHeading = new Heading(playerTransform.position, playerTransform.forward);
             Vector3 intersectionPoint = segment.GetIntersectionPoint(playerHeading);
-            prevRing = RingManager.Instance.Create(playerTransform.forward, intersectionPoint);
+            prevRing = RingFactory.Create(playerTransform.forward, intersectionPoint);
         }
 
         return prevRing;

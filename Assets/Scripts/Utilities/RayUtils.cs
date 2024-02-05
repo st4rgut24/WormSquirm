@@ -38,7 +38,7 @@ public class RayUtils
 
         while (currentRadius <= maxRadius)
         {
-            Ring ring = RingManager.Instance.Create(currentRadius, ringVertexCount, orientation, position, null);
+            Ring ring = RingFactory.Create(currentRadius, ringVertexCount, orientation, position, null);
 
             // Add the points to the overall list
             ringPoints.AddRange(ring.vertices);

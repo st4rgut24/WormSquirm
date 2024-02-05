@@ -7,6 +7,7 @@ public class Ring
 
     public Vector3[] vertices;
 
+    Vector3 normal;
     float radius;
     Vector3 center;
 
@@ -15,7 +16,7 @@ public class Ring
         this.radius = radius;
         this.vertices = new Vector3[vertexCount];
         this.center = center;
-
+        this.normal = normal;
 
         setVertices(vertexCount, normal, noiseScale);
     }
@@ -23,6 +24,11 @@ public class Ring
     public Vector3 GetCenter()
     {
         return center;
+    }
+
+    public Vector3 GetNormal()
+    {
+        return normal;
     }
 
     void setVertices(int vertexCount, Vector3 normal, float? noiseScale)

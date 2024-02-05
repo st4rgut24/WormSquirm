@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Net.NetworkInformation;
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.Collections.Generic;
+using System.Net.NetworkInformation;
 
 public struct OptionalMeshProps
 {
@@ -43,7 +44,9 @@ public class MeshObjectFactory
 
 		Mesh mesh;
 
-		switch (type)
+        Debug.Log("Testing");
+
+        switch (type)
 		{
 			case MeshType.EndCap:
 				mesh = CreateEndCapMesh(ring);
@@ -72,6 +75,7 @@ public class MeshObjectFactory
         return MeshObject;
 	}
 
+
     /// <summary>
     /// Create a Tunnel mesh
     /// </summary>
@@ -80,46 +84,105 @@ public class MeshObjectFactory
     /// <param name="props">Props about the tunnel</param>
     /// <returns>Mesh for the tunnel</returns>
 	private static Mesh CreateTunnelMesh(Transform transform, Ring ring, Ring prevRing, TunnelProps props)
-	{
+    {
         Mesh tunnelMesh = new Mesh();
 
-        Vector3[] vertices = prevRing.vertices.Concat(ring.vertices).ToArray();
+        //Vector3[] vertices = prevRing.vertices.Concat(ring.vertices).ToArray();
 
-        int tunnelSegments = props.TunnelSegments;
+        int verticesPerRing = ring.vertices.Length;
+        int verticesPerTriangle = 6;
+
+        //tunnelMesh.vertices = vertices;
+
+        List<Ring> rings = RingFactory.CreateRings(prevRing, ring);
+        int slices = rings.Count - 1;
+
+        if (verticesPerRing != props.TunnelSegments)
+        {
+            throw new Exception("vertex count per ring not equal to segment count");
+        }
+        if (slices < 1)
+        {
+            throw new Exception("cant create a tunnel with less than one slice");
+        }
+        Vector3[] vertices = new Vector3[rings.Count * verticesPerRing];
+        int[] triangles = new int[verticesPerTriangle * props.TunnelSegments * slices];
+
+        // build vertices
+        for (int r = 0; r < rings.Count; r++)
+        {
+            Ring offsetRing = rings[r];
+
+            int offset = r * verticesPerRing;
+
+            Array.Copy(offsetRing.vertices, 0, vertices, offset, verticesPerRing);
+        }
+
+        // build triangles
+        int ti = 0;
+
+        for (int r = 0; r < rings.Count - 1; r++)
+        {
+            Ring offsetRing = rings[r];
+
+            int offset = r * verticesPerRing;
+
+            int oppFaceOffset = offset + verticesPerRing; // vertex index offset for the first vertex on the opposite ring
+
+            // add a tunnel segment to the mesh between each pair of rings
+            CreateTunnelSlice(offset, oppFaceOffset, ref ti, triangles, verticesPerRing, verticesPerTriangle);
+        }
 
         tunnelMesh.vertices = vertices;
+        tunnelMesh.triangles = triangles;
 
-        int[] triangles = new int[6 * tunnelSegments];
+        return tunnelMesh;
+    }
 
-        for (int i = 0, ti = 0; i < tunnelSegments; i++, ti += 6)
+    /// <summary>
+    /// Create a segment of the tunnel
+    /// </summary>
+    /// <param name="offset">mesh vertex offset for this slice</param>
+    /// <param name="oppFaceOffset">offset for the starting vertex of the opposite ring of the slice</param>
+    /// <param name="ti">triangle vertex index</param>
+    /// <param name="triangles">triangles array for the mesh</param>
+    /// <param name="verticesPerRing">vertices per ring</param>
+    /// <param name="verticesPerTriangle">vertices per triangle</param>
+    private static void CreateTunnelSlice(int offset, int oppFaceOffset, ref int ti, int[] triangles, int verticesPerRing, int verticesPerTriangle)
+    {
+        for (int i = offset; i < oppFaceOffset; i++, ti += verticesPerTriangle)
         {
-            // last tunnel segment connects the first triangle to the last triangle
-            if (i == tunnelSegments - 1)
+            // last tunnel segment (rectangle) connects the first triangle to the last triangle
+            if (i == oppFaceOffset - 1)
             {
                 triangles[ti] = i;
-                triangles[ti + 1] = 0;
-                triangles[ti + 2] = tunnelSegments;
+                triangles[ti + 1] = offset;
+                triangles[ti + 2] = oppFaceOffset;
 
-                triangles[ti + 3] = tunnelSegments;
-                triangles[ti + 4] = i + tunnelSegments;
+                triangles[ti + 3] = oppFaceOffset;
+                triangles[ti + 4] = i + verticesPerRing;
                 triangles[ti + 5] = i;
             }
             else
             {
                 triangles[ti] = i;
                 triangles[ti + 1] = i + 1;
-                triangles[ti + 2] = i + tunnelSegments;
+                triangles[ti + 2] = i + verticesPerRing;
 
                 triangles[ti + 3] = i + 1;
-                triangles[ti + 4] = i + tunnelSegments + 1;
-                triangles[ti + 5] = i + tunnelSegments;
+                triangles[ti + 4] = i + verticesPerRing + 1;
+                triangles[ti + 5] = i + verticesPerRing;
             }
         }
-        tunnelMesh.triangles = triangles;
+    }
 
-        RingManager.Instance.UpdateEntry(transform, ring);
+    /// <summary>
+    /// Add a segment to a tunnel mesh, defined as the faces between two rings
+    /// </summary>
+    private static void AddTunnelMeshSegment(Ring startRing, Ring endRing, Vector3[] vertices, int[] triangles)
+    {
+        vertices = vertices.Concat(endRing.vertices).ToArray();
 
-        return tunnelMesh;
     }
 
     /// <summary>

@@ -9,6 +9,13 @@ public class MeshUtils
         return mesh.triangles.Reverse().ToArray();
     }
 
+    public static float GetSideLength(int sides, float radius)
+    {
+        float angleInRadians = Mathf.PI / sides;
+        float sideLength = 2 * radius * Mathf.Sin(angleInRadians);
+        return sideLength;
+    }
+
     public static void InvertFaces(Mesh mesh)
     {
         Vector3[] normals = mesh.normals;

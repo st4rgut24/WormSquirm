@@ -51,7 +51,7 @@ public class TunnelMake: MonoBehaviour
 
     private SegmentGo CreateSegment(Vector3 direction, Vector3 position, Transform playerTransform, Ring prevRing)
     {
-        Ring endRing = RingManager.Instance.Create(direction, position);
+        Ring endRing = RingFactory.Create(direction, position);
         //Ring prevRing = RingManager.Instance.Get(playerTransform);
 
         OptionalMeshProps meshProps = new OptionalMeshProps(playerTransform, prevRing, _props);
@@ -76,8 +76,7 @@ public class TunnelMake: MonoBehaviour
     private Ring InitTunnel(Vector3 direction, Transform playerTransform)
     {
         // the first ring should use player position to connect to the next ring with offset
-        Ring ring = RingManager.Instance.Create(direction, playerTransform.position);
-        RingManager.Instance.Add(playerTransform, ring); // update normal vector
+        Ring ring = RingFactory.Create(direction, playerTransform.position);
 
         return ring;
     }
