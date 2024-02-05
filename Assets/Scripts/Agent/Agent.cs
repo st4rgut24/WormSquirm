@@ -45,11 +45,13 @@ public class Agent : MonoBehaviour
         {
             isLookInProgress = Rotate(lookRotation, continuousRotateSpeed);
         }
+        // check if player's rotation changes based on direction within tunnel
         else if (curSegment != null && !DirectionUtils.isDirectionsAligned(transform.forward, curSegmentForward)) // for ex. if player has turned around in the current tunnel
         {
             // if traveling to the other end of the segment, update the segment forward vector
             curSegmentForward = -curSegmentForward;
-            Vector3 verticalRotate = DirectionUtils.GetUpDownRotation(transform.forward, curSegment.forward);
+            float xRot = DirectionUtils.GetUpDownRotation(transform.forward, curSegment.forward);
+            Vector3 verticalRotate = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
             ChangeRotation(verticalRotate, true);
         }
     }
@@ -124,17 +126,17 @@ public class Agent : MonoBehaviour
     /// <summary>
     /// Change the target rotation
     /// </summary>
-    /// <param name="rotation">the target rotation that sets rotation along the non-zero axes</param>
+    /// <param name="targetRotation">the target rotation that sets rotation along the non-zero axes</param>
     /// <param name="isContinuous">Will this rotation happen over multiple frames</param>
-    public void ChangeRotation(Vector3 rotation, bool isContinuous)
+    public void ChangeRotation(Vector3 targetRotation, bool isContinuous)
     {
         if (isLookInProgress)
         {
-            //Debug.Log("Look Rotation blocked because another look is in progress");
+            Debug.Log("Look Rotation blocked because another look is in progress");
             return;
         }
 
-        Vector3 targetRotation = SetLookRotation(rotation);
+        lookRotation = targetRotation;
 
         //Debug.Log("Look Rotation change to " + targetRotation);
 
@@ -146,30 +148,6 @@ public class Agent : MonoBehaviour
         {
             Rotate(lookRotation, rotationSpeed); // do a rotation in a single frame
         }
-    }
-
-    /// <summary>
-    /// Set the target rotation
-    /// </summary>
-    /// <param name="rotation">the non-zero values indicate target angles for respectives axes</param>
-    public Vector3 SetLookRotation(Vector3 rotation)
-    {
-        lookRotation = transform.eulerAngles;
-
-        if (rotation.x != 0)
-        {
-            lookRotation.x = rotation.x;
-        }
-        if (rotation.y != 0)
-        {
-            lookRotation.y = rotation.y;
-        }
-        if (rotation.z != 0)
-        {
-            lookRotation.z = rotation.z;
-        }
-
-        return lookRotation;
     }
 
     protected void notifyDig(Vector3 digDirection)

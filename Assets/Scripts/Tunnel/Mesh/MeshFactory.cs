@@ -97,7 +97,7 @@ public class MeshObjectFactory
         List<Ring> rings = RingFactory.CreateRings(prevRing, ring);
         int slices = rings.Count - 1;
 
-        if (verticesPerRing != props.TunnelSegments)
+        if (verticesPerRing != props.TunnelSides)
         {
             throw new Exception("vertex count per ring not equal to segment count");
         }
@@ -106,7 +106,7 @@ public class MeshObjectFactory
             throw new Exception("cant create a tunnel with less than one slice");
         }
         Vector3[] vertices = new Vector3[rings.Count * verticesPerRing];
-        int[] triangles = new int[verticesPerTriangle * props.TunnelSegments * slices];
+        int[] triangles = new int[verticesPerTriangle * props.TunnelSides * slices];
 
         // build vertices
         for (int r = 0; r < rings.Count; r++)

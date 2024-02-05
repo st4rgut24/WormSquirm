@@ -14,6 +14,7 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 
     public int rayRings = 3; // The bigger this number is, the smaller the interval
     public int offsetMultiple = 3; // How many units the intersection ray should be offset from the intersecting faces
+    public float intersectBuffer = .25f;
 
     TunnelMake tunnelMaker;
     Grid tunnelGrid;
@@ -41,7 +42,7 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
         _props = TunnelManager.Instance.defaultProps;
         _rayInterval = Mathf.FloorToInt(_props.TunnelRadius / rayRings);
 
-        _ringVertices = _props.TunnelSegments + 5;
+        _ringVertices = _props.TunnelSides + 5;
         _holeRadius = _props.TunnelRadius / 2;
     }
 
@@ -90,8 +91,8 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
         // TODO: Removing this line may be a bad idea, but previous tunnel may also be intersected as a result of creating a bisecting tunnel out of the current segment
         //otherTunnels.Remove(prevTunnel); // adjoining segment does not count as intersected object
 
-        List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment.getTunnel(), otherTunnels);
-
+        List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment.getTunnel(), otherTunnels, intersectBuffer);
+        //Debug.Log("intersected tunnels count " + intersectedTunnels.Count);
         List<GameObject> deletedTunnels = new List<GameObject>();
 
         intersectedTunnels.ForEach((tunnel) =>

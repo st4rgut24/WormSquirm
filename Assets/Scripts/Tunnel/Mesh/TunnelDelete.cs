@@ -85,7 +85,7 @@ public class TunnelDelete
         {
              if (hit.collider.gameObject == tunnel) // if tunnel was the hit gameobject, then add the triangle to removal set
             {
-                //Debug.DrawRay(ray.origin, ray.direction * 6f, Color.red, 100.0f);
+                Debug.DrawRay(ray.origin, ray.direction * 6f, Color.red, 100.0f);
                 //Debug.Log("Remove the triangle from Tunnel " + tunnel.name + " at index " + hit.triangleIndex);
                 removalIdxSet.Add(hit.triangleIndex);
             }

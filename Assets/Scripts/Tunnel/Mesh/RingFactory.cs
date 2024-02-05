@@ -16,7 +16,7 @@ public class RingFactory: MonoBehaviour
 
     public static Ring Create(Vector3 direction, Vector3 position)
     {
-        return new Ring(_props.TunnelRadius, _props.TunnelSegments, direction, position, _props.NoiseScale);
+        return new Ring(_props.TunnelRadius, _props.TunnelSides, direction, position, _props.NoiseScale);
     }
 
     public static Ring Create(float radius, int segments, Vector3 direction, Vector3 position, float? noiseScale)
@@ -35,7 +35,7 @@ public class RingFactory: MonoBehaviour
         List<Ring> rings = new List<Ring>() { startRing };
 
         Vector3 startCenter = startRing.GetCenter();
-        Vector3 dir = startRing.GetNormal();
+        Vector3 dir = (endRing.GetCenter() - startRing.GetCenter()).normalized;
 
         float dist = Vector3.Distance(endRing.GetCenter(), startCenter);
 

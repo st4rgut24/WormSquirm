@@ -5,31 +5,42 @@ using UnityEngine;
 
 public class TunnelUtils
 {
+    private static Bounds GetAdjustedBounds(GameObject tunnelGo, float buffer)
+    {
+        Bounds originalBounds = tunnelGo.GetComponent<Renderer>().bounds;
+        // Adjust the bounds with the buffer value
+        Vector3 sizeWithBuffer = originalBounds.size + new Vector3(buffer, buffer, buffer) * 2f;
+        Bounds adjustedBounds = new Bounds(originalBounds.center, sizeWithBuffer);
+
+        return adjustedBounds;
+    }
+
     /// <summary>
     /// Get an intersecting list of gameObjects using bounds
     /// </summary>
     /// <param name="targetObject">the object we are testing intersects</param>
     /// <param name="objectList">list of objects we are testing intersects</param>
+    /// <param name="intersectBuffer">buffer to adjust bounds of intersecting objects</param>
     /// <returns></returns>
-    public static List<GameObject> GetIntersectedObjects(GameObject targetObject, List<GameObject> objectList)
+    public static List<GameObject> GetIntersectedObjects(GameObject targetObject, List<GameObject> objectList, float intersectBuffer = 0)
     {
         List<GameObject> intersectingObjects = new List<GameObject>();
 
-        Bounds targetBounds = targetObject.GetComponent<Renderer>().bounds;
+        Bounds targetBounds = GetAdjustedBounds(targetObject, intersectBuffer);
 
         foreach (GameObject otherObject in objectList)
         {
             if (otherObject != null && otherObject != targetObject) // Ensure the GameObject in the list is not null
             {
-                Bounds otherBounds = otherObject.GetComponent<Renderer>().bounds;
+                Bounds otherBounds = GetAdjustedBounds(otherObject, intersectBuffer);
 
                 if (targetBounds.Intersects(otherBounds)) // consider using Contains() instead and passing in the targetPosition?
                 {
-                         intersectingObjects.Add(otherObject); // Bounds intersect with at least one GameObject in the list
+                    intersectingObjects.Add(otherObject); // Bounds intersect with at least one GameObject in the list
                 }
                 else
                 {
-                    // Debug.Log("segment " + targetObject.name + " does not intersect object " + otherObject.name);
+                     Debug.Log("segment " + targetObject.name + " does not intersect object " + otherObject.name);
                 }
             }
         }
@@ -122,7 +133,7 @@ public class TunnelUtils
 
         Ray ray = new Ray(transform.position, transform.forward);
 
-        Debug.DrawRay(ray.origin, ray.direction * GameManager.Instance.agentOffset, Color.green, 100.0f);
+        //Debug.DrawRay(ray.origin, ray.direction * GameManager.Instance.agentOffset, Color.green, 100.0f);
         bool didHit = Physics.Raycast(ray.origin, ray.direction, out hit, GameManager.Instance.agentOffset);
 
         ComponentUtils.removeBoxColliders(objectList);

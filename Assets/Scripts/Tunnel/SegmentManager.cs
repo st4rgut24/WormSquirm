@@ -35,8 +35,15 @@ public class SegmentManager : Singleton<SegmentManager>
         if (!curSegment.ContainsTransform(transform)) // another tunnel that is closer than the current tunnel
         {
             UpdatedSegment = GetEnclosingSegment(curSegment, transform);
-            Debug.Log("Player has moved to the new segment " + UpdatedSegment.tunnel.name);
-            OnEnterNewSegment?.Invoke(transform, UpdatedSegment);
+            if (UpdatedSegment != null)
+            {
+                Debug.Log("Player has moved to the new segment " + UpdatedSegment.tunnel.name);
+                OnEnterNewSegment?.Invoke(transform, UpdatedSegment);
+            }
+            else
+            {
+                Debug.LogWarning("Player has not been detected in current segment or any adjoining segments. Default to current segment " + curSegment.tunnel.name);
+            }
         }
 
         return UpdatedSegment;
@@ -157,7 +164,7 @@ public class SegmentManager : Singleton<SegmentManager>
         bool isEndRingCloser = Vector3.Distance(intersectingEndRing, closestPointToEndRing) < Vector3.Distance(intersectingStartRing, closestPointToStartRing);
         Guideline intersectingGuideline = isEndRingCloser ? new Guideline(closestPointToEndRing, intersectingEndRing) : new Guideline(closestPointToStartRing, intersectingStartRing);
 
-        //Debug.DrawRay(intersectingGuideline.start, intersectingGuideline.end - intersectingGuideline.start, Color.green, 100);
+        Debug.DrawRay(intersectingGuideline.start, intersectingGuideline.end - intersectingGuideline.start, Color.blue, 100);
         intersectedSegment.AddGuideline(intersectingGuideline);
     }
 

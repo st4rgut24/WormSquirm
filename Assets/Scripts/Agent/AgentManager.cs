@@ -68,10 +68,10 @@ public class AgentManager : Singleton<AgentManager>
         //    movedAgent.ChangeMovement(controlledMoveDest, true, 1);
         //}
 
-
-        Vector3 upDownRotation = DirectionUtils.GetUpDownRotation(transform.forward, movedAgent.curSegmentForward);
-        movedAgent.ChangeRotation(upDownRotation, true);
-
+        float xRot = DirectionUtils.GetUpDownRotation(transform.forward, movedAgent.curSegmentForward);
+        Vector3 rotation = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
+        movedAgent.ChangeRotation(rotation, true);
+        Debug.Log("Enter new segment " + segment.tunnel.name + ". Target rotation is " + rotation);
         TransformSegmentDict[transform] = segment;
     }
 

@@ -41,13 +41,14 @@ public class DirectionUtils
     /// <param name="transformForward">player's forward direction</param>
     /// <param name="segmentForward">segment's forward direction</param>
     /// <returns>rotation along the x axis (up,down) from player perspsective</returns>
-    public static Vector3 GetUpDownRotation(Vector3 transformForward, Vector3 segmentForward)
+    public static float GetUpDownRotation(Vector3 transformForward, Vector3 segmentForward)
     {
-        float angle = Vector3.Angle(transformForward, segmentForward);
         Vector3 direction = isDirectionsAligned(transformForward, segmentForward) ? segmentForward : -segmentForward; // go opposite direction of segment if facing in that general direction
         //Debug.Log("Angle between player and segment forward is " + angle + " Direction in new segment is " + direction);
+        Quaternion curRotation = Quaternion.LookRotation(direction);
         Quaternion rotation = Quaternion.LookRotation(direction);
-        return new Vector3(rotation.eulerAngles.x, 0, 0);
+        //return new Vector3(rotation.eulerAngles.x, 0, 0);
+        return rotation.eulerAngles.x;
     }
 }
 

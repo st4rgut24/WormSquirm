@@ -32,7 +32,7 @@ public class TunnelManager : Singleton<TunnelManager>
 
     public const float tunnelRadius = 5.13f;
 
-	const int tunnelSegments = 7;
+	const int tunnelSides = 8;
     const float segmentSpacing = 1.33f;
     const float noiseScale = .8f;
 
@@ -46,7 +46,7 @@ public class TunnelManager : Singleton<TunnelManager>
 
     private void Awake()
     {
-        defaultProps = new TunnelProps(tunnelSegments, segmentSpacing, tunnelRadius, noiseScale);
+        defaultProps = new TunnelProps(tunnelSides, segmentSpacing, tunnelRadius, noiseScale);
 
 		//EndCapDict = new Dictionary<Transform, GameObject>();
         IntersectedTunnelDict = new Dictionary<GameObject, List<GameObject>>();

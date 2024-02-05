@@ -150,7 +150,7 @@ public class Controller
     public void Rotate(Vector3 rawInput)
     {
         float angle = GetAngleFromInput(rawInput);
-        Vector3 sideToSideRotation = new Vector3(0, transform.eulerAngles.y + angle, 0);
+        Vector3 sideToSideRotation = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y + angle, transform.eulerAngles.z);
         changeRotation(sideToSideRotation, false); 
     }
 }
