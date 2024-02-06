@@ -13,7 +13,7 @@ public class SearchUtils
 	/// <returns>list of tunnels within search radius</returns>
 	public static List<GameObject> bfsSegments(Segment startSegment, int n)
 	{
-        List<GameObject> adjacentSegments = new List<GameObject>();
+        List<GameObject> adjacentSegments = new List<GameObject>() { startSegment.tunnel }; // current segment is proximal to itself
 
         Queue<Segment> queue = new Queue<Segment>();
         HashSet<Segment> visited = new HashSet<Segment>();

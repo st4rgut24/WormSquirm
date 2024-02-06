@@ -34,7 +34,7 @@ public class Segment
 
         this.guidelineList = new List<Guideline>();
         centerLine = new Guideline(this.startRingCenter, this.endRingCenter);
-        //Debug.DrawRay(centerLine.start, centerLine.end - centerLine.start, Color.green, 100);
+        Debug.DrawRay(centerLine.start, centerLine.end - centerLine.start, Color.green, 300);
 
         this.guidelineList.Add(centerLine);
     }
@@ -182,7 +182,7 @@ public class Segment
         }
         float dist = GetClosestDistance(position);
 
-        //Debug.Log("In Tunnel " + tunnel.name + ". Distance to center line is " + dist + ". Should be less than " + SegmentManager.Instance.MinDistFromCenterLine);
+        Debug.Log("In Tunnel " + tunnel.name + ". Distance to center line is " + dist + ". Should be less than " + SegmentManager.Instance.MinDistFromCenterLine);
         return dist >= SegmentManager.Instance.MinDistFromCenterLine; // divide by 2 because the moveable area is smaller on bottom plane of the tunnel
     }
 

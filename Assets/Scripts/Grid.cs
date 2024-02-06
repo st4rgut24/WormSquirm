@@ -7,7 +7,7 @@ public class Grid
 
     public int unitsPerCell; 
 
-    int searchBuffer;        // number of adjoining cells need to check due to uncertainty
+    const int searchBuffer = 3;        // number of adjoining cells need to check due to uncertainty
                              // of gameobject size
 
     private List<GameObject>[,,] grid;
@@ -20,16 +20,9 @@ public class Grid
     public Grid(int unitsPerCell, int maxDimSize) {
 
         this.unitsPerCell = unitsPerCell;
-        this.searchBuffer = getSearchBuffer(maxDimSize, unitsPerCell);
 
         this.dimension = getDimension();
         grid = new List<GameObject>[this.dimension.x, this.dimension.y, this.dimension.z];
-    }
-
-
-    int getSearchBuffer(int maxDimSize, int unitsPerCell)
-    {
-        return Mathf.FloorToInt(maxDimSize / this.unitsPerCell) + 2;
     }
 
     Vector3Int ConvertWorldPosToGridPos(Vector3 worldPos)
@@ -66,7 +59,7 @@ public class Grid
         {
             grid[cellPos.x, cellPos.y, cellPos.z] = new List<GameObject>();
         }
-        //Debug.Log("Save gameobject " + go.name + " with world pos " + pos + " to cell position " + cellPos);
+        Debug.Log("Save gameobject " + go.name + " with world pos " + pos + " to cell position " + cellPos);
         grid[cellPos.x, cellPos.y, cellPos.z].Add(go);
     }
 
@@ -95,13 +88,13 @@ public class Grid
          
         Vector3Int cellPos = ConvertWorldPosToGridPos(worldPos);
 
-        //Debug.Log("Get GameObjects at cell position " + cellPos + " world Pos " + worldPos);
+        Debug.Log("Get GameObjects at cell position " + cellPos + " world Pos " + worldPos);
 
         int x = cellPos.x;
         int y = cellPos.y;
         int z = cellPos.z;
 
-        int buffer = this.searchBuffer * searchMultiplier;
+        int buffer = searchBuffer * searchMultiplier;
 
         // Iterate through the cells in the specified buffer around the indexed cell
         for (int i = x - buffer; i <= x + buffer; i++)

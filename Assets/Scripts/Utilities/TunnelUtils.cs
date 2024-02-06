@@ -133,13 +133,13 @@ public class TunnelUtils
 
         Ray ray = new Ray(transform.position, transform.forward);
 
-        //Debug.DrawRay(ray.origin, ray.direction * GameManager.Instance.agentOffset, Color.green, 100.0f);
         bool didHit = Physics.Raycast(ray.origin, ray.direction, out hit, GameManager.Instance.agentOffset);
 
         ComponentUtils.removeBoxColliders(objectList);
 
         if (didHit)
         {
+            Debug.DrawRay(ray.origin, ray.direction * GameManager.Instance.agentOffset, Color.cyan, 200.0f);
             return new HitInfo(hit.collider.gameObject, hit.point);
         }
         else

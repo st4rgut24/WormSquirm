@@ -75,7 +75,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     public bool CreateTunnel(Transform playerTransform, Heading TunnelHeading)
     {
         bool extendsTunnel = SegmentManager.Instance.IsExtendingTunnel(playerTransform);
-
+        Debug.Log("is extending tunnel");
         List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(TunnelHeading.position, 1);
 
         HitInfo hitInfo = TunnelUtils.getHitObject(playerTransform, otherTunnels);
@@ -103,7 +103,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
             }
             else
             {
-                Debug.Log("Tunnel Action Create");
+                Debug.Log("TunnelAction Create");
                 OnCreateTunnel?.Invoke(playerTransform, extendsTunnel, TunnelHeading, prevRing);
             }
 
