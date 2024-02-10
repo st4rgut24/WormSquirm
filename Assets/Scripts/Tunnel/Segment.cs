@@ -119,6 +119,7 @@ public class Segment
     /// <returns>point of intersection</returns>
     public Vector3 GetIntersectionPoint(Heading heading)
     {
+        // TODO: add mesh collider here, find where the mesh is intersected using Physics.Raycast
         Vector3 centerPoint = GetClosestPointToCenterline(heading.position);
         Vector3 edgePoint = centerPoint + heading.forward.normalized * TunnelManager.tunnelRadius;
 

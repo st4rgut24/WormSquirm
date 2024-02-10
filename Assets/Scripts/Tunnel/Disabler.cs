@@ -7,7 +7,9 @@ using System.Collections.Generic;
 /// </summary>
 public class Disabler
 {
-	Dictionary<Transform, List<GameObject>> ProximalObjectDict;
+    public static event Action<List<GameObject>> OnDisableTunnels;
+
+	public Dictionary<Transform, List<GameObject>> ProximalObjectDict;
     int enabledCount;
 
 	public Disabler(int enabledCount)
@@ -28,10 +30,8 @@ public class Disabler
             return;
         }
 
+        List<GameObject> disabledTunnels = new List<GameObject>();
         List<GameObject> proximalObjects = SearchUtils.bfsSegments(segment, this.enabledCount);
-
-        //List<GameObject> proximalObjects = grid.GetGameObjects(transform.position, this.searchMultiplier);
-
         List<GameObject> previousProximalObjects = ProximalObjectDict.ContainsKey(transform) ? ProximalObjectDict[transform] : new List<GameObject>();
 
         // Disable objects that are no longer proximal
@@ -39,6 +39,7 @@ public class Disabler
         {
             if (!proximalObjects.Contains(previousObject))
             {
+                disabledTunnels.Add(previousObject);
                 previousObject.SetActive(false);
             }
         }
@@ -54,6 +55,9 @@ public class Disabler
 
         // Update the previousProximalObjects list
         ProximalObjectDict[transform] = proximalObjects;
+
+        // emit event about disabled tunnel
+        OnDisableTunnels?.Invoke(disabledTunnels);
     }
 }
 

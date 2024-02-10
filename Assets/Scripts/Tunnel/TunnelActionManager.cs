@@ -96,7 +96,6 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
             if (isIntersecting) // intersect
             {
-
                 Debug.Log("TunnelAction Intersect");
                 GameObject prevSegment = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
                 OnIntersectTunnel?.Invoke(playerTransform, prevSegment, TunnelHeading, extendsTunnel, prevRing, hitInfo);
@@ -106,7 +105,6 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
                 Debug.Log("TunnelAction Create");
                 OnCreateTunnel?.Invoke(playerTransform, extendsTunnel, TunnelHeading, prevRing);
             }
-
             return true;
         }
     }
@@ -136,6 +134,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         {
             Heading playerHeading = new Heading(playerTransform.position, playerTransform.forward);
             Vector3 intersectionPoint = segment.GetIntersectionPoint(playerHeading);
+            Debug.Log("intersection point is " + intersectionPoint);
             prevRing = RingFactory.Create(playerTransform.forward, intersectionPoint);
         }
 

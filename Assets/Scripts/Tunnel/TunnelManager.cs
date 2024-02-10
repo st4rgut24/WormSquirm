@@ -34,7 +34,9 @@ public class TunnelManager : Singleton<TunnelManager>
 
 	const int tunnelSides = 8;
     const float segmentSpacing = 1.33f;
-    const float noiseScale = .8f;
+    // issue with noiseScale != 0: dist from center line to ring edge should be constant to
+    // avoid any error when calculating tunnel edges
+    const float noiseScale = 0;
 
     private void OnEnable()
     {
@@ -51,6 +53,24 @@ public class TunnelManager : Singleton<TunnelManager>
 		//EndCapDict = new Dictionary<Transform, GameObject>();
         IntersectedTunnelDict = new Dictionary<GameObject, List<GameObject>>();
         tunnelDisabler = new Disabler(5);
+    }
+
+    /// <summary>
+    /// Get tunnels near to player
+    /// </summary>
+    /// <param name="playerTransform">the player</param>
+    /// <returns></returns>
+    /// <exception cref="Exception">if no tunnels found near player</exception>
+    public List<GameObject> GetProximalTunnels(Transform playerTransform)
+    {
+        if (tunnelDisabler.ProximalObjectDict.ContainsKey(playerTransform))
+        {
+            return tunnelDisabler.ProximalObjectDict[playerTransform];
+        }
+        else
+        {
+            throw new Exception("No tunnels corresponding to player transform " + playerTransform);
+        }
     }
 
 	public GameObject GetGameObjectTunnel(Transform playerTransform)

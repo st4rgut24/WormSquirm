@@ -18,6 +18,7 @@ public class Ring
         this.center = center;
         this.normal = normal;
 
+        Debug.Log("Center is " + center);
         setVertices(vertexCount, normal, noiseScale);
     }
 

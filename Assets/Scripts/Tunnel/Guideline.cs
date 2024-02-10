@@ -9,10 +9,14 @@ public class Guideline
 	public Vector3 start;
 	public Vector3 end;
 
+    public Vector3 direction;
+
 	public Guideline(Vector3 start, Vector3 end)
 	{
 		this.start = start;
 		this.end = end;
+
+        this.direction = this.end - this.start;
 	}
 
     /// <summary>
@@ -39,6 +43,7 @@ public class Guideline
         // Calculate the closest point on the line segment
         Vector3 closestPoint = start + t * line;
 
+        Debug.Log("Closest point is " + closestPoint);
         return closestPoint;
     }
 }

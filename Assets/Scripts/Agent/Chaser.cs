@@ -9,6 +9,12 @@ public class Chaser : Bot
         Random
     }
 
+    protected override void Awake()
+    {
+        botType = BotManager.BotType.Chaser;
+        base.Awake();
+    }
+
     protected override void Start()
     {
         base.Start();
@@ -40,6 +46,12 @@ public class Chaser : Bot
     protected override void SetObjective()
     {
         objective = ChooseTarget(ChooseStrategy.Random);
+    }
+
+    protected override void ReachDestination()
+    {
+        SetObjective();
+        BotManager.SetBotRoute(this);
     }
 }
 

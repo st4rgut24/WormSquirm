@@ -9,22 +9,32 @@ public class Route
 {
     int waypointIdx = -1; // the index of the waypoint along the route the user is currently traversing
 
-    public List<Vector3> waypoints;
+    public List<Waypoint> waypoints;
 
     public class MiniRoute
 	{
+        public Segment startSegment;
+        public Segment endSegment;
+
         public Vector3 start;
         public Vector3 end;
-        public bool isFinalWaypoint;
 
-		public MiniRoute(List<Vector3> waypoints, int waypointIdx)
+		public bool isFinalWaypoint;
+
+		public MiniRoute(List<Waypoint> waypoints, int waypointIdx)
 		{
 			if (waypointIdx + 1 < waypoints.Count)
 			{
-                this.start = waypoints[waypointIdx];
-                this.end = waypoints[waypointIdx + 1];
+				Waypoint startWaypoint = waypoints[waypointIdx];
+				Waypoint endWaypoint = waypoints[waypointIdx + 1];
 
-				isFinalWaypoint = waypointIdx + 1 == waypoints.Count - 1; // if true, this is the last stop to complete the overall Route
+                this.start = startWaypoint.position;
+                this.end = endWaypoint.position;
+
+				this.startSegment = startWaypoint.segment;
+				this.endSegment = endWaypoint.segment;
+
+                isFinalWaypoint = waypointIdx + 1 == waypoints.Count - 1; // if true, this is the last stop to complete the overall Route
             }
 			else
 			{
@@ -35,19 +45,34 @@ public class Route
 
 	public Route()
 	{
-		waypoints = new List<Vector3>();
+		waypoints = new List<Waypoint>();
 	}
 
-	public void AddWaypoint(Vector3 wp)
+	public Segment GetInitSegment()
 	{
-		waypoints.Add(wp);
+		if (waypoints.Count > 0)
+		{
+			return waypoints[0].segment;
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	public void AddWaypoint(Waypoint waypoint)
+	{
+		//waypoints.Insert(0, wp); // waypoints are added in reverse order from end to start
+		waypoints.Add(waypoint);
 	}
 
 	public Vector3 getDestination()
 	{
 		if (waypoints.Count > 0)
 		{
-			return waypoints[waypoints.Count - 1];
+			Waypoint waypoint = waypoints[waypoints.Count - 1];
+
+			return waypoint.position;
 		}
 		else
 		{

@@ -1,13 +1,17 @@
+using System;
 using UnityEngine;
 
 public abstract class Bot : Agent
 {
+    // TODO: how to set the current segment of a bot. should we do it the same way as player agent or use the route waypoints to update less frequently?
+    public BotManager.BotType botType;
+
     public Transform objective;
 
     protected Vector3 startLocation = DefaultUtils.DefaultVector3;
     protected Vector3 endLocation;
 
-    public float velocity = .5f; // Configurable velocity
+    public float velocity = .00001f; // Configurable velocity
 
     protected float startTime;
 
@@ -17,7 +21,9 @@ public abstract class Bot : Agent
 
     protected abstract void SetObjective();
 
-    private void Awake()
+    protected abstract void ReachDestination();
+
+    protected virtual void Awake()
     {
         reachedDestination = true;
         SetObjective();
@@ -62,6 +68,13 @@ public abstract class Bot : Agent
     {
         base.Start();
         startTime = Time.time;
+
+        Segment initSegment = this.route.GetInitSegment();
+
+        if (initSegment != null)
+        {
+            AgentManager.Instance.InitTransformSegmentDict(transform, initSegment);
+        }
     }
 
     private void FixedUpdate()
@@ -69,22 +82,37 @@ public abstract class Bot : Agent
         if (transform.position == endLocation) // reached destination
         {
             Route.MiniRoute miniRoute = route.GetMiniRoute();
+
+            if (miniRoute.endSegment != null)
+            {
+                UpdateSegment(miniRoute.endSegment);
+            }
+
+            //Vector3 rayDir = miniRoute.end - miniRoute.start;
+            //Debug.DrawRay(miniRoute.start, rayDir, Color.red);
+
             if (miniRoute.isFinalWaypoint)
             {
-                //Debug.Log("Reached final waypoint");
-                // emit event signalling Bot has reached destination, so it can be assigned a new destination
+                Debug.Log("Reached final waypoint");
+                ReachDestination();
             }
             else
             {
                 setNextDestination();
             }
 
-            notifyDig(transform.forward);
+            // for now bots can't dig
+            //notifyDig(transform.forward);
         }
         else
         {
             Move();
         }
+    }
+
+    public void Destroy()
+    {
+        GameObject.Destroy(gameObject);
     }
 
     private void Move()

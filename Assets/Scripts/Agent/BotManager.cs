@@ -13,7 +13,7 @@ public class BotManager : AgentManager
 
     public int maxBots = 1; // the upper limit of active Bots in the game
     
-    public float spawnFrequency = 1; // the interval between Bot spawns
+    public float spawnFrequency = 15; // the interval between Bot spawns
 
     public Transform SimpStartBlock;
 
@@ -30,6 +30,11 @@ public class BotManager : AgentManager
 
     public int spawnDistance = 13; // number of segments away from the player the bot should spawns
 
+    private void OnEnable()
+    {
+        Disabler.OnDisableTunnels += OnTunnelDisabled;
+    }
+
     protected override void Awake()
     {
         base.Awake();
@@ -43,7 +48,49 @@ public class BotManager : AgentManager
         StartCoroutine(SpawnAtInterval());
     }
 
+    public void OnTunnelDisabled(List<GameObject> disabledTunnels)
+    {
+        // remove bots that are within the disabled tunnels
+        bots.ForEach((bot) =>
+        {
+            GameObject botTunnel = bot.curSegment.tunnel;
+            disabledTunnels.ForEach((tunnel) => // check if bot's tunnel is one of the disabled tunnels
+            {
+                if (botTunnel == tunnel)
+                {
+                    RemoveBot(bot);
+                }
+            });
+        });
+    }
 
+    /// <summary>
+    /// Removes all references to the bot
+    /// </summary>
+    /// <param name="bot">the bot to remove</param>
+    public void RemoveBot(Bot bot)
+    {
+        bots.Remove(bot);
+        Transform botObjective = bot.objective;
+
+        if (ChasingDict.ContainsKey(botObjective))
+        {
+            ChasingDict[botObjective].Remove(bot);
+        }
+
+        bot.Destroy();
+    }
+
+    /// <summary>
+    /// For testing chasing
+    /// </summary>
+    public void SpawnChaser()
+    {
+        GameObject Bot = CreateAgent(Chaser);
+        Bot bot = Bot.GetComponent<Bot>();
+        SetBotRoute(bot);
+        bots.Add(bot);
+    }
 
     GameObject Spawn(BotType type)
     {
@@ -67,15 +114,17 @@ public class BotManager : AgentManager
         {
             if (bots.Count <  maxBots)
             {
-                //GameObject botGo = Spawn(BotType.Chaser);
-                GameObject botGo = Spawn(BotType.Simp);
+                BotType type = bots.Count == 0 ? BotType.Simp : BotType.Chaser;
+                Debug.Log("Spawn bot of type " + type);
+                GameObject botGo = Spawn(type);
                 Bot bot = botGo.GetComponent<Bot>();
 
                 try
                 {
                     //Route route = GetBotRoute(bot.objective, RouteStrat.FollowSegment);
-                    Route route = GetBotRoute(bot.objective, RouteStrat.StraightPath);
-                    bot.setRoute(route);
+                    SetBotRoute(bot);
+                    //Route route = GetBotRoute(bot.objective, RouteStrat.StraightPath);
+                    //bot.setRoute(route);
                     bots.Add(bot);
                 }
                 catch (System.Exception error)
@@ -93,21 +142,24 @@ public class BotManager : AgentManager
     }
 
     /// <summary>
-    /// Define behavior when the bot has reached its route
-    /// </summary>
-    /// <param name="bot">the bot</param>
-    public void OnReachedRoute(Bot bot)
-    {
-        Debug.Log("Reached Route!!! Now what should I do?");
-    }
-
-    /// <summary>
     /// Give the Bot an initial destination 
     /// </summary>
     /// <param name="bot">the bot</param>
-    Route GetBotRoute(Transform targetTransform, RouteStrat strat)
+    public static void SetBotRoute(Bot bot)
     {
-        return RouteFactory.Get(strat, targetTransform);
+        RouteStrat strat;
+
+        if (bot.botType == BotType.Simp)
+        {
+            strat = RouteStrat.StraightPath;
+        }
+        else // (bot.botType == BotType.Chaser)
+        {
+            strat = RouteStrat.FollowSegment;
+        }
+
+        Route route = RouteFactory.Get(strat, bot, bot.objective);
+        bot.setRoute(route);
     }
 
     // Update is called once per frame
@@ -115,5 +167,10 @@ public class BotManager : AgentManager
 	{
 			
 	}
+
+    private void OnDisable()
+    {
+        Disabler.OnDisableTunnels -= OnTunnelDisabled;
+    }
 }
 
