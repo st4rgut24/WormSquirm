@@ -7,6 +7,8 @@ public class AgentManager : Singleton<AgentManager>
 {
     public Dictionary<Transform, Segment> TransformSegmentDict; // <GameObject Transform, Last Enclosing Segment>
 
+    public Transform agentsParent;
+
     public PlayerManager playerManager;
     public BotManager botManager;
 
@@ -91,7 +93,7 @@ public class AgentManager : Singleton<AgentManager>
 
     protected GameObject CreateAgent(GameObject agentGo)
     {
-        GameObject agent = Instantiate(agentGo);
+        GameObject agent = Instantiate(agentGo, agentsParent);
         OnSpawn?.Invoke(agent.transform);
 
         return agent;

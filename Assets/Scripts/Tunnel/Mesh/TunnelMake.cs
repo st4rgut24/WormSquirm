@@ -8,6 +8,8 @@ using static UnityEngine.Rendering.HableCurve;
 
 public class TunnelMake: MonoBehaviour
 {
+    public Transform TunnelContainer;
+
     // Rectangle GameObject to represent the UV mapping area
     public GameObject rectangleGameObject;
 
@@ -57,6 +59,7 @@ public class TunnelMake: MonoBehaviour
         OptionalMeshProps meshProps = new OptionalMeshProps(playerTransform, prevRing, _props);
 
         GameObject tunnelObject = MeshObjectFactory.Get(MeshType.Tunnel, TunnelSegment, endRing, meshProps);
+        tunnelObject.transform.parent = TunnelContainer;
 
         tunnelObject.name = "Tunnel " + tunnelCounter;
         tunnelCounter++;

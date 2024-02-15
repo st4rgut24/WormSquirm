@@ -8,9 +8,6 @@ public abstract class Bot : Agent
 
     public Transform objective;
 
-    protected Vector3 startLocation = DefaultUtils.DefaultVector3;
-    protected Vector3 endLocation;
-
     public float velocity = .00001f; // Configurable velocity
 
     protected float startTime;
@@ -27,35 +24,19 @@ public abstract class Bot : Agent
     {
         reachedDestination = true;
         SetObjective();
-        transform.position = startLocation;
     }
 
     public void setRoute(Route route)
     {
         this.route = route;
-
-        setNextDestination();        
-    }
-
-    public void setNextDestination()
-    {
-        Route.MiniRoute miniRoute = route.GetNewMiniRoute();
-
-        if (startLocation == DefaultUtils.DefaultVector3)
-        {
-            transform.position = miniRoute.start; // initialize bot position
-        }
-
-        startLocation = miniRoute.start;
-        endLocation = miniRoute.end;
     }
 
     /// <summary>
     /// Face the direction of travel
     /// </summary>
-    void faceDirection()
+    void faceDirection(Vector3 dest)
     {
-        Vector3 moveDirection = (endLocation - startLocation).normalized;
+        Vector3 moveDirection = (dest - transform.position).normalized;
 
         // Rotate the bot to face the direction it is moving in
         if (moveDirection != Vector3.zero)
@@ -79,26 +60,26 @@ public abstract class Bot : Agent
 
     private void FixedUpdate()
     {
-        if (transform.position == endLocation) // reached destination
-        {
-            Route.MiniRoute miniRoute = route.GetMiniRoute();
+        Waypoint destWP = route.GetCurWaypoint();
 
-            if (miniRoute.endSegment != null)
+        if (transform.position == destWP.position) // reached destination
+        {
+            if (destWP.segment != null)
             {
-                UpdateSegment(miniRoute.endSegment);
+                UpdateSegment(destWP.segment);
             }
 
             //Vector3 rayDir = miniRoute.end - miniRoute.start;
             //Debug.DrawRay(miniRoute.start, rayDir, Color.red);
 
-            if (miniRoute.isFinalWaypoint)
+            if (route.IsFinalWaypoint(destWP))
             {
                 Debug.Log("Reached final waypoint");
                 ReachDestination();
             }
             else
             {
-                setNextDestination();
+                route.AdvanceWaypoint();
             }
 
             // for now bots can't dig
@@ -106,7 +87,7 @@ public abstract class Bot : Agent
         }
         else
         {
-            Move();
+            Move(destWP);
         }
     }
 
@@ -115,9 +96,11 @@ public abstract class Bot : Agent
         GameObject.Destroy(gameObject);
     }
 
-    private void Move()
+    private void Move(Waypoint wp)
     {
-        faceDirection();
-        ChangeMovement(endLocation, true, velocity);
+        Vector3 destination = wp.position;
+        faceDirection(destination);
+        ChangeMovement(destination, true, velocity);
+        Debug.Log("Move to position " + transform.position);
     }
 }

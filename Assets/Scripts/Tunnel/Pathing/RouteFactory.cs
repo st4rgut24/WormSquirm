@@ -56,43 +56,25 @@ public class RouteFactory
     }
 
     /// <summary>
-    /// Get a route that uses a list of segments as waypoints
+    /// Get the route that traverses segments
     /// </summary>
-    /// <param name="segments">list of tunnel segments used for intermediary waypoints</param>
-    /// <param name="finalDest">final stopping place</param>
-    /// <param name="isInSegment">if agent is in a segment already</param>
-    /// <param name="startPos">location of agent</param>
-    /// <returns>a route</returns>
-    public static Route GetFollowSegmentsRoute(List<Segment> segments, Vector3 finalDest, Vector3 startPos, bool isInSegment)
+    /// <param name="segments">The segments that are part of the route</param>
+    /// <param name="endWP">The destination waypoint</param>
+    /// <returns>the route</returns>
+    public static Route GetFollowSegmentsRoute(List<Segment> segments, Waypoint endWP)
     {
         Route route = new Route();
 
-        for (int i = 0; i < segments.Count; i++)
+        for (int i=1;i<segments.Count; i++)
         {
-            Segment segment = segments[i];
+            Segment startSegment = segments[i - 1];
+            Segment destSegment = segments[i];
 
-            // the last segment should use the position of the target transform. 
-            if (i == segments.Count - 1)
-            {
-                route.AddWaypoint(new Waypoint(finalDest, segment));
-            }
-            else if (i > 0)
-            {
-                route.AddWaypoint(new Waypoint(segment.getCenter(), segment));
-            }
-        }
-        route.waypoints.Reverse(); // reverse the list so the goal segment waypoint is last
-
-        // add the first waypoint
-        if (isInSegment)
-        {
-            route.waypoints.Insert(0, new Waypoint(startPos, segments[0]));
-        }
-        else
-        {
-            route.waypoints.Insert(0, new Waypoint(segments[0].getCenter(), segments[0]));
+            List<Waypoint> path = SegmentManager.Instance.GetConnectedSegmentPath(startSegment, destSegment);
+            route.AddWaypoints(path);
         }
 
+        route.AddWaypoint(endWP);
         return route;
     }
 
@@ -145,6 +127,7 @@ public class RouteFactory
             }
         }
 
+        segments.Reverse(); // make the list go from start segment to the goal segment
         return segments;
     }
 
@@ -162,10 +145,15 @@ public class RouteFactory
 
         List<Segment> segments = isInSegment ?
             SearchUtils.dfsConnectSegments(goalSegment, curSegment) :
-            StartFollowSegments(goalSegment);            
+            StartFollowSegments(goalSegment);
+
+
+        //Waypoint startWaypoint = isInSegment ? new Waypoint(transform.position, segments[0]) : new Waypoint(segments[0].getCenter(), segments[0]);
+        // TODO: final waypoint will be a point along an existing guideline. Don't go to the target's position
+        Waypoint endWaypoint = new Waypoint(targetTransform.position, segments[segments.Count - 1]);
 
         // convert a list of segments to a list of waypoints
-        Route route = GetFollowSegmentsRoute(segments, targetTransform.position, transform.position, isInSegment);
+        Route route = GetFollowSegmentsRoute(segments, endWaypoint);
         return route;
     }
 }

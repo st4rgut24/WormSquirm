@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 public class Segment
 {
@@ -67,15 +68,6 @@ public class Segment
     {
         return segmentGo.hasCap();
     }
-
-    //public void setPrevTunnel(GameObject prev)
-    //{
-    //    if (prev == null)
-    //    {
-    //        throw new Exception("A null object is added to list of previous tunnels");
-    //    }
-    //    this.prevTunnel.Add(prev);
-    //}
 
     public void setNextTunnels(List<GameObject> nexts)
     {

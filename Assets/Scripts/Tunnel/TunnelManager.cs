@@ -6,8 +6,6 @@ using UnityEngine.UIElements.Experimental;
 
 public class TunnelManager : Singleton<TunnelManager>
 {
-    //public Dictionary<Transform, GameObject> EndCapDict; // <GameObject Transform, Enclosing Segment GameObject>
-
     // The intersection relationship is not bidirectional.
     // The key should be the tunnel that initiates the intersection.
     // For ex. Tunnel A intersects Tunnel B when Tunnel A is created.

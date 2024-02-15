@@ -6,6 +6,8 @@ using static UnityEngine.Rendering.HableCurve;
 
 public class SegmentManager : Singleton<SegmentManager>
 {
+    SegmentGraph SegmentGraph;
+
     public float MinDistFromCap;
     public float MinDistFromCenterLine;
 
@@ -16,6 +18,7 @@ public class SegmentManager : Singleton<SegmentManager>
 
     private void Awake()
     {
+        SegmentGraph = new SegmentGraph();
         SegmentGoDict = new Dictionary<string, Segment>();
     }
 
@@ -25,6 +28,18 @@ public class SegmentManager : Singleton<SegmentManager>
 
         MinDistFromCenterLine = TunnelManager.tunnelRadius / 2; // todo: tinker with this to find what number works with creating newly intersected tunnels
         MinDistFromCap = edgeDist;
+    }
+
+    /// <summary>
+    /// Get the path to next segment from current segment
+    /// </summary>
+    /// <param name="curSegment">origin segment</param>
+    /// <param name="nextSegment">destination segment</param>
+    /// <returns>a path between both segments</returns>
+    public List<Waypoint> GetConnectedSegmentPath(Segment curSegment, Segment nextSegment)
+    {
+        Connector connector = SegmentGraph.GetConnector(curSegment, nextSegment);
+        return connector.GetConnectingPath(curSegment);
     }
 
     public Segment UpdateSegmentFromTransform(Transform transform)
@@ -149,11 +164,8 @@ public class SegmentManager : Singleton<SegmentManager>
     /// </summary>
     /// <param name="intersectorInitiator">the object that caused the intersection</param>
     /// <param name="intersectedObject">the object that was intersected</param>
-    public void AddIntersectingLineToSegment(GameObject intersectorInitiator, GameObject intersectedObject)
+    public Guideline AddIntersectingLineToSegment(Segment intersectingSegment, Segment intersectedSegment)
     {
-        Segment intersectingSegment = GetSegmentFromObject(intersectorInitiator);
-        Segment intersectedSegment = GetSegmentFromObject(intersectedObject);
-
         Vector3 intersectingEndRing = intersectingSegment.endRingCenter;
         Vector3 intersectingStartRing = intersectingSegment.startRingCenter;
 
@@ -165,33 +177,41 @@ public class SegmentManager : Singleton<SegmentManager>
         Guideline intersectingGuideline = isEndRingCloser ? new Guideline(closestPointToEndRing, intersectingEndRing) : new Guideline(closestPointToStartRing, intersectingStartRing);
 
         Debug.DrawRay(intersectingGuideline.start, intersectingGuideline.end - intersectingGuideline.start, Color.blue, 100);
-        intersectedSegment.AddGuideline(intersectingGuideline);
+        intersectedSegment.AddGuideline(intersectingGuideline); // the intersecting guideline connectst he intersected point with the other tunnel
+
+        return intersectingGuideline;
     }
 
     /// <summary>
-    /// Add guidelines between intersecting tunnels
+    /// Create edges between tunnels to support pathing
     /// </summary>
-    public void AddIntersectingLine(GameObject tunnel, GameObject otherTunnel)
-    {
-        if (tunnel == null || otherTunnel == null)
-        {
-            return;
-        }
-        if (TunnelManager.Instance.IsIntersectingInitiator(tunnel, otherTunnel))
-        {
-            AddIntersectingLineToSegment(tunnel, otherTunnel);
-        }
-        else if (TunnelManager.Instance.IsIntersectingInitiator(otherTunnel, tunnel))
-        {
-            AddIntersectingLineToSegment(otherTunnel, tunnel);
-        }
-    }
-
+    /// <param name="curTunnel">current tunnel</param>
+    /// <param name="nextTunnels">neighboring tunnels</param>
     public void UpdateConnectingSegmentGuidelines(GameObject curTunnel, List<GameObject> nextTunnels)
     {
+        Segment curSegment = GetSegmentFromObject(curTunnel);
+
         nextTunnels.ForEach((nextTunnel) =>
         {
-            AddIntersectingLine(curTunnel, nextTunnel);
+            Segment nextSegment = GetSegmentFromObject(nextTunnel);
+
+            Guideline connectingLine;
+
+            if (TunnelManager.Instance.IsIntersectingInitiator(curTunnel, nextTunnel))
+            {
+                connectingLine = AddIntersectingLineToSegment(curSegment, nextSegment);
+                SegmentGraph.AddEdge(nextSegment, curSegment, connectingLine, false);
+            }
+            else if (TunnelManager.Instance.IsIntersectingInitiator(nextTunnel, curTunnel))
+            {
+                connectingLine = AddIntersectingLineToSegment(nextSegment, curSegment);
+                SegmentGraph.AddEdge(curSegment, nextSegment, connectingLine, false);
+            }
+            else // not intersecting, but continuous
+            {
+                // centerline runs straight through middle of segment, is continuous with nextSegment
+                SegmentGraph.AddEdge(curSegment, nextSegment, curSegment.centerLine, true);
+            }
         });
     }
 
@@ -227,4 +247,3 @@ public class SegmentManager : Singleton<SegmentManager>
         });
     }
 }
-
