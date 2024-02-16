@@ -150,7 +150,8 @@ public class RouteFactory
 
         //Waypoint startWaypoint = isInSegment ? new Waypoint(transform.position, segments[0]) : new Waypoint(segments[0].getCenter(), segments[0]);
         // TODO: final waypoint will be a point along an existing guideline. Don't go to the target's position
-        Waypoint endWaypoint = new Waypoint(targetTransform.position, segments[segments.Count - 1]);
+
+        Waypoint endWaypoint = new Waypoint(targetTransform.position);
 
         // convert a list of segments to a list of waypoints
         Route route = GetFollowSegmentsRoute(segments, endWaypoint);

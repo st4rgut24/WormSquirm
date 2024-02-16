@@ -4,6 +4,8 @@ using System;
 
 public class Agent : MonoBehaviour
 {
+    Coroutine MoveRoutine;
+
     float rotationSpeed = 1;
     float movementSpeed = 1;
     float continuousRotateSpeed = 10; // complete this rotation faster because it is an interrupting rotation
@@ -74,6 +76,12 @@ public class Agent : MonoBehaviour
         transform.position = targetPosition;
     }
 
+    public void AbortMovement()
+    {
+        isMoveInProgress = false;
+        StopCoroutine(MoveRoutine);
+    }
+
     /// <summary>
     /// Update segment player is in
     /// </summary>
@@ -115,7 +123,7 @@ public class Agent : MonoBehaviour
         if (isContinuous)
         {
             isMoveInProgress = true;
-            StartCoroutine(MoveToDestination(destination, speed));
+            MoveRoutine = StartCoroutine(MoveToDestination(destination, speed));
         }
         else
         {

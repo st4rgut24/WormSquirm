@@ -9,6 +9,11 @@ public class SimpleBot : Bot
         base.Awake();
     }
 
+    protected override bool IsReachedFinalDestination(Waypoint finalWP)
+    {
+        return finalWP.position == transform.position;
+    }
+
     protected override void ReachDestination()
     {
         notifyDig(transform.forward);

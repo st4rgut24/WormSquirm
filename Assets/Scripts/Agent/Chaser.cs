@@ -48,8 +48,16 @@ public class Chaser : Bot
         objective = ChooseTarget(ChooseStrategy.Random);
     }
 
+    protected override bool IsReachedFinalDestination(Waypoint finalWP)
+    {
+        float distToFinalWP = Vector3.Distance(transform.position, finalWP.position);
+
+        return distToFinalWP <= stoppingDistance;
+    }
+
     protected override void ReachDestination()
     {
+        AbortMovement();
         SetObjective();
         BotManager.SetBotRoute(this);
     }

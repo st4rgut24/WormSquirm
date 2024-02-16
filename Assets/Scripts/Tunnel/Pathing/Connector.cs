@@ -81,7 +81,7 @@ public class Connector
         Guideline intersectedGuideline = intersectingSegment.centerLine;
 
         // one paths from intersected segment to other segment
-        List<Waypoint> intersectedPath = new List<Waypoint>() { new Waypoint(intersectingLine.start, intersectedSegment), new Waypoint(intersectingLine.end, intersectedSegment) };
+        List<Waypoint> intersectedPath = new List<Waypoint>() { new Waypoint(intersectingLine.start, intersectedSegment), new Waypoint(intersectingLine.end, intersectingSegment) };
 
         // one path from intersecting segment to other segment
         List<Waypoint> intersectingPath = new List<Waypoint>() { new Waypoint(intersectedGuideline.end, intersectedSegment) };

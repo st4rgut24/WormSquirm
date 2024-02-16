@@ -17,9 +17,13 @@ public abstract class Bot : Agent
 
     protected abstract void SetObjective();
 
+    protected abstract bool IsReachedFinalDestination(Waypoint finalWP);
+
     protected abstract void ReachDestination();
 
     protected bool hasRoute;
+
+    protected float stoppingDistance = 2;
 
     protected virtual void Awake()
     {
@@ -68,34 +72,34 @@ public abstract class Bot : Agent
 
     private void FixedUpdate()
     {
-        Waypoint destWP = route.GetCurWaypoint();
-        Debug.Log("Waypoint is " + destWP.position);
-        if (transform.position == destWP.position) // reached destination
+        Waypoint curWP = route.GetCurWaypoint();
+        Waypoint finalWP = route.GetLastWaypoint();
+
+        Debug.Log("Waypoint is " + curWP.position);
+
+        if (IsReachedFinalDestination(finalWP))
         {
-            if (destWP.segment != null)
+            Debug.Log("Reached final waypoint");
+            ReachDestination();
+        }
+        else if (transform.position == curWP.position) // reached destination
+        {
+            if (curWP.segment != null)
             {
-                UpdateSegment(destWP.segment);
+                UpdateSegment(curWP.segment);
             }
 
             //Vector3 rayDir = miniRoute.end - miniRoute.start;
             //Debug.DrawRay(miniRoute.start, rayDir, Color.red);
 
-            if (route.IsFinalWaypoint(destWP))
-            {
-                Debug.Log("Reached final waypoint");
-                ReachDestination();
-            }
-            else
-            {
-                route.AdvanceWaypoint();
-            }
+            route.AdvanceWaypoint();
 
             // for now bots can't dig
             //notifyDig(transform.forward);
         }
         else
         {
-            Move(destWP);
+            Move(curWP);
         }
     }
 
@@ -109,6 +113,5 @@ public abstract class Bot : Agent
         Vector3 destination = wp.position;
         faceDirection(destination);
         ChangeMovement(destination, true, velocity);
-        Debug.Log("Move to position " + transform.position);
     }
 }
