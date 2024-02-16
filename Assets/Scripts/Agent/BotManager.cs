@@ -159,7 +159,13 @@ public class BotManager : AgentManager
         }
 
         Route route = RouteFactory.Get(strat, bot, bot.objective);
-        bot.setRoute(route);
+
+        // TESTING WAYPOINTS
+        WaypointDrawer wpDrawer = GameObject.Find("WaypointDrawer").GetComponent<WaypointDrawer>();
+        Debug.Log("Set " + route.waypoints.Count + " waypoints");
+        wpDrawer.SetWaypoints(route.waypoints);
+
+        bot.initRoute(route);
     }
 
     // Update is called once per frame

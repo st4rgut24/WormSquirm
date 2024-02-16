@@ -38,6 +38,12 @@ public class Route
 		return waypoint == lastWP;
 	}
 
+	public Vector3 GetDestination()
+	{
+		Waypoint curWP = GetCurWaypoint();
+		return curWP.position;
+	}
+
 	public Waypoint GetCurWaypoint()
 	{
 		return waypoints[waypointIdx];
@@ -59,9 +65,9 @@ public class Route
 		waypoints.Add(waypoint);
 	}
 
-	public void AddWaypoints(List<Waypoint> waypoints)
+	public void AddWaypoints(List<Waypoint> newWaypoints)
 	{
-		waypoints.AddRange(waypoints);
+		waypoints.AddRange(newWaypoints);
 	}
 
 	public Vector3 getDestination()

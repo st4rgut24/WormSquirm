@@ -78,7 +78,7 @@ public class Connector
     /// <param name="intersectingLine">the line that intersects one segment</param>
     public void SetIntersectingPath(Segment intersectedSegment, Segment intersectingSegment, Guideline intersectingLine)
     {
-        Guideline intersectedGuideline = intersectedSegment.centerLine;
+        Guideline intersectedGuideline = intersectingSegment.centerLine;
 
         // one paths from intersected segment to other segment
         List<Waypoint> intersectedPath = new List<Waypoint>() { new Waypoint(intersectingLine.start, intersectedSegment), new Waypoint(intersectingLine.end, intersectedSegment) };

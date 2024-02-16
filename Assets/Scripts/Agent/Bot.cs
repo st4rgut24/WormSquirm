@@ -3,12 +3,11 @@ using UnityEngine;
 
 public abstract class Bot : Agent
 {
-    // TODO: how to set the current segment of a bot. should we do it the same way as player agent or use the route waypoints to update less frequently?
     public BotManager.BotType botType;
 
     public Transform objective;
 
-    public float velocity = .00001f; // Configurable velocity
+    public float velocity; // Configurable velocity
 
     protected float startTime;
 
@@ -20,14 +19,23 @@ public abstract class Bot : Agent
 
     protected abstract void ReachDestination();
 
+    protected bool hasRoute;
+
     protected virtual void Awake()
     {
+        hasRoute = false;
         reachedDestination = true;
         SetObjective();
     }
 
-    public void setRoute(Route route)
+    public void initRoute(Route route)
     {
+        if (!hasRoute)
+        {
+            hasRoute = true;
+            transform.position = route.GetDestination();
+        }
+
         this.route = route;
     }
 
@@ -61,7 +69,7 @@ public abstract class Bot : Agent
     private void FixedUpdate()
     {
         Waypoint destWP = route.GetCurWaypoint();
-
+        Debug.Log("Waypoint is " + destWP.position);
         if (transform.position == destWP.position) // reached destination
         {
             if (destWP.segment != null)
