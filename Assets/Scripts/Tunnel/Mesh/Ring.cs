@@ -6,10 +6,9 @@ public class Ring
     const float defaultNoise = 0;
 
     public Vector3[] vertices;
-
-    Vector3 normal;
-    float radius;
-    Vector3 center;
+    public float radius;
+    public Vector3 normal;
+    public Vector3 center;
 
     public Ring(float radius, int vertexCount, Vector3 normal, Vector3 center, float? noiseScale)
 	{

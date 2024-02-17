@@ -93,7 +93,7 @@ public class TunnelManager : Singleton<TunnelManager>
 
 	void OnAddCreatedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel)
 	{
-        GameObject endCap = segment.cap;
+        GameObject endCap = segment.GetCap();
         List<GameObject> neighborTunnels = InitTunnelList(prevTunnel);
 		AddTunnel(playerTransform, segment, neighborTunnels, prevTunnel);
 		//ReplaceEndCap(playerTransform, endCap);
@@ -109,7 +109,7 @@ public class TunnelManager : Singleton<TunnelManager>
     /// <param name="intersectedTunnels">a list of intersected tunnel segments</param>
 	void OnAddIntersectedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel, List<GameObject> intersectedTunnels)
 	{
-        GameObject endCap = segment.cap;
+        GameObject endCap = segment.GetCap();
 
         MapIntersectingTunnels(segment.getTunnel(), intersectedTunnels);
 
@@ -129,7 +129,8 @@ public class TunnelManager : Singleton<TunnelManager>
 
         if (connectingTunnels.Count > 1 || prevTunnel == null) // the new segment intersects the previous and another tunnel in front, creating a corridor (no need for cap)
         {
-            segment.DestroyCap();
+            //segment.DestroyCap();
+            segment.IntersectCap();
         }
     }
 
@@ -188,7 +189,7 @@ public class TunnelManager : Singleton<TunnelManager>
         Corridor corridor = segmentGo.corridor;
         GameObject tunnel = segmentGo.getTunnel();
 
-        Segment segment = SegmentManager.Instance.AddTunnelSegment(segmentGo, nextTunnels, corridor.ring, corridor.prevRing);
+        Segment segment = SegmentManager.Instance.AddTunnelSegment(segmentGo, nextTunnels, corridor.CapRing, corridor.prevRing);
         AgentManager.Instance.InitTransformSegmentDict(playerTransform, segment);
 
         Debug.Log("Add segment to grid at position " + segment.getCenter());
@@ -207,8 +208,7 @@ public class TunnelManager : Singleton<TunnelManager>
         if (prevSegment.hasEndCap())
         {
             SegmentGo segmentGo = prevSegment.segmentGo;
-            GameObject cap = segmentGo.cap;
-            Destroy(cap);
+            segmentGo.DestroyCap();
         }
     }
 

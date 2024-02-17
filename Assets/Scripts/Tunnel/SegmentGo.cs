@@ -5,12 +5,12 @@ using UnityEngine;
 public class SegmentGo
 {
 	public Corridor corridor;
-	public GameObject cap;
 
+    public GameObject CapPrefab;
 
-	public bool hasCap()
+    public bool hasCap()
 	{
-		return cap != null;
+		return corridor.cap != null;
 	}
 
 	public GameObject getTunnel()
@@ -23,21 +23,32 @@ public class SegmentGo
 		return corridor.GetLength();
 	}
 
-	public SegmentGo(GameObject cap, Corridor corridor)
+    public SegmentGo(GameObject tunnelObject, GameObject CapPrefab, Ring endRing, Ring prevRing)
+    {
+		this.CapPrefab = CapPrefab;
+		this.corridor = new Corridor(tunnelObject, CapPrefab, endRing, prevRing);
+        //this.corridor = corridor;
+        //this.cap = cap;
+    }
+
+	public void IntersectCap()
 	{
-		this.corridor = corridor;
-		this.cap = cap;
+		corridor.IntersectCap(CapPrefab);
+	}
+
+	public GameObject GetCap()
+	{
+		return corridor.cap;
 	}
 
 	public void DestroyCap()
 	{
-        GameObject.Destroy(cap);
+		corridor.DestroyCap();
     }
 
 	public void Destroy()
 	{
-		GameObject.Destroy(corridor.tunnel);
-		DestroyCap();
+		corridor.Destroy();
 	}
 }
 

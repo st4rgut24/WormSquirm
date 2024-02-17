@@ -23,8 +23,6 @@ public abstract class Bot : Agent
 
     protected bool hasRoute;
 
-    protected float stoppingDistance = 2;
-
     protected virtual void Awake()
     {
         hasRoute = false;

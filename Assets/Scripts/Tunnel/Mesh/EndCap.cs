@@ -3,7 +3,7 @@ using System.Collections;
 
 /// <summary>
 /// A mesh created from a list of vertices
-/// Create a mesh of triangles with a Fan topology
+/// Create a mesh of triangles that forms a fan topology
 /// </summary>
 public class EndCap
 {

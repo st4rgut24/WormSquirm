@@ -64,10 +64,9 @@ public class TunnelMake: MonoBehaviour
         tunnelObject.name = "Tunnel " + tunnelCounter;
         tunnelCounter++;
 
-        GameObject capObject = MeshObjectFactory.Get(MeshType.EndCap, Cap, endRing, new OptionalMeshProps());
-
-        Corridor corridor = new Corridor(tunnelObject, endRing, prevRing);
-        return new SegmentGo(capObject, corridor);
+        //GameObject capObject = MeshObjectFactory.Get(MeshType.EndCap, Cap, endRing, new OptionalMeshProps());    
+        //return new SegmentGo(corridor);
+        return new SegmentGo(tunnelObject, Cap, endRing, prevRing);
     }
 
     /// <summary>

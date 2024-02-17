@@ -22,7 +22,8 @@ public struct OptionalMeshProps
 public enum MeshType
 {
 	EndCap,
-	Tunnel
+	Tunnel,
+    PassThruCap
 }
 
 /// <summary>
@@ -51,7 +52,10 @@ public class MeshObjectFactory
 			case MeshType.EndCap:
 				mesh = CreateEndCapMesh(ring);
 				break;
-			case MeshType.Tunnel:
+            case MeshType.PassThruCap:
+                mesh = CreatePassCap(ring);
+                break;
+            case MeshType.Tunnel:
 				mesh = CreateTunnelMesh(meshProps.transform, ring, meshProps.prevRing, meshProps.props);
 				break;
 			default:
@@ -194,6 +198,20 @@ public class MeshObjectFactory
     {
 		EndCap endCap = new EndCap(ring);
 		return endCap.GetMesh();
+    }
+
+    /// <summary>
+    /// Generate a cap that has a hole in the middle
+    /// </summary>
+    /// <param name="ring">the vertices of the original (whole) cap</param>
+    /// <returns>A mesh for the cap/returns>
+    private static Mesh CreatePassCap(Ring ring)
+    {
+        float innerRadius = ring.radius - 2f;
+
+        Ring innerRing = RingFactory.Create(innerRadius, ring.vertices.Length, ring.normal, ring.center, 0);
+        PassCap passCap = new PassCap(ring, innerRing);
+        return passCap.GetMesh();
     }
 }
 

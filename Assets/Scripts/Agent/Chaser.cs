@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Chaser : Bot
 {
+    protected float stoppingDistance = 2;
+
     public enum ChooseStrategy
     {
         Random
