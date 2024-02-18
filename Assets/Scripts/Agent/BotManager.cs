@@ -8,14 +8,17 @@ using static UnityEngine.GraphicsBuffer;
 /// </summary>
 public class BotManager : AgentManager
 {
+    // Testing
+    public Transform SimpStartBlock;
+    public Transform SimpWP1;
+    public Transform[] SimpWPs;
+
     public GameObject Chaser;
     public GameObject SimpBot;
 
     public int maxBots = 1; // the upper limit of active Bots in the game
     
     public float spawnFrequency = 15; // the interval between Bot spawns
-
-    public Transform SimpStartBlock;
 
     Dictionary<Transform, List<Bot>> ChasingDict; // dictionary of target transforms and their respective chasers
 
@@ -39,7 +42,10 @@ public class BotManager : AgentManager
     {
         base.Awake();
         bots = new List<Bot>();
-        ChasingDict = new Dictionary<Transform, List<Bot>>(); 
+        ChasingDict = new Dictionary<Transform, List<Bot>>();
+
+        // Testing
+        SimpWPs = new Transform[] { SimpStartBlock, SimpWP1 };
     }
 
     // Use this for initialization

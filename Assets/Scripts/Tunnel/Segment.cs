@@ -60,13 +60,23 @@ public class Segment
         return endRing;
     }
 
+    public Cap GetEndCap()
+    {
+        return segmentGo.EndCap;
+    }
+
+    public Cap GetStartCap()
+    {
+        return segmentGo.StartCap;
+    }
+
     /// <summary>
     /// A tunnel that is not the first segment will have no end cap
     /// </summary>
     /// <returns>true if is a leading tunnel, false otherwise</returns>
-    public bool hasEndCap()
+    public bool HasDeadEndCap()
     {
-        return segmentGo.hasCap();
+        return segmentGo.HasDeadEndCap();
     }
 
     public void setNextTunnels(List<GameObject> nexts)
@@ -161,7 +171,7 @@ public class Segment
     /// <returns>true if out of bounds</returns>
     public bool isOutOfBounds(Transform transform, Vector3 position)
     {
-        if (hasEndCap()) // check if player is close enough to the end of a tunnel
+        if (HasDeadEndCap()) // check if player is close enough to the end of a tunnel
         {
             float distToEndCap = Vector3.Distance(position, endRingCenter);
 

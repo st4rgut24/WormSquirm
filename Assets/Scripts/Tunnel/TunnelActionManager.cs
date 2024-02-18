@@ -78,6 +78,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         Debug.Log("is extending tunnel");
         List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(TunnelHeading.position, 1);
 
+        // todo: intersection depends on direction of player instead of direction of swing?
         HitInfo hitInfo = TunnelUtils.getHitObject(playerTransform, otherTunnels);
 
         //Ray ray = new Ray(playerTransform.position, playerTransform.forward);
@@ -96,13 +97,13 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
             if (isIntersecting) // intersect
             {
-                Debug.Log("TunnelAction Intersect");
+                Debug.Log("Tunnel Action Intersect");
                 GameObject prevSegment = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
                 OnIntersectTunnel?.Invoke(playerTransform, prevSegment, TunnelHeading, extendsTunnel, prevRing, hitInfo);
             }
             else
             {
-                Debug.Log("TunnelAction Create");
+                Debug.Log("Tunnel Action Create");
                 OnCreateTunnel?.Invoke(playerTransform, extendsTunnel, TunnelHeading, prevRing);
             }
             return true;
@@ -155,7 +156,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         {
             GameObject nextTunnel = hitInfo.hitGo;
             // intersects is true, if next tunnel segment is a new intersecting segment that is not already connected to current tunnel player is in
-            return curTunnel != nextTunnel && !SegmentManager.Instance.IsTunnelsConnected(curTunnel, nextTunnel);
+            return nextTunnel.tag == Consts.TunnelTag && curTunnel != nextTunnel && !SegmentManager.Instance.IsTunnelsConnected(curTunnel, nextTunnel);
         }
         else
         {

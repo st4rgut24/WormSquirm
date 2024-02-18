@@ -10,7 +10,8 @@ using static UnityEngine.Rendering.HableCurve;
 /// </summary>
 public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 {
-    public static event Action<Transform, SegmentGo, GameObject, List<GameObject>> OnAddIntersectedTunnel;
+    public static event Action<Transform, SegmentGo, GameObject, List<GameObject>> OnAddIntersectedTunnelSuccess;
+    public static event Action<Transform> OnAddIntersectedTunnelFailure;
 
     public int rayRings = 3; // The bigger this number is, the smaller the interval
     public int offsetMultiple = 3; // How many units the intersection ray should be offset from the intersecting faces
@@ -83,16 +84,39 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 
     void Intersect(Transform transform, GameObject prevTunnel, List<GameObject> otherTunnels, List<Ray> rays, Heading heading, Ring prevRing)
     {
-        SegmentGo projectedSegment = tunnelMaker.GrowTunnel(transform, heading, prevRing);
+        SegmentGo projectedSegment = null;
 
+        try
+        {
+            projectedSegment = tunnelMaker.GrowTunnel(transform, heading, prevRing);
+            projectedSegment.IntersectStartCap(); // start of intersected tunnel segment will have a hole in it
 
-        // get intersected tunnels (may be more than 1)
+            List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment.getTunnel(), otherTunnels, intersectBuffer);
 
-        // TODO: Removing this line may be a bad idea, but previous tunnel may also be intersected as a result of creating a bisecting tunnel out of the current segment
-        //otherTunnels.Remove(prevTunnel); // adjoining segment does not count as intersected object
+            ValidateIntersection(intersectedTunnels, heading);
+            List<GameObject> deletedTunnels = DeleteTunnels(intersectedTunnels, rays);
 
-        List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment.getTunnel(), otherTunnels, intersectBuffer);
-        //Debug.Log("intersected tunnels count " + intersectedTunnels.Count);
+            OnAddIntersectedTunnelSuccess?.Invoke(transform, projectedSegment, prevTunnel, deletedTunnels);
+        } catch (Exception e)
+        {
+            Debug.LogWarning(e.Message);
+
+            if (projectedSegment != null)
+            {
+                projectedSegment.Destroy();
+            }
+            OnAddIntersectedTunnelFailure?.Invoke(transform);
+        }
+    }
+
+    /// <summary>
+    /// Delete tunnels at the intersection points
+    /// </summary>
+    /// <param name="intersectedTunnels">list of candidate tunnels to delete faces from</param>
+    /// <param name="rays">rays that represent the intersection points</param>
+    /// <returns>list of tunnels that had their faces deleted</returns>
+    List<GameObject> DeleteTunnels(List<GameObject> intersectedTunnels, List<Ray> rays)
+    {
         List<GameObject> deletedTunnels = new List<GameObject>();
 
         intersectedTunnels.ForEach((tunnel) =>
@@ -106,7 +130,62 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
             }
         });
 
-        OnAddIntersectedTunnel?.Invoke(transform, projectedSegment, prevTunnel, deletedTunnels);
+        return deletedTunnels;
+    }
+
+    /// <summary>
+    /// Is the intersection valid, ie not affected by any constraints
+    /// </summary>
+    /// <param name="intersectedTunnels">tunnels that would be intersected</param>
+    /// <param name="intersectionHeading">positional info of the intersection point</param>
+    bool ValidateIntersection(List<GameObject> intersectedTunnels, Heading intersectionHeading)
+    {
+        Vector3 intersectPoint = intersectionHeading.position;
+        Debug.Log("intersect position " + intersectPoint);
+        // check if intersected tunnels have caps (meaning they are not continuous intermediary segments)
+        // check the distance from the intersection point to any caps
+        // if the distance is less than minimum allowed, throw an exception
+        // in the catch{}
+        //      1. destroy the intersecting tunnel
+        //      2. emit an event about creation error (listened for by digger)
+        intersectedTunnels.ForEach((intersectedTunnel) =>
+        {
+            Segment segment = SegmentManager.Instance.GetSegmentFromObject(intersectedTunnel);
+            bool intersectsCaps = IsIntersectingCap(intersectPoint, segment.GetStartCap()) || IsIntersectingCap(intersectPoint, segment.GetEndCap());
+
+            if (intersectsCaps)
+            {
+                throw new Exception("Invalid intersection, intersects caps");
+            }
+        });
+
+        return true;
+    }
+
+    /// <summary>
+    /// Check if a new point of intersection is too close to another ring 
+    /// </summary>
+    /// <param name="intersectionPoint">point of intersection</param>
+    /// <param name="center">center of a ring</param>
+    /// <returns>true if ring center intersects</returns>
+    bool IsIntersectingCap(Vector3 intersectionPoint, Cap cap)
+    {
+        if (cap.HasCap())
+        {
+            Ring ring = cap.ring;
+            float hypotenuse = Vector3.Distance(intersectionPoint, ring.center);
+            Debug.DrawRay(intersectionPoint, ring.center - intersectionPoint, Color.red, 30000);
+
+            float side = ring.radius;
+            float height = Mathf.Sqrt(Mathf.Pow(hypotenuse, 2) - Mathf.Pow(side, 2));
+            float minDist = ring.radius + SegmentManager.Instance.MinDistFromCap;
+            Debug.Log("intersection point is " + height + " units from cap center. min dist is " + minDist + " Units");
+            return height <= minDist; // if it is intersecting, then height is less than minimum
+        }
+        else
+        {
+            return false;
+        }
     }
 
     // Update is called once per frame

@@ -44,7 +44,12 @@ public class Route
 		return curWP.position;
 	}
 
-	public Waypoint GetCurWaypoint()
+    public Waypoint GetNextWaypoint()
+    {
+        return waypoints[waypointIdx + 1];
+    }
+
+    public Waypoint GetCurWaypoint()
 	{
 		return waypoints[waypointIdx];
 	}

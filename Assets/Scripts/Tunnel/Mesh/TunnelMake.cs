@@ -60,6 +60,7 @@ public class TunnelMake: MonoBehaviour
 
         GameObject tunnelObject = MeshObjectFactory.Get(MeshType.Tunnel, TunnelSegment, endRing, meshProps);
         tunnelObject.transform.parent = TunnelContainer;
+        tunnelObject.tag = Consts.TunnelTag;
 
         tunnelObject.name = "Tunnel " + tunnelCounter;
         tunnelCounter++;

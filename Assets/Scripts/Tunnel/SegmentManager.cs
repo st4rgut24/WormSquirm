@@ -24,7 +24,7 @@ public class SegmentManager : Singleton<SegmentManager>
 
     private void Start()
     {
-        float edgeDist = 5; // the distance from the edge of tunnel serves as a stopping point
+        float edgeDist = 1; // the distance from the edge of tunnel serves as a stopping point
 
         MinDistFromCenterLine = TunnelManager.tunnelRadius / 2; // todo: tinker with this to find what number works with creating newly intersected tunnels
         MinDistFromCap = edgeDist;
@@ -148,7 +148,7 @@ public class SegmentManager : Singleton<SegmentManager>
         {
             return true;
         }
-        else if (segment.hasEndCap())
+        else if (segment.HasDeadEndCap())
         {
             float angle = Vector3.Angle(transform.forward, segment.forward);
             return angle <= SameDirAngleMargin;

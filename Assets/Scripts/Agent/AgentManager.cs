@@ -77,6 +77,11 @@ public class AgentManager : Singleton<AgentManager>
         TransformSegmentDict[transform] = segment;
     }
 
+    public void OnAddTunnelFailure(Transform transform)
+    {
+
+    }
+
     //public bool IsControlledMovement(Transform transform, Segment segment)
     //{
     //    if (TransformSegmentDict.ContainsKey(transform))

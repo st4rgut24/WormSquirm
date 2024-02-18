@@ -39,7 +39,7 @@ public class TunnelManager : Singleton<TunnelManager>
     private void OnEnable()
     {
         TunnelCreatorManager.OnAddCreatedTunnel += OnAddCreatedTunnel;
-        TunnelIntersectorManager.OnAddIntersectedTunnel += OnAddIntersectedTunnel;
+        TunnelIntersectorManager.OnAddIntersectedTunnelSuccess += OnAddIntersectedTunnel;
 
 		Agent.OnDig += tunnelDisabler.Disable;
     }
@@ -93,7 +93,7 @@ public class TunnelManager : Singleton<TunnelManager>
 
 	void OnAddCreatedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel)
 	{
-        GameObject endCap = segment.GetCap();
+        GameObject endCap = segment.GetEndCap();
         List<GameObject> neighborTunnels = InitTunnelList(prevTunnel);
 		AddTunnel(playerTransform, segment, neighborTunnels, prevTunnel);
 		//ReplaceEndCap(playerTransform, endCap);
@@ -109,7 +109,7 @@ public class TunnelManager : Singleton<TunnelManager>
     /// <param name="intersectedTunnels">a list of intersected tunnel segments</param>
 	void OnAddIntersectedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel, List<GameObject> intersectedTunnels)
 	{
-        GameObject endCap = segment.GetCap();
+        GameObject endCap = segment.GetEndCap();
 
         MapIntersectingTunnels(segment.getTunnel(), intersectedTunnels);
 
@@ -129,8 +129,7 @@ public class TunnelManager : Singleton<TunnelManager>
 
         if (connectingTunnels.Count > 1 || prevTunnel == null) // the new segment intersects the previous and another tunnel in front, creating a corridor (no need for cap)
         {
-            //segment.DestroyCap();
-            segment.IntersectCap();
+            segment.IntersectEndCap();
         }
     }
 
@@ -186,10 +185,11 @@ public class TunnelManager : Singleton<TunnelManager>
     void AddTunnel(Transform playerTransform, SegmentGo segmentGo, List<GameObject> nextTunnels, GameObject prevTunnel)
 	{
 
-        Corridor corridor = segmentGo.corridor;
+        Cap startCap = segmentGo.StartCap;
+        Cap endCap = segmentGo.EndCap;
         GameObject tunnel = segmentGo.getTunnel();
 
-        Segment segment = SegmentManager.Instance.AddTunnelSegment(segmentGo, nextTunnels, corridor.CapRing, corridor.prevRing);
+        Segment segment = SegmentManager.Instance.AddTunnelSegment(segmentGo, nextTunnels, endCap.ring, startCap.ring);
         AgentManager.Instance.InitTransformSegmentDict(playerTransform, segment);
 
         Debug.Log("Add segment to grid at position " + segment.getCenter());
@@ -205,10 +205,10 @@ public class TunnelManager : Singleton<TunnelManager>
     {
         Segment prevSegment = SegmentManager.Instance.GetSegmentFromObject(prevTunnel);
 
-        if (prevSegment.hasEndCap())
+        if (prevSegment.HasDeadEndCap())
         {
             SegmentGo segmentGo = prevSegment.segmentGo;
-            segmentGo.DestroyCap();
+            segmentGo.DestroyEndCap();
         }
     }
 
@@ -267,7 +267,7 @@ public class TunnelManager : Singleton<TunnelManager>
     private void OnDisable()
     {
         TunnelCreatorManager.OnAddCreatedTunnel -= OnAddCreatedTunnel;
-        TunnelIntersectorManager.OnAddIntersectedTunnel -= OnAddIntersectedTunnel;
+        TunnelIntersectorManager.OnAddIntersectedTunnelSuccess -= OnAddIntersectedTunnel;
 
         Agent.OnDig -= tunnelDisabler.Disable;
     }

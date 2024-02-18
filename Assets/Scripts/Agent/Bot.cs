@@ -36,6 +36,11 @@ public abstract class Bot : Agent
         {
             hasRoute = true;
             transform.position = route.GetDestination();
+
+            // initialize the direction bot is facing
+            Waypoint CurWP = route.GetCurWaypoint();
+            Waypoint NextWP = route.GetNextWaypoint();
+            this.faceDirection(CurWP.position, NextWP.position);
         }
 
         this.route = route;
@@ -44,14 +49,15 @@ public abstract class Bot : Agent
     /// <summary>
     /// Face the direction of travel
     /// </summary>
-    void faceDirection(Vector3 dest)
+    void faceDirection(Vector3 start, Vector3 dest)
     {
-        Vector3 moveDirection = (dest - transform.position).normalized;
+        Vector3 moveDirection = (dest - start).normalized;
 
         // Rotate the bot to face the direction it is moving in
         if (moveDirection != Vector3.zero)
         {
             transform.rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+            Debug.Log("rotate bot " + transform.rotation);
         }
     }
 
@@ -68,7 +74,12 @@ public abstract class Bot : Agent
         }
     }
 
-    private void FixedUpdate()
+    protected virtual void ReachWaypoint()
+    {
+        route.AdvanceWaypoint();
+    }
+
+    protected virtual void FixedUpdate()
     {
         Waypoint curWP = route.GetCurWaypoint();
         Waypoint finalWP = route.GetLastWaypoint();
@@ -89,11 +100,7 @@ public abstract class Bot : Agent
 
             //Vector3 rayDir = miniRoute.end - miniRoute.start;
             //Debug.DrawRay(miniRoute.start, rayDir, Color.red);
-
-            route.AdvanceWaypoint();
-
-            // for now bots can't dig
-            //notifyDig(transform.forward);
+            ReachWaypoint();
         }
         else
         {
@@ -109,7 +116,7 @@ public abstract class Bot : Agent
     private void Move(Waypoint wp)
     {
         Vector3 destination = wp.position;
-        faceDirection(destination);
+        faceDirection(transform.position, destination);
         ChangeMovement(destination, true, velocity);
     }
 }

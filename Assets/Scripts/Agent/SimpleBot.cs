@@ -16,6 +16,13 @@ public class SimpleBot : Bot
 
     protected override void ReachDestination()
     {
+        Debug.Log("Reached destination");
+        //notifyDig(transform.forward);
+    }
+
+    protected override void ReachWaypoint()
+    {
+        base.ReachWaypoint();
         notifyDig(transform.forward);
     }
 
