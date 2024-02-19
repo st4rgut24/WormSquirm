@@ -79,7 +79,13 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(TunnelHeading.position, 1);
 
         // todo: intersection depends on direction of player instead of direction of swing?
-        HitInfo hitInfo = TunnelUtils.getHitObject(playerTransform, otherTunnels);
+
+        Ring prevRing = GetPrevRing(extendsTunnel, playerTransform);
+
+        RayRing hitTestRayRing = new RayRing(prevRing, playerTransform.forward); // get rays for the vertices of a tunnel ring
+        HitInfo hitInfo = TunnelUtils.GetHitInfoFromRays(hitTestRayRing.rays, otherTunnels);
+
+        // if hit detected, create a new ray that is directed at the center guideline of the hit tunnel
 
         //Ray ray = new Ray(playerTransform.position, playerTransform.forward);
         //Debug.DrawRay(ray.origin, ray.direction * GameManager.Instance.agentOffset, Color.red, 100);
@@ -93,8 +99,6 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         }
         else
         {
-            Ring prevRing = GetPrevRing(extendsTunnel, playerTransform); 
-
             if (isIntersecting) // intersect
             {
                 Debug.Log("Tunnel Action Intersect");
@@ -109,6 +113,8 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
             return true;
         }
     }
+
+    
 
     public bool IsCreationValid(Heading TunnelHeading, Ring prevRing)
     {

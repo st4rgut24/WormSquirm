@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
 
@@ -40,7 +41,7 @@ public class TunnelUtils
                 }
                 else
                 {
-                     Debug.Log("segment " + targetObject.name + " does not intersect object " + otherObject.name);
+                    Debug.Log("segment " + targetObject.name + " does not intersect object " + otherObject.name);
                 }
             }
         }
@@ -126,26 +127,42 @@ public class TunnelUtils
     //    return enclosingObject;
     //}
 
-    public static HitInfo getHitObject(Transform transform, List<GameObject> objectList)
+    public static HitInfo GetHitInfoFromRay(Ray ray, GameObject go)
+    {
+        return GetHitInfoFromRays(new List<Ray>() { ray }, new List<GameObject> { go });
+    }
+
+    public static HitInfo GetHitInfoFromRays(List<Ray> rays, List<GameObject> objectList)
     {
         RaycastHit hit;
         ComponentUtils.addBoxColliders(objectList);
 
-        Ray ray = new Ray(transform.position, transform.forward);
+        HitInfo hitInfo = null;
 
-        bool didHit = Physics.Raycast(ray.origin, ray.direction, out hit, GameManager.Instance.agentOffset);
+        //Ray ray = new Ray(transform.position, transform.forward);
+
+        for (int i = 0; i < rays.Count; i++)
+        {
+            Ray ray = rays[i];
+
+            bool didHit = Physics.Raycast(ray.origin, ray.direction, out hit, GameManager.Instance.agentOffset);
+
+            Debug.DrawRay(ray.origin, ray.direction * GameManager.Instance.agentOffset, Color.cyan, 200.0f);
+            if (didHit)
+            {
+                hitInfo = new HitInfo(hit.collider.gameObject, hit.point);
+
+                if (!objectList.Contains(hitInfo.hitGo))
+                {
+                    throw new Exception("A gameobject other than the ones provided in list was hit.");
+                }
+                break;
+            }
+        }
 
         ComponentUtils.removeBoxColliders(objectList);
 
-        if (didHit)
-        {
-            Debug.DrawRay(ray.origin, ray.direction * GameManager.Instance.agentOffset, Color.cyan, 200.0f);
-            return new HitInfo(hit.collider.gameObject, hit.point);
-        }
-        else
-        {
-            return null;
-        }
+        return hitInfo;
     }
 
 }

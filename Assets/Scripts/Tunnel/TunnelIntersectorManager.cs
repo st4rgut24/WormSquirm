@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UIElements.Experimental;
 using static UnityEngine.Rendering.HableCurve;
+using Unity.VisualScripting;
 
 /// <summary>
 /// Manages the intersection of tunnels
@@ -50,45 +51,47 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
     /// <summary>
     /// Get the Tunnels that will be intersected
     /// </summary>
-    /// <param name="transform">The transform of the tunnel end</param>
+    /// <param name="playerTransform">The player transform</param>
     /// <param name="otherTunnels">Other tunnels in the vicinity of the active tunnel</param>
     /// <param name="prevTunnel">Previous tunnel segment belonging to the active tunnel</param>
     /// <param name="extendsTunnel">The player is extending a tunnel</param>
     /// <param name="heading">The directional info of the tunnel</param>
     /// <param name="hitInfo">info about the hit object</param>
-    void IntersectAction(Transform transform, GameObject prevTunnel, Heading heading, bool extendsTunnel, Ring prevRing, HitInfo hitInfo)
+    void IntersectAction(Transform playerTransform, GameObject prevTunnel, Heading heading, bool extendsTunnel, Ring prevRing, HitInfo hitInfo)
     {
-        if (hitInfo != null)
-        {
-            heading.position = hitInfo.hitCoord; // the end of the intersecting segment will be the point of intersection obtained from hit info
-        }
+        Heading intersectHeading = hitInfo != null ? GetHitHeading(hitInfo, playerTransform) : heading;
 
-        Vector3 center = TunnelUtils.GetCenterPoint(prevRing.GetCenter(), heading.position);
+
+        //if (hitInfo != null)
+        //{
+        //    ModifyHitPosition()
+        //    heading.position = hitInfo.hitCoord; // the end of the intersecting segment will be the point of intersection obtained from hit info
+        //}
+
+        Vector3 center = TunnelUtils.GetCenterPoint(prevRing.GetCenter(), intersectHeading.position);
         List<GameObject> nearbyTunnels = tunnelGrid.GetGameObjects(center, 1);
         Debug.Log("There are " + nearbyTunnels.Count + " tunnels with the viciting of position " + center);
 
-
-        List<Ray> endRingRays = RayUtils.CreateRays(heading.position, -heading.forward, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
-
-        List<Ray> rays = new List<Ray>(endRingRays);
+        RayRing endRayRing = new RayRing(_ringVertices, -intersectHeading.forward, intersectHeading.position, offsetMultiple, _rayInterval, _holeRadius);
+        List<Ray> intersectingRays = new List<Ray>(endRayRing.rays);
 
         if (!extendsTunnel) // tunnel faces may be deleted from the start of a segment if the intersecting segment bisects the current segment
         {
-            List<Ray> startRingRays = RayUtils.CreateRays(prevRing.GetCenter(), heading.forward, _ringVertices, _holeRadius, _rayInterval, offsetMultiple); // experiment with TunnelRadius, rayIntervals
-            rays.AddRange(startRingRays);
+            RayRing startRayRing = new RayRing(_ringVertices, intersectHeading.forward, prevRing.GetCenter(), offsetMultiple, _rayInterval, _holeRadius);
+            intersectingRays.AddRange(startRayRing.rays);
         }
 
 
-        Intersect(transform, prevTunnel, nearbyTunnels, rays, heading, prevRing);
+        Intersect(playerTransform, prevTunnel, nearbyTunnels, intersectingRays, intersectHeading, prevRing);
     }
 
-    void Intersect(Transform transform, GameObject prevTunnel, List<GameObject> otherTunnels, List<Ray> rays, Heading heading, Ring prevRing)
+    void Intersect(Transform playerTransform, GameObject prevTunnel, List<GameObject> otherTunnels, List<Ray> rays, Heading heading, Ring prevRing)
     {
         SegmentGo projectedSegment = null;
 
-        //try
-        //{
-            projectedSegment = tunnelMaker.GrowTunnel(transform, heading, prevRing);
+        try
+        {
+            projectedSegment = tunnelMaker.GrowTunnel(playerTransform, heading, prevRing);
             projectedSegment.IntersectStartCap(); // start of intersected tunnel segment will have a hole in it
 
             List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment.getTunnel(), otherTunnels, intersectBuffer);
@@ -96,17 +99,16 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
             ValidateIntersection(intersectedTunnels, heading);
             List<GameObject> deletedTunnels = DeleteTunnels(intersectedTunnels, rays);
 
-            OnAddIntersectedTunnelSuccess?.Invoke(transform, projectedSegment, prevTunnel, deletedTunnels);
-        //} catch (Exception e)
-        //{
-        //    Debug.LogWarning(e.Message);
+            OnAddIntersectedTunnelSuccess?.Invoke(playerTransform, projectedSegment, prevTunnel, deletedTunnels);
+        } catch (Exception e) {
+            Debug.LogError(e.Message);
 
-        //    if (projectedSegment != null)
-        //    {
-        //        projectedSegment.Destroy();
-        //    }
-        //    OnAddIntersectedTunnelFailure?.Invoke(transform);
-        //}
+            if (projectedSegment != null)
+            {
+                projectedSegment.Destroy();
+            }
+            OnAddIntersectedTunnelFailure?.Invoke(playerTransform);
+        }
     }
 
     /// <summary>
@@ -131,6 +133,30 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
         });
 
         return deletedTunnels;
+    }
+
+    /// <summary>
+    /// Create a new heading so that the intersecting tunnel intersects squarely with the other tunnel
+    /// </summary>
+    /// <param name="hitInfo">Initial hit info</param>
+    /// <returns>Heading related to the final hit position</returns>
+    Heading GetHitHeading(HitInfo hitInfo, Transform playerTransform)
+    {
+        // shoot a new ray to the modified position
+        Vector3 hitPosition = hitInfo.hitCoord;
+        Segment segment = SegmentManager.Instance.GetSegmentFromObject(hitInfo.hitGo);
+
+        Vector3 intersectPoint = segment.GetClosestPointToCenterline(hitPosition);
+        Vector3 startPoint = playerTransform.position;
+
+        Vector3 rayDir = intersectPoint - startPoint;
+        Ray hitRay = new Ray(startPoint, rayDir);
+        HitInfo modHitInfo = TunnelUtils.GetHitInfoFromRay(hitRay, hitInfo.hitGo);
+
+        Heading intersectHeading = new Heading(modHitInfo.hitCoord, rayDir.normalized);
+
+        Debug.Log("hit coord " + modHitInfo.hitCoord);
+        return intersectHeading;
     }
 
     /// <summary>
