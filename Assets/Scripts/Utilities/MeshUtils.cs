@@ -9,6 +9,18 @@ public class MeshUtils
         return mesh.triangles.Reverse().ToArray();
     }
 
+    public static int[] ConvertTriangleIdxToVertexArr(int[] triangleIdxArr)
+    {
+        int[] vertexIdxArr = new int[triangleIdxArr.Length];
+
+        for (int i = 0; i < triangleIdxArr.Length; i++)
+        {
+            vertexIdxArr[i] = triangleIdxArr[i] * 3;
+        }
+
+        return vertexIdxArr;
+    }
+
     public static float GetSideLength(int sides, float radius)
     {
         float angleInRadians = Mathf.PI / sides;

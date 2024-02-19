@@ -30,27 +30,30 @@ public class TunnelDelete
         tunnel.AddComponent<MeshCollider>();
 
         HashSet<int> HitTriangleIdxSet = GetTrianglesHitByRays(this.mesh, this.rays);
-        int[] removeFaceIdxArr = HitTriangleIdxSet.ToArray<int>();
-        RemoveTriangles(removeFaceIdxArr);
+        int[] removeTriangleIdxArr = HitTriangleIdxSet.ToArray<int>();
+        int[] removeVertexArr = MeshUtils.ConvertTriangleIdxToVertexArr(removeTriangleIdxArr);
+        RemoveTriangles(removeVertexArr);
         //this.mesh.RecalculateNormals();
 
         ComponentUtils.removeMeshCollider(tunnel);
 
-        return removeFaceIdxArr.Length > 0;
+        return removeTriangleIdxArr.Length > 0;
     }
 
-    void RemoveTriangles(int[] trianglesToRemove)
+    void RemoveTriangles(int[] verticesToRemove)
     {
         // Create a new triangle array without the specified triangles
-        int[] newTriangles = new int[mesh.triangles.Length - trianglesToRemove.Length * 3];
+        int[] newTriangles = new int[mesh.triangles.Length - verticesToRemove.Length * 3];
         int currentIndex = 0;
 
         for (int i = 0; i < mesh.triangles.Length; i += 3)
         {
-            // Check if the current triangle should be removed
-            if (System.Array.IndexOf(trianglesToRemove, i / 3) == -1)
+            // If the current triangle is not removed, then add it to the new triangles array
+            // only include the vertices of triangles that are NOT removed
+            if (System.Array.IndexOf(verticesToRemove, i) == -1)
             {
-                // Copy the vertices of the triangle to the new array
+                // If the vertex of the triangle is not among the removed vertices,
+                // copy the vertices of the triangle to the new array
                 newTriangles[currentIndex++] = mesh.triangles[i];
                 newTriangles[currentIndex++] = mesh.triangles[i + 1];
                 newTriangles[currentIndex++] = mesh.triangles[i + 2];
@@ -61,6 +64,12 @@ public class TunnelDelete
         mesh.triangles = newTriangles;
     }
 
+    /// <summary>
+    /// Get the indices of triangles that have been intersected
+    /// </summary>
+    /// <param name="mesh">mesh to test for intersection</param>
+    /// <param name="rays">intersecting rays</param>
+    /// <returns>set of triangle indices, each indices representing the first vertex of a triangle</returns>
     HashSet<int> GetTrianglesHitByRays(Mesh mesh, List<Ray> rays)
     {
         HashSet<int> triangleRemoveSet = new HashSet<int>();
@@ -83,10 +92,10 @@ public class TunnelDelete
 
         if (Physics.Raycast(ray.origin, ray.direction, out hit, 6))
         {
-             if (hit.collider.gameObject == tunnel) // if tunnel was the hit gameobject, then add the triangle to removal set
+             if (hit.collider.gameObject == tunnel && hit.triangleIndex != -1) // if tunnel was the hit gameobject, then add the triangle to removal set
             {
                 Debug.DrawRay(ray.origin, ray.direction * 6f, Color.red, 100.0f);
-                //Debug.Log("Remove the triangle from Tunnel " + tunnel.name + " at index " + hit.triangleIndex);
+                Debug.Log("Remove the triangle from Tunnel " + tunnel.name + " at index " + hit.triangleIndex);
                 removalIdxSet.Add(hit.triangleIndex);
             }
         }

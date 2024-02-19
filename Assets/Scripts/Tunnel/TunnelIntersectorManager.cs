@@ -86,8 +86,8 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
     {
         SegmentGo projectedSegment = null;
 
-        try
-        {
+        //try
+        //{
             projectedSegment = tunnelMaker.GrowTunnel(transform, heading, prevRing);
             projectedSegment.IntersectStartCap(); // start of intersected tunnel segment will have a hole in it
 
@@ -97,16 +97,16 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
             List<GameObject> deletedTunnels = DeleteTunnels(intersectedTunnels, rays);
 
             OnAddIntersectedTunnelSuccess?.Invoke(transform, projectedSegment, prevTunnel, deletedTunnels);
-        } catch (Exception e)
-        {
-            Debug.LogWarning(e.Message);
+        //} catch (Exception e)
+        //{
+        //    Debug.LogWarning(e.Message);
 
-            if (projectedSegment != null)
-            {
-                projectedSegment.Destroy();
-            }
-            OnAddIntersectedTunnelFailure?.Invoke(transform);
-        }
+        //    if (projectedSegment != null)
+        //    {
+        //        projectedSegment.Destroy();
+        //    }
+        //    OnAddIntersectedTunnelFailure?.Invoke(transform);
+        //}
     }
 
     /// <summary>
