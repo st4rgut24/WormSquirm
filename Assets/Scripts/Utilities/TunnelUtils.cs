@@ -127,12 +127,12 @@ public class TunnelUtils
     //    return enclosingObject;
     //}
 
-    public static HitInfo GetHitInfoFromRay(Ray ray, GameObject go)
+    public static HitInfo GetHitInfoFromRay(Ray ray, GameObject go, float rayDistance)
     {
-        return GetHitInfoFromRays(new List<Ray>() { ray }, new List<GameObject> { go });
+        return GetHitInfoFromRays(new List<Ray>() { ray }, new List<GameObject> { go }, rayDistance);
     }
 
-    public static HitInfo GetHitInfoFromRays(List<Ray> rays, List<GameObject> objectList)
+    public static HitInfo GetHitInfoFromRays(List<Ray> rays, List<GameObject> objectList, float rayDistance)
     {
         RaycastHit hit;
         ComponentUtils.addBoxColliders(objectList);
@@ -145,11 +145,12 @@ public class TunnelUtils
         {
             Ray ray = rays[i];
 
-            bool didHit = Physics.Raycast(ray.origin, ray.direction, out hit, GameManager.Instance.agentOffset);
+            bool didHit = Physics.Raycast(ray.origin, ray.direction, out hit, rayDistance);
 
-            Debug.DrawRay(ray.origin, ray.direction * GameManager.Instance.agentOffset, Color.cyan, 200.0f);
+            Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.cyan, 200.0f);
             if (didHit)
             {
+                Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.red, 200.0f);
                 hitInfo = new HitInfo(hit.collider.gameObject, hit.point);
 
                 if (!objectList.Contains(hitInfo.hitGo))

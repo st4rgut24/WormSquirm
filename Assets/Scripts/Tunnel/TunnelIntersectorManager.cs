@@ -150,8 +150,10 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
         Vector3 startPoint = playerTransform.position;
 
         Vector3 rayDir = intersectPoint - startPoint;
+        float rayDist = Vector3.Distance(intersectPoint, startPoint);
+
         Ray hitRay = new Ray(startPoint, rayDir);
-        HitInfo modHitInfo = TunnelUtils.GetHitInfoFromRay(hitRay, hitInfo.hitGo);
+        HitInfo modHitInfo = TunnelUtils.GetHitInfoFromRay(hitRay, hitInfo.hitGo, rayDist);
 
         Heading intersectHeading = new Heading(modHitInfo.hitCoord, rayDir.normalized);
 

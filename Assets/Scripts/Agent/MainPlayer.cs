@@ -45,6 +45,10 @@ public class MainPlayer : Player
             Vector2 rawInput = joystick.GetInput();
             controller.HandleInput(rawInput);
         }
+        else
+        {
+            ChangeMovement(transform.position, false, 0);
+        }
     }
 
     /// <summary>
@@ -66,6 +70,7 @@ public class MainPlayer : Player
     {
         state = PlayerState.Dig;
         Debug.Log("Start Digging");
+        charAnimator.TriggerAnimation(swingAnimName);
         notifyDig(direction);
 
         //controller.AccelerateInDirection(direction);

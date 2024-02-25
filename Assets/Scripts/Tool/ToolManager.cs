@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public enum ToolType
 {
@@ -29,7 +30,8 @@ public class ToolManager : Singleton<ToolManager>
 
         GameObject mainPlayerGo = pm.GetMainPlayer();
         playerTransform = mainPlayerGo.transform;
-        playerCamera = playerTransform.GetChild(0).GetComponent<Camera>();
+        Camera[] cameras = mainPlayerGo.GetComponentsInChildren<Camera>();
+        playerCamera = cameras[0];
 
         GameObject pickaxeTool = CreateTool(ToolType.Pickaxe);
         Equip(pickaxeTool);

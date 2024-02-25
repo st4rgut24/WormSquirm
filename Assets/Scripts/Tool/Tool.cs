@@ -13,6 +13,7 @@ public abstract class Tool : MonoBehaviour
     public Vector3 ProjectScreenPosition(Vector2 screenPos)
     {
         // Use the screen position to create a ray from the player's perspective
+
         Ray ray = playerCamera.ScreenPointToRay(screenPos);
 
         // Debug draw the ray (optional)

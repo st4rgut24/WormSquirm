@@ -83,12 +83,12 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         Ring prevRing = GetPrevRing(extendsTunnel, playerTransform);
 
         RayRing hitTestRayRing = new RayRing(prevRing, playerTransform.forward); // get rays for the vertices of a tunnel ring
-        HitInfo hitInfo = TunnelUtils.GetHitInfoFromRays(hitTestRayRing.rays, otherTunnels);
+        HitInfo hitInfo = TunnelUtils.GetHitInfoFromRays(hitTestRayRing.rays, otherTunnels, GameManager.Instance.agentOffset);
 
         // if hit detected, create a new ray that is directed at the center guideline of the hit tunnel
 
-        //Ray ray = new Ray(playerTransform.position, playerTransform.forward);
-        //Debug.DrawRay(ray.origin, ray.direction * GameManager.Instance.agentOffset, Color.red, 100);
+        Ray ray = new Ray(playerTransform.position, playerTransform.forward);
+        Debug.DrawRay(ray.origin, ray.direction * GameManager.Instance.agentOffset, Color.red, 100);
 
         bool isIntersecting = IsIntersect(hitInfo, extendsTunnel, playerTransform);
         bool isFollowing = !isIntersecting && !extendsTunnel;

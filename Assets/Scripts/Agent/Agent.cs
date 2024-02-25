@@ -4,10 +4,17 @@ using System;
 
 public class Agent : MonoBehaviour
 {
+    public Animator animator;
+    public CharacterAnimator charAnimator;
+
+    public const string moveAnimName = "speed";
+    public const string dieAnimName = "isDying";
+
+    protected string[] agentAnimNames = { dieAnimName, moveAnimName };
+
     Coroutine MoveRoutine;
 
     float rotationSpeed = 1;
-    float movementSpeed = 1;
     float continuousRotateSpeed = 10; // complete this rotation faster because it is an interrupting rotation
 
     public float rotationThreshold = 0.1f;
@@ -38,6 +45,7 @@ public class Agent : MonoBehaviour
         isLookInProgress = false;
         isMoveInProgress = false;
         curSegmentForward = DefaultUtils.DefaultVector3;
+        animator = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -63,6 +71,8 @@ public class Agent : MonoBehaviour
         Debug.Log("Move to destination " + targetPosition);
         float startTime = Time.time;
         Vector3 startPosition = transform.position;
+
+        charAnimator.SetAnimationMovement(speed);
 
         while (Time.time - startTime < 1.0f / speed)
         {
@@ -120,6 +130,8 @@ public class Agent : MonoBehaviour
         {
             return;
         }
+
+        charAnimator.SetAnimationMovement(speed);
         if (isContinuous)
         {
             isMoveInProgress = true;

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 
 public abstract class Bot : Agent
@@ -23,11 +24,32 @@ public abstract class Bot : Agent
 
     protected bool hasRoute;
 
+    const string isAttackingAnimName = "isAttacking";
+
+    string[] animNames = { isAttackingAnimName };
+
     protected virtual void Awake()
     {
         hasRoute = false;
         reachedDestination = true;
         SetObjective();
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+
+        string[] allAnimNames = animNames.Concat(agentAnimNames).ToArray();
+        charAnimator = new CharacterAnimator(animator, allAnimNames);
+
+        startTime = Time.time;
+
+        Segment initSegment = this.route.GetInitSegment();
+
+        if (initSegment != null)
+        {
+            AgentManager.Instance.InitTransformSegmentDict(transform, initSegment);
+        }
     }
 
     public void initRoute(Route route)
@@ -58,19 +80,6 @@ public abstract class Bot : Agent
         {
             transform.rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
             Debug.Log("rotate bot " + transform.rotation);
-        }
-    }
-
-    protected override void Start()
-    {
-        base.Start();
-        startTime = Time.time;
-
-        Segment initSegment = this.route.GetInitSegment();
-
-        if (initSegment != null)
-        {
-            AgentManager.Instance.InitTransformSegmentDict(transform, initSegment);
         }
     }
 
