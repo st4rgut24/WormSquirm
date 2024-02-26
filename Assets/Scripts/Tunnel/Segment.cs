@@ -169,7 +169,7 @@ public class Segment
     /// <param name="transform">transform</param>
     /// <param name="position">position to check for bounds</param>
     /// <returns>true if out of bounds</returns>
-    public bool isOutOfBounds(Transform transform, Vector3 position)
+    public bool IsOutOfBounds(Transform transform, Vector3 position)
     {
         if (HasDeadEndCap()) // check if player is close enough to the end of a tunnel
         {

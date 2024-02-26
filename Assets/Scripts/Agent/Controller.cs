@@ -89,7 +89,7 @@ public class Controller
         }
 
         Vector3 projectedPosition = transform.position + translationVector;
-        if (!player.isOutOfBounds(transform, projectedPosition))
+        if (!player.isGoingOutOfBounds(transform, transform.position, projectedPosition))
         {
             changeMovement(projectedPosition, false, 1);
             //transform.Translate(translationVector, Space.World);

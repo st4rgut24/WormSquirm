@@ -52,14 +52,27 @@ public class MainPlayer : Player
     }
 
     /// <summary>
-    /// Is the player outside the bounds of the current segment
+    /// Is the player traveling in a direction that is going out of the segment bounds
     /// </summary>
-    /// <param name="transform">player's transform</param>
-    /// <param name="position">vector3 position</param>
+    /// <param name="position">Player transform</param>
+    /// <param name="originalPosition">player's original position</param>
+    /// <param name="projectedPosition">player's next position</param>
     /// <returns>true if out of bounds</returns>
-    public bool isOutOfBounds(Transform transform, Vector3 position)
+    public bool isGoingOutOfBounds(Transform transform, Vector3 originalPosition, Vector3 projectedPosition)
     {
-        return curSegment.isOutOfBounds(transform, position);
+        bool outOfBounds = curSegment.IsOutOfBounds(transform, projectedPosition);
+
+        if (outOfBounds)
+        {
+            float curPosDist = curSegment.GetClosestDistance(originalPosition);
+            float nextPosDist = curSegment.GetClosestDistance(projectedPosition);
+
+            return nextPosDist > curPosDist;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     /// <summary>

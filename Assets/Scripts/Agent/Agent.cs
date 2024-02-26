@@ -90,6 +90,7 @@ public class Agent : MonoBehaviour
     {
         isMoveInProgress = false;
         StopCoroutine(MoveRoutine);
+        charAnimator.SetAnimationMovement(0);
     }
 
     /// <summary>

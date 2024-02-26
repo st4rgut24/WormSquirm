@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Chaser : Bot
 {
-    protected float stoppingDistance = 2;
+    protected float stoppingDistance = 1.75f;
 
     public enum ChooseStrategy
     {
@@ -52,7 +52,7 @@ public class Chaser : Bot
 
     protected override bool IsReachedFinalDestination(Waypoint finalWP)
     {
-        float distToFinalWP = Vector3.Distance(transform.position, finalWP.position);
+;        float distToFinalWP = Vector3.Distance(transform.position, finalWP.position);
 
         return distToFinalWP <= stoppingDistance;
     }

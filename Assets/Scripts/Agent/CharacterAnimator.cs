@@ -36,6 +36,7 @@ public class CharacterAnimator
     {
         if (animator != null)
         {
+            Debug.Log("Set aniamtion movement for gameobject " + this.animator.gameObject.name + " to speed " + speed);
             animator.SetFloat(speedAnimationId, speed);
         }
     }
@@ -46,8 +47,11 @@ public class CharacterAnimator
     /// <param name="name">name of the animation</param>
     public void TriggerAnimation(string name)
     {
-        int animId = AnimNamesToIds[name];
-        animator.SetTrigger(animId);
+        if (animator != null)
+        {
+            int animId = AnimNamesToIds[name];
+            animator.SetTrigger(animId);
+        }
     }
 }
 

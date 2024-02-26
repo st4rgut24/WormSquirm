@@ -24,7 +24,7 @@ public abstract class Bot : Agent
 
     protected bool hasRoute;
 
-    const string isAttackingAnimName = "isAttacking";
+    protected const string isAttackingAnimName = "isAttacking";
 
     string[] animNames = { isAttackingAnimName };
 
@@ -97,6 +97,7 @@ public abstract class Bot : Agent
 
         if (IsReachedFinalDestination(finalWP))
         {
+            charAnimator.TriggerAnimation(isAttackingAnimName);
             Debug.Log("Reached final waypoint");
             ReachDestination();
         }
