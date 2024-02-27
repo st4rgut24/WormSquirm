@@ -63,13 +63,6 @@ public class AgentManager : Singleton<AgentManager>
     {
         Agent movedAgent = transform.gameObject.GetComponent<Agent>();
         movedAgent.UpdateSegment(segment);
-
-        //if (IsControlledMovement(transform, segment))
-        //{
-        //   Vector3 controlledMoveDest = segment.GetClosestPointOnSegmentEdge(transform.position);
-        //    movedAgent.ChangeMovement(controlledMoveDest, true, 1);
-        //}
-
         float xRot = DirectionUtils.GetUpDownRotation(transform.forward, movedAgent.curSegmentForward);
         Vector3 rotation = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
         movedAgent.ChangeRotation(rotation, true);

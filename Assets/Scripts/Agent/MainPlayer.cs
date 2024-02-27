@@ -60,19 +60,8 @@ public class MainPlayer : Player
     /// <returns>true if out of bounds</returns>
     public bool isGoingOutOfBounds(Transform transform, Vector3 originalPosition, Vector3 projectedPosition)
     {
-        bool outOfBounds = curSegment.IsOutOfBounds(transform, projectedPosition);
-
-        if (outOfBounds)
-        {
-            float curPosDist = curSegment.GetClosestDistance(originalPosition);
-            float nextPosDist = curSegment.GetClosestDistance(projectedPosition);
-
-            return nextPosDist > curPosDist;
-        }
-        else
-        {
-            return false;
-        }
+        bool outOfBounds = curSegment.IsOutOfBounds(transform, originalPosition, projectedPosition);
+        return outOfBounds;
     }
 
     /// <summary>

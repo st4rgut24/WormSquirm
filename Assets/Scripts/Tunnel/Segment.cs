@@ -19,7 +19,7 @@ public class Segment
 	//List<GameObject> prevTunnel;
 	List<GameObject> nextTunnel;
 
-    List<Guideline> guidelineList;
+    List<Guideline> segmentLines;
 
 	public Segment(SegmentGo segmentGo, Ring ring, Ring prevRing)
 	{
@@ -33,16 +33,16 @@ public class Segment
 
 		this.nextTunnel = new List<GameObject>();
 
-        this.guidelineList = new List<Guideline>();
+        this.segmentLines = new List<Guideline>();
         centerLine = new Guideline(this.startRingCenter, this.endRingCenter);
         Debug.DrawRay(centerLine.start, centerLine.end - centerLine.start, Color.green, 300);
 
-        this.guidelineList.Add(centerLine);
+        this.segmentLines.Add(centerLine);
     }
 
     public void AddGuideline(Guideline line)
     {
-        guidelineList.Add(line);
+        segmentLines.Add(line);
     }
 
     public Vector3 GetClosestPointToCenterline(Vector3 otherPoint)
@@ -144,12 +144,12 @@ public class Segment
     /// </summary>
     /// <param name="point">point</param>
     /// <returns></returns>
-    public float GetClosestDistance(Vector3 point)
+    public float GetClosestDistance(Vector3 point, List<Guideline> guidelines)
     {
         float closestDist = Mathf.Infinity;
         Vector3 closestSegmentPoint = DefaultUtils.DefaultVector3;
 
-        guidelineList.ForEach((guideline) =>
+        guidelines.ForEach((guideline) =>
         {
             Vector3 segmentPoint = guideline.GetClosestPoint(point);
             float dist = Vector3.Distance(point, segmentPoint);
@@ -169,23 +169,27 @@ public class Segment
     /// <param name="transform">transform</param>
     /// <param name="position">position to check for bounds</param>
     /// <returns>true if out of bounds</returns>
-    public bool IsOutOfBounds(Transform transform, Vector3 position)
+    public bool IsOutOfBounds(Transform transform, Vector3 originalPos, Vector3 position)
     {
         if (HasDeadEndCap()) // check if player is close enough to the end of a tunnel
         {
-            float distToEndCap = Vector3.Distance(position, endRingCenter);
+            //float distToEndCap = Vector3.Distance(position, endRingCenter);
+            float curDistToEndCap = GetClosestDistance(originalPos, endRing.GetRingLines());
+
+            float DistToEndCap = GetClosestDistance(position, endRing.GetRingLines());
+            Debug.Log("In Tunnel " + tunnel.name + ". Projected Distance to end cap " + DistToEndCap + ". Should be less than " + SegmentManager.Instance.MinDistFromCap + " Current dist is " + curDistToEndCap);
 
             //Debug.Log("Distance to end cap is " + distToEndCap + ". Min dist to end cap is " + SegmentManager.Instance.MinDistFromCap);
             // TODO: There is a situation where an intersecting tunnel is within the min distance from cap, which immobilizes the player
             // to remedy this, and situations like this, certain intersections should not be possible (perhaps by creating a unbreakable endcap?)
-            if (distToEndCap <= SegmentManager.Instance.MinDistFromCap)
+            if (DistToEndCap <= SegmentManager.Instance.MinDistFromCap)
             {
                 return true;
             }
         }
-        float dist = GetClosestDistance(position);
-
-        Debug.Log("In Tunnel " + tunnel.name + ". Distance to center line is " + dist + ". Should be less than " + SegmentManager.Instance.MinDistFromCenterLine);
+        float dist = GetClosestDistance(position, segmentLines);
+        float curDist = GetClosestDistance(originalPos, segmentLines);
+        Debug.Log("In Tunnel " + tunnel.name + ". Projected Distance to center line is " + dist + ". Should be less than " + SegmentManager.Instance.MinDistFromCenterLine + " Current dist is " + curDist);
         return dist >= SegmentManager.Instance.MinDistFromCenterLine; // divide by 2 because the moveable area is smaller on bottom plane of the tunnel
     }
 

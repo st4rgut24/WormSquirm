@@ -17,6 +17,8 @@ public class Controller
     Player.ChangeRotationDelegate changeRotation;
     Player.ChangeMoveDelegate changeMovement;
 
+    Vector3 lastInBoundsPosition;
+
     public float rotationSpeed = .5f;
     public float acceleration = 1;
     public float deceleration = 2f; // Adjust the deceleration factor
@@ -89,14 +91,15 @@ public class Controller
         }
 
         Vector3 projectedPosition = transform.position + translationVector;
+
         if (!player.isGoingOutOfBounds(transform, transform.position, projectedPosition))
         {
             changeMovement(projectedPosition, false, 1);
-            //transform.Translate(translationVector, Space.World);
+            lastInBoundsPosition = projectedPosition;
         }
         else
         {
-            Debug.Log("Clamp position");
+            changeMovement(lastInBoundsPosition, false, 0);
             currentSpeed = 0;
         }
 

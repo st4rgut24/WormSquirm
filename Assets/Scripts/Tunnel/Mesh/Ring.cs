@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Ring
@@ -10,6 +11,8 @@ public class Ring
     public Vector3 normal;
     public Vector3 center;
 
+    List<Guideline> vertexLineList;
+
     public Ring(float radius, int vertexCount, Vector3 normal, Vector3 center, float? noiseScale)
 	{
         this.radius = radius;
@@ -17,8 +20,15 @@ public class Ring
         this.center = center;
         this.normal = normal;
 
+        vertexLineList = new List<Guideline>();
         Debug.Log("Center is " + center);
-        setVertices(vertexCount, normal, noiseScale);
+        Vector3[] vertices = SetVertices(vertexCount, normal, noiseScale);
+        SetRingGuidelines(vertices, center);
+    }
+
+    public List<Guideline> GetRingLines()
+    {
+        return vertexLineList;
     }
 
     public Vector3 GetCenter()
@@ -31,7 +41,22 @@ public class Ring
         return normal;
     }
 
-    void setVertices(int vertexCount, Vector3 normal, float? noiseScale)
+    /// <summary>
+    /// Set guidelines defining the plane of the ring
+    /// guidelines radiate from the center to each vertex of the ring
+    /// </summary>
+    /// <param name="vertices">vertices of the ring</param>
+    void SetRingGuidelines(Vector3[] vertices, Vector3 center)
+    {
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            Vector3 vertex = vertices[i];
+            Guideline guideline = new Guideline(center, vertex);
+            vertexLineList.Add(guideline);
+        }
+    }
+
+    Vector3[] SetVertices(int vertexCount, Vector3 normal, float? noiseScale)
     {
         Vector3 vector2 = normal + new Vector3(1, 1, 1);
         Vector3 planeVector = Vector3.Cross(normal, vector2).normalized;
@@ -50,6 +75,8 @@ public class Ring
             // Debug.Log("point " + point + " at angle " + angle);
             vertices[i] = point;
         }
+
+        return vertices;
     }
 
     float getNoise(int index, float? noiseScale)

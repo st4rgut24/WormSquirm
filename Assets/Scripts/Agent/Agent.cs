@@ -140,6 +140,7 @@ public class Agent : MonoBehaviour
         }
         else
         {
+            Debug.Log("Set pos to " + destination.ToString("F5"));
             transform.position = destination;
         }
     }
