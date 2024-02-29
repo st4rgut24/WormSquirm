@@ -14,14 +14,13 @@ public class Agent : MonoBehaviour
 
     Coroutine MoveRoutine;
 
-    float rotationSpeed = 1;
-    float continuousRotateSpeed = 10; // complete this rotation faster because it is an interrupting rotation
+    public float rotationSpeed;
 
     public float rotationThreshold = 0.1f;
     public float distanceThreshold = 0.1f;
 
-    Vector3 lookRotation = DefaultUtils.DefaultVector3;
-    bool isLookInProgress; // a look is in progress that must complete before any other looks can be processed
+    Quaternion targetRotation;
+
     protected bool isMoveInProgress; // a move is in progress that must complete before any other movements can be processed
 
     public static event Action<Transform, Vector3> OnDig;
@@ -30,7 +29,6 @@ public class Agent : MonoBehaviour
 
     public bool isDigging;
 
-    Quaternion targetRotation;
     Vector3 targetPosition;
 
     Vector3 startNotifyPosition;
@@ -42,7 +40,6 @@ public class Agent : MonoBehaviour
     protected virtual void Start()
 	{
         startNotifyPosition = transform.position;
-        isLookInProgress = false;
         isMoveInProgress = false;
         curSegmentForward = DefaultUtils.DefaultVector3;
         animator = GetComponent<Animator>();
@@ -51,24 +48,21 @@ public class Agent : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
 	{
-        if (isLookInProgress)
-        {
-            isLookInProgress = Rotate(lookRotation, continuousRotateSpeed);
-        }
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         // check if player's rotation changes based on direction within tunnel
-        else if (curSegment != null && !DirectionUtils.isDirectionsAligned(transform.forward, curSegmentForward)) // for ex. if player has turned around in the current tunnel
+        if (curSegment != null && !DirectionUtils.isDirectionsAligned(transform.forward, curSegmentForward)) // for ex. if player has turned around in the current tunnel
         {
             // if traveling to the other end of the segment, update the segment forward vector
             curSegmentForward = -curSegmentForward;
             float xRot = DirectionUtils.GetUpDownRotation(transform.forward, curSegment.forward);
-            Vector3 verticalRotate = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
-            ChangeRotation(verticalRotate, true);
+            //Vector3 verticalRotate = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
+            // Rotations happen over several frames until playerr reaches target destination
+            ChangeVerticalRotation(xRot, Consts.rotationSpeed);
         }
     }
 
     IEnumerator MoveToDestination(Vector3 targetPosition, float speed)
     {
-        Debug.Log("Move to destination " + targetPosition);
         float startTime = Time.time;
         Vector3 startPosition = transform.position;
 
@@ -103,21 +97,47 @@ public class Agent : MonoBehaviour
         curSegmentForward = DirectionUtils.isDirectionsAligned(transform.forward, curSegment.forward) ? segment.forward : -segment.forward;
     }
 
-    bool Rotate(Vector3 rotation, float rotateSpeed)
+    /// <summary>
+    /// Rotate to the point, destination
+    /// </summary>
+    /// <param name="destination"></param>
+    /// <param name="rotateSpeed"></param>
+    /// <returns></returns>
+    public void ChangeVerticalRotation(float vertRot, float? rotateSpeed=null)
     {
-        // Create a rotation that points in the specified direction
-        Quaternion targetRotation = Quaternion.Euler(rotation);
-
+        Debug.Log("Change vertical rotation to " + vertRot + " at speed " + rotateSpeed);
+        Vector3 rot = new Vector3(vertRot, this.targetRotation.eulerAngles.y, this.targetRotation.eulerAngles.z);
+        ChangeRotation(rot, rotateSpeed);
         // Check if the current rotation is close enough to the target rotation
-        bool isInProgress = Quaternion.Angle(transform.rotation, targetRotation) > rotationThreshold;
 
-        if (isInProgress)
-        {
-            // Interpolate between the current rotation and the target rotation
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
-        }
+        //bool isInProgress = Quaternion.Angle(transform.rotation, targetRotation) > rotationThreshold;
 
-        return isInProgress;
+        //if (isInProgress)
+        //{
+        //    float speed = rotateSpeed.GetValueOrDefault(1 / Time.deltaTime); // default value results in instant rotation
+        //    // Interpolate between the current rotation and the target rotation
+        //    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation,speed * Time.deltaTime);
+        //}
+
+        //return isInProgress;
+    }
+
+    public void ChangeHorizontalRotation(float horRot, float? rotateSpeed=null)
+    {
+        Vector3 rot = new Vector3(this.targetRotation.eulerAngles.x, horRot, this.targetRotation.eulerAngles.z);
+        ChangeRotation(rot, rotateSpeed);
+    }
+
+    public void ChangeRotation(Vector3 targetRotation, float? rotateSpeed = null)
+    {
+        this.targetRotation = Quaternion.Euler(targetRotation);
+        this.rotationSpeed = rotateSpeed.GetValueOrDefault(1 / Time.deltaTime);
+    }
+
+    public void ChangeRotation(Quaternion targetRotation, float? rotateSpeed = null)
+    {
+        this.targetRotation = targetRotation;
+        this.rotationSpeed = rotateSpeed.GetValueOrDefault(1 / Time.deltaTime);
     }
 
     /// <summary>
@@ -140,7 +160,6 @@ public class Agent : MonoBehaviour
         }
         else
         {
-            Debug.Log("Set pos to " + destination.ToString("F5"));
             transform.position = destination;
         }
     }
@@ -150,27 +169,25 @@ public class Agent : MonoBehaviour
     /// </summary>
     /// <param name="targetRotation">the target rotation that sets rotation along the non-zero axes</param>
     /// <param name="isContinuous">Will this rotation happen over multiple frames</param>
-    public void ChangeRotation(Vector3 targetRotation, bool isContinuous)
-    {
-        if (isLookInProgress)
-        {
-            Debug.Log("Look Rotation blocked because another look is in progress");
-            return;
-        }
+    //public void ChangeRotation(Quaternion targetRotation, bool isContinuous)
+    //{
+    //    if (isLookInProgress)
+    //    {
+    //        Debug.Log("Look Rotation blocked because another look is in progress");
+    //        return;
+    //    }
 
-        lookRotation = targetRotation;
+    //    lookRotation = targetRotation;
 
-        //Debug.Log("Look Rotation change to " + targetRotation);
-
-        if (isContinuous) // a continuous rotation happens over multiple frames, until it is complete we set the block flag to true
-        {
-            isLookInProgress = true;
-        }
-        else
-        {
-            Rotate(lookRotation, rotationSpeed); // do a rotation in a single frame
-        }
-    }
+    //    if (isContinuous) // a continuous rotation happens over multiple frames, until it is complete we set the block flag to true
+    //    {
+    //        isLookInProgress = true;
+    //    }
+    //    else
+    //    {
+    //        isLookInProgress = RotateToTarget(lookRotation, rotationSpeed); // do a rotation in a single frame
+    //    }
+    //}
 
     protected void notifyDig(Vector3 digDirection)
     {

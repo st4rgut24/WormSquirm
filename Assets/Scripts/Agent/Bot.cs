@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UIElements;
 
 public abstract class Bot : Agent
 {
@@ -62,7 +64,9 @@ public abstract class Bot : Agent
             // initialize the direction bot is facing
             Waypoint CurWP = route.GetCurWaypoint();
             Waypoint NextWP = route.GetNextWaypoint();
-            this.faceDirection(CurWP.position, NextWP.position);
+            //this.FaceMovementDirection(CurWP.position, NextWP.position);
+            Vector3 initDir = (NextWP.position - CurWP.position).normalized;
+            transform.rotation = Quaternion.LookRotation(initDir, Vector3.up);
         }
 
         this.route = route;
@@ -71,15 +75,16 @@ public abstract class Bot : Agent
     /// <summary>
     /// Face the direction of travel
     /// </summary>
-    void faceDirection(Vector3 start, Vector3 dest)
+    void FaceMovementDirection(Vector3 start, Vector3 dest)
     {
         Vector3 moveDirection = (dest - start).normalized;
 
         // Rotate the bot to face the direction it is moving in
         if (moveDirection != Vector3.zero)
         {
-            transform.rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+            Quaternion rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
             Debug.Log("rotate bot " + transform.rotation);
+            ChangeRotation(rotation, Consts.rotationSpeed);
         }
     }
 
@@ -126,7 +131,9 @@ public abstract class Bot : Agent
     private void Move(Waypoint wp)
     {
         Vector3 destination = wp.position;
-        faceDirection(transform.position, destination);
+
+        FaceMovementDirection(transform.position, destination);
+
         ChangeMovement(destination, true, velocity);
     }
 }

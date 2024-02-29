@@ -45,7 +45,6 @@ public class DirectionUtils
     {
         Vector3 direction = isDirectionsAligned(transformForward, segmentForward) ? segmentForward : -segmentForward; // go opposite direction of segment if facing in that general direction
         //Debug.Log("Angle between player and segment forward is " + angle + " Direction in new segment is " + direction);
-        Quaternion curRotation = Quaternion.LookRotation(direction);
         Quaternion rotation = Quaternion.LookRotation(direction);
         //return new Vector3(rotation.eulerAngles.x, 0, 0);
         return rotation.eulerAngles.x;

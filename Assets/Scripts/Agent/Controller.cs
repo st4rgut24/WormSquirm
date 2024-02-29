@@ -14,12 +14,11 @@ public class Controller
     Transform transform;
     MainPlayer player;
 
-    Player.ChangeRotationDelegate changeRotation;
+    Player.ChangeSideRotation changeRotation;
     Player.ChangeMoveDelegate changeMovement;
 
     Vector3 lastInBoundsPosition;
 
-    public float rotationSpeed = .5f;
     public float acceleration = 1;
     public float deceleration = 2f; // Adjust the deceleration factor
     private float currentSpeed = 0f;
@@ -28,7 +27,7 @@ public class Controller
     public float movementThreshold = 1; // the minimum magnitude of vector to move a player
     public float rotationThreshold = 30; // minimum rotation in degrees to throttle the movement speed of player
 
-    public Controller(GameObject playerGo, Player.ChangeRotationDelegate changeRotation, Player.ChangeMoveDelegate changeMovement)
+    public Controller(GameObject playerGo, Player.ChangeSideRotation changeRotation, Player.ChangeMoveDelegate changeMovement)
     {
         this.transform = playerGo.transform;
         this.player = playerGo.GetComponent<MainPlayer>();
@@ -153,7 +152,8 @@ public class Controller
     public void Rotate(Vector3 rawInput)
     {
         float angle = GetAngleFromInput(rawInput);
-        Vector3 sideToSideRotation = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y + angle, transform.eulerAngles.z);
-        changeRotation(sideToSideRotation, false); 
+        float horRot = transform.eulerAngles.y + angle * .1f;
+        //Vector3 sideToSideRotation = new Vector3(transform.eulerAngles.x, , transform.eulerAngles.z);
+        changeRotation(horRot, Consts.rotationSpeed); 
     }
 }

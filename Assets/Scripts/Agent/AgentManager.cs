@@ -64,30 +64,11 @@ public class AgentManager : Singleton<AgentManager>
         Agent movedAgent = transform.gameObject.GetComponent<Agent>();
         movedAgent.UpdateSegment(segment);
         float xRot = DirectionUtils.GetUpDownRotation(transform.forward, movedAgent.curSegmentForward);
-        Vector3 rotation = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
-        movedAgent.ChangeRotation(rotation, true);
-        Debug.Log("Enter new segment " + segment.tunnel.name + ". Target rotation is " + rotation);
+        //Vector3 rotation = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
+        movedAgent.ChangeVerticalRotation(xRot, Consts.rotationSpeed); // instantaneous update
+        //Debug.Log("Enter new segment " + segment.tunnel.name + ". Target rotation is " + rotation);
         TransformSegmentDict[transform] = segment;
     }
-
-    public void OnAddTunnelFailure(Transform transform)
-    {
-
-    }
-
-    //public bool IsControlledMovement(Transform transform, Segment segment)
-    //{
-    //    if (TransformSegmentDict.ContainsKey(transform))
-    //    {
-    //        Segment prevSegment = TransformSegmentDict[transform];
-
-    //        return TunnelManager.Instance.IsIntersectingTunnel(segment.tunnel, prevSegment.tunnel);
-    //    }
-    //    else
-    //    {
-    //        return false;
-    //    }
-    //}
 
     protected GameObject CreateAgent(GameObject agentGo)
     {

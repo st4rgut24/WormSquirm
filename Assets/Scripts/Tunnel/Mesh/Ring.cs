@@ -22,8 +22,21 @@ public class Ring
 
         vertexLineList = new List<Guideline>();
         Debug.Log("Center is " + center);
-        Vector3[] vertices = SetVertices(vertexCount, normal, noiseScale);
+        float angularOffset = GetAngularOffset(vertexCount);
+        Vector3[] vertices = SetVertices(vertexCount, normal, angularOffset, noiseScale);
         SetRingGuidelines(vertices, center);
+    }
+
+    /// <summary>
+    /// Get the number of degrees to rotate the shape so that its side is parallel with the ground
+    /// </summary>
+    /// <param name="vertexCount">vertices or sides per shape</param>
+    /// <returns>offset angle</returns>
+    public float GetAngularOffset(int vertexCount)
+    {
+        float anglePerSide = Consts.FullRevolution / vertexCount;
+
+        return anglePerSide / 2;
     }
 
     public List<Guideline> GetRingLines()
@@ -56,7 +69,7 @@ public class Ring
         }
     }
 
-    Vector3[] SetVertices(int vertexCount, Vector3 normal, float? noiseScale)
+    Vector3[] SetVertices(int vertexCount, Vector3 normal, float angleOffset, float? noiseScale)
     {
         Vector3 vector2 = normal + new Vector3(1, 1, 1);
         Vector3 planeVector = Vector3.Cross(normal, vector2).normalized;
@@ -67,7 +80,7 @@ public class Ring
             float noise = getNoise(i, noiseScale);
 
             float tunnelRadiusAtPoint = radius + noise;
-            float angle = Mathf.Lerp(0, 360f, i / (float)vertexCount);
+            float angle = Mathf.Lerp(0, Consts.FullRevolution, i / (float)vertexCount) + angleOffset;
 
             Quaternion rotation = Quaternion.AngleAxis(angle, normal);
             // Debug.Log("plane vector " + planeVector);

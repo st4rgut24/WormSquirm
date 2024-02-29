@@ -5,7 +5,7 @@ using System.Linq;
 
 public class Player : Agent
 {
-    public delegate void ChangeRotationDelegate(Vector3 rotation, bool isContinuous);
+    public delegate void ChangeSideRotation(float horRot, float? speed);
     public delegate void ChangeMoveDelegate(Vector3 destination, bool isContinuous, float speed);
 
     public const string swingAnimName = "isSwinging";
