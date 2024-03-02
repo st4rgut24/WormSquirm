@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Chaser : Bot
 {
+    public const float damageAmt = 10f;
+
     protected float stoppingDistance = 1.75f;
 
     public enum ChooseStrategy
@@ -14,6 +16,8 @@ public class Chaser : Bot
     protected override void Awake()
     {
         botType = BotManager.BotType.Chaser;
+
+        damage = damageAmt; // amount of damage this type of Bot can inflict
         base.Awake();
     }
 

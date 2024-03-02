@@ -28,6 +28,8 @@ public abstract class Bot : Agent
 
     protected const string isAttackingAnimName = "isAttacking";
 
+    protected float damage = 0; // can be overriden in child classes
+
     string[] animNames = { isAttackingAnimName };
 
     protected virtual void Awake()
@@ -35,6 +37,8 @@ public abstract class Bot : Agent
         hasRoute = false;
         reachedDestination = true;
         SetObjective();
+
+        health = new AgentHealth(BotManager.BotHealth);
     }
 
     protected override void Start()
@@ -52,6 +56,16 @@ public abstract class Bot : Agent
         {
             AgentManager.Instance.InitTransformSegmentDict(transform, initSegment);
         }
+    }
+
+    /// <summary>
+    /// Called when bot is inflicting damage on objective gameobject
+    /// This is a trigger for the event added to the attack animation
+    /// </summary>
+    public void TriggerInflictDamage()
+    {
+        Agent attackedAgent = objective.GetComponent<Agent>();
+        InflictDamage(damage, attackedAgent);
     }
 
     public void initRoute(Route route)

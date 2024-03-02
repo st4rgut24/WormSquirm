@@ -16,6 +16,8 @@ public class BotManager : AgentManager
     public GameObject Chaser;
     public GameObject SimpBot;
 
+    public const float BotHealth = 10;
+
     public int maxBots = 1; // the upper limit of active Bots in the game
     
     public float spawnFrequency = 15; // the interval between Bot spawns

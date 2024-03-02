@@ -7,6 +7,8 @@ public class Agent : MonoBehaviour
     public Animator animator;
     public CharacterAnimator charAnimator;
 
+    protected AgentHealth health;
+
     public const string moveAnimName = "speed";
     public const string dieAnimName = "isDying";
 
@@ -59,6 +61,12 @@ public class Agent : MonoBehaviour
             // Rotations happen over several frames until playerr reaches target destination
             ChangeVerticalRotation(xRot, Consts.rotationSpeed);
         }
+    }
+
+    public void InflictDamage(float damage, Agent agent)
+    {
+        AgentHealth attackedAgentHealth = agent.health;
+        attackedAgentHealth.TakeDamage(damage);
     }
 
     IEnumerator MoveToDestination(Vector3 targetPosition, float speed)

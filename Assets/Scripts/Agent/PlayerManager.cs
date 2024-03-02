@@ -12,6 +12,8 @@ public class PlayerManager : AgentManager
 
     public List<GameObject> Players;
 
+    public const float PlayerHealth = 100;
+
     Vector3 defaultSpawnLoc = new Vector3(26, 10, 7);
 
     protected override void Awake()
