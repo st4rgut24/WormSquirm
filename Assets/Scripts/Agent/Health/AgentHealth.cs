@@ -3,7 +3,7 @@
 public class AgentHealth
 {
     public float maxHealth;  // Maximum health of the player
-    protected float currentHealth;  // Current health of the player
+    public float currentHealth;  // Current health of the player
 
     public AgentHealth(float maxHealth)
     {
@@ -11,25 +11,20 @@ public class AgentHealth
         currentHealth = maxHealth;
     }
 
-    // Method to reduce player's health
-    public virtual void TakeDamage(float damageAmount)
+    // Method to reduce player's health,
+    // returns if the player's health has reduced to zero
+    public virtual bool ReduceHealth(float damageAmount)
     {
         currentHealth -= damageAmount;
 
         // Ensure health doesn't go below zero
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
 
-        // Check if player is dead
-        if (currentHealth == 0f)
-        {
-            // Perform actions when player is dead, e.g., game over
-            // You can add your own logic here
-            Debug.Log("Player is dead!");
-        }
+        return currentHealth == 0f;
     }
 
     // Method to increase player's health
-    protected virtual void Heal(float healAmount)
+    public virtual void IncreaseHealth(float healAmount)
     {
         currentHealth += healAmount;
 

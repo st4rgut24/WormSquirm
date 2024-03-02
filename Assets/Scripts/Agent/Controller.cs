@@ -35,39 +35,39 @@ public class Controller
         this.changeMovement = changeMovement;
     }
 
-    /// <summary>
-    /// Get translation vector after accelerating
-    /// </summary>
-    /// <param name="forwardDirection">forward facing vector</param>
-    /// <returns>normalized vector to translate player</returns>
-    public Vector3 GetAccelerateTranslation()
-    {
-        // Accelerate the player in the current direction
-        currentSpeed += acceleration * Time.deltaTime;
-        float moveDistance = currentSpeed * Time.deltaTime;
+    ///// <summary>
+    ///// Get translation vector after accelerating
+    ///// </summary>
+    ///// <param name="forwardDirection">forward facing vector</param>
+    ///// <returns>normalized vector to translate player</returns>
+    //public Vector3 GetAccelerateTranslation()
+    //{
+    //    // Accelerate the player in the current direction
+    //    currentSpeed += acceleration * Time.deltaTime;
+    //    float moveDistance = currentSpeed * Time.deltaTime;
 
-        return transform.forward * moveDistance;
-        //return transform.forward * currentSpeed;
-    }
+    //    return transform.forward * moveDistance;
+    //    //return transform.forward * currentSpeed;
+    //}
 
-    Vector3 GetDecelerateTranslation()
-    {
-        // Decelerate the player when the spacebar is not pressed
-        currentSpeed -= deceleration * Time.deltaTime;
-        currentSpeed = Mathf.Max(currentSpeed, 0f); // Ensure speed doesn't go below zero
-        float moveDistance = currentSpeed * Time.deltaTime;
+    //Vector3 GetDecelerateTranslation()
+    //{
+    //    // Decelerate the player when the spacebar is not pressed
+    //    currentSpeed -= deceleration * Time.deltaTime;
+    //    currentSpeed = Mathf.Max(currentSpeed, 0f); // Ensure speed doesn't go below zero
+    //    float moveDistance = currentSpeed * Time.deltaTime;
 
-        // If the player is moving, translate the player to simulate deceleration
-        if (currentSpeed > 0f)
-        {
-            return transform.forward * moveDistance;
-            //return transform.forward * currentSpeed;
-        }
-        else
-        {
-            return DefaultUtils.DefaultVector3;
-        }
-    }
+    //    // If the player is moving, translate the player to simulate deceleration
+    //    if (currentSpeed > 0f)
+    //    {
+    //        return transform.forward * moveDistance;
+    //        //return transform.forward * currentSpeed;
+    //    }
+    //    else
+    //    {
+    //        return DefaultUtils.DefaultVector3;
+    //    }
+    //}
 
     /// <summary>
     /// Handle input via controls
@@ -82,18 +82,18 @@ public class Controller
 
     public void Move(Vector2 rawInput)
     {
-        Vector3 translationVector = GetTranslation(rawInput);
+        Vector3 forwardMovement = GetForwardMovement();
             
-        if (translationVector == DefaultUtils.DefaultVector3)
+        if (forwardMovement == DefaultUtils.DefaultVector3)
         {
             return;
         }
 
-        Vector3 projectedPosition = transform.position + translationVector;
+        Vector3 projectedPosition = transform.position + forwardMovement;
 
         if (!player.isGoingOutOfBounds(transform, transform.position, projectedPosition))
         {
-            changeMovement(projectedPosition, false, 1);
+            changeMovement(projectedPosition, false, currentSpeed);
             lastInBoundsPosition = projectedPosition;
         }
         else
@@ -107,18 +107,15 @@ public class Controller
 
     /// <summary>
     /// Get projected movement in the player's forward direction
-    /// </summary>
-    /// <param name="inputMovement">vector representing movement input</param>
-    public Vector3 GetTranslation(Vector2 inputMovement)
+    /// </summary> movement input</param>
+    public Vector3 GetForwardMovement()
     {
-        if (currentSpeed < maxSpeed)
-        {
-            return GetAccelerateTranslation();
-        }
-        else
-        {
-            return GetDecelerateTranslation();
-        }
+        // todo: check that our projection of player's next position is where the player actually will be
+        currentSpeed = this.player.HasStamina() ? Consts.RunningSpeed : Consts.WalkingSpeed;
+        float moveDistance = currentSpeed * Time.deltaTime;
+
+        return transform.forward * moveDistance;
+        //return transform.forward * currentSpeed;
     }
 
     /// <summary>

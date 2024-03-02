@@ -4,29 +4,31 @@ using UnityEngine.UI;
 
 public class PlayerHealth : AgentHealth
 {
-    public Slider slider;  // Reference to the UI Slider for the health bar
+    public Slider healthSlider;  // Reference to the UI Slider for the health bar
 
-    public PlayerHealth(float maxHealth) : base(maxHealth)
+    public PlayerHealth(string sliderGoName, float maxHealth) : base(maxHealth)
     {
-        slider = GameObject.Find("HealthBar").GetComponent<Slider>();
+        healthSlider = GameObject.Find(sliderGoName).GetComponent<Slider>();
     }
 
     // Method to update the health bar with the current health value
     void UpdateHealthBar()
     {
-        slider.value = currentHealth / maxHealth;
+        healthSlider.value = currentHealth / maxHealth;
     }
 
-    public override void TakeDamage(float damageAmount)
+    public override bool ReduceHealth(float damageAmount)
     {
-        base.TakeDamage(damageAmount);
+        bool isDead = base.ReduceHealth(damageAmount);
 
         UpdateHealthBar();
+
+        return isDead;
     }
 
-    protected override void Heal(float healAmount)
+    public override void IncreaseHealth(float healAmount)
     {
-        base.Heal(healAmount);
+        base.IncreaseHealth(healAmount);
 
         UpdateHealthBar();
     }

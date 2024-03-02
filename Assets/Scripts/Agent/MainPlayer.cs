@@ -17,6 +17,14 @@ public class MainPlayer : Player
 
     bool isPositionClamped;
 
+    protected PlayerHealth playerStamina;
+
+    private void Awake()
+    {
+        health = new PlayerHealth(Consts.HealthSlider, PlayerManager.PlayerHealth);
+        playerStamina = new PlayerHealth(Consts.StaminaSlider, PlayerManager.PlayerHealth);
+    }
+
     private void OnEnable()
     {
         Pickaxe.Dig += HandleDig;
@@ -31,7 +39,7 @@ public class MainPlayer : Player
         GameObject joystickGo = GameObject.Find("Variable Joystick");
         joystick = joystickGo.GetComponent<Joystick>();
 
-        controller = new Controller(gameObject, new ChangeSideRotation(ChangeHorizontalRotation), new ChangeMoveDelegate(ChangeMovement));
+        controller = new Controller(gameObject, new ChangeSideRotation(ChangeHorizontalRotation), new ChangeMoveDelegate(ChangePlayerMovement));
 
         isPositionClamped = false;
     }
@@ -44,11 +52,26 @@ public class MainPlayer : Player
         {
             Vector2 rawInput = joystick.GetInput();
             controller.HandleInput(rawInput);
+
+            playerStamina.ReduceHealth(Consts.ReduceStaminaAmt);
         }
         else
         {
             ChangeMovement(transform.position, false, 0);
+            playerStamina.IncreaseHealth(Consts.ReduceStaminaAmt);
         }
+    }
+
+    public bool HasStamina()
+    {
+        return playerStamina.currentHealth > 0;
+    }
+
+    public void ChangePlayerMovement(Vector3 destination, bool isContinuous, float speed)
+    {
+        // adjust the speed based on stamina (get this from player health
+
+        ChangeMovement(destination, isContinuous, speed);
     }
 
     /// <summary>

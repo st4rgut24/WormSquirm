@@ -66,7 +66,9 @@ public class Agent : MonoBehaviour
     public void InflictDamage(float damage, Agent agent)
     {
         AgentHealth attackedAgentHealth = agent.health;
-        attackedAgentHealth.TakeDamage(damage);
+
+        // TODO: send event so the attacked agent reduce his own health
+        attackedAgentHealth.ReduceHealth(damage);
     }
 
     IEnumerator MoveToDestination(Vector3 targetPosition, float speed)
@@ -91,7 +93,12 @@ public class Agent : MonoBehaviour
     public void AbortMovement()
     {
         isMoveInProgress = false;
-        StopCoroutine(MoveRoutine);
+
+        if (MoveRoutine != null)
+        {
+            StopCoroutine(MoveRoutine);
+        }
+
         charAnimator.SetAnimationMovement(0);
     }
 
@@ -150,7 +157,7 @@ public class Agent : MonoBehaviour
 
     /// <summary>
     /// Move in a direction
-    /// </summary>
+    /// </summary>  
     /// <param name="destination">final destination</param>
     /// <param name="isContinuous">Will this movement happen over multiple frames</param>
     public void ChangeMovement(Vector3 destination, bool isContinuous, float speed)
@@ -171,31 +178,6 @@ public class Agent : MonoBehaviour
             transform.position = destination;
         }
     }
-
-    /// <summary>
-    /// Change the target rotation
-    /// </summary>
-    /// <param name="targetRotation">the target rotation that sets rotation along the non-zero axes</param>
-    /// <param name="isContinuous">Will this rotation happen over multiple frames</param>
-    //public void ChangeRotation(Quaternion targetRotation, bool isContinuous)
-    //{
-    //    if (isLookInProgress)
-    //    {
-    //        Debug.Log("Look Rotation blocked because another look is in progress");
-    //        return;
-    //    }
-
-    //    lookRotation = targetRotation;
-
-    //    if (isContinuous) // a continuous rotation happens over multiple frames, until it is complete we set the block flag to true
-    //    {
-    //        isLookInProgress = true;
-    //    }
-    //    else
-    //    {
-    //        isLookInProgress = RotateToTarget(lookRotation, rotationSpeed); // do a rotation in a single frame
-    //    }
-    //}
 
     protected void notifyDig(Vector3 digDirection)
     {

@@ -13,11 +13,6 @@ public class Player : Agent
 
     string[] animNames = { swingAnimName, throwAnimName };
 
-    private void Awake()
-    {
-        health = new PlayerHealth(PlayerManager.PlayerHealth);
-    }
-
     protected override void Start()
     {
         // Start the coroutine
