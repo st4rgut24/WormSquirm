@@ -76,7 +76,7 @@ public abstract class Bot : Agent
             transform.position = route.GetDestination();
 
             // initialize the direction bot is facing
-            Waypoint CurWP = route.GetCurWaypoint();
+            Waypoint CurWP = route.GetCurWaypoint();    
             Waypoint NextWP = route.GetNextWaypoint();
             //this.FaceMovementDirection(CurWP.position, NextWP.position);
             Vector3 initDir = (NextWP.position - CurWP.position).normalized;

@@ -22,7 +22,7 @@ public class BotManager : AgentManager
     
     public float spawnFrequency = 15; // the interval between Bot spawns
 
-    Dictionary<Transform, List<Bot>> ChasingDict; // dictionary of target transforms and their respective chasers
+    Dictionary<Transform, List<Bot>> ObjectiveDict; // dictionary of target transforms and their respective chasers
 
     RouteFactory routeMaker;
 
@@ -37,6 +37,8 @@ public class BotManager : AgentManager
 
     private void OnEnable()
     {
+        TunnelCreatorManager.OnAddCreatedTunnel += OnAddCreatedTunnel;
+        TunnelIntersectorManager.OnAddIntersectedTunnelSuccess += OnAddIntersectedTunnel;
         Disabler.OnDisableTunnels += OnTunnelDisabled;
     }
 
@@ -44,7 +46,7 @@ public class BotManager : AgentManager
     {
         base.Awake();
         bots = new List<Bot>();
-        ChasingDict = new Dictionary<Transform, List<Bot>>();
+        ObjectiveDict = new Dictionary<Transform, List<Bot>>();
 
         // Testing
         SimpWPs = new Transform[] { SimpStartBlock, SimpWP1 };
@@ -54,6 +56,28 @@ public class BotManager : AgentManager
     void Start()
 	{
         StartCoroutine(SpawnAtInterval());
+    }
+
+    void OnAddIntersectedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel, List<GameObject> intersectedTunnels)
+    {
+        AddBotToSegment(playerTransform, segment);
+    }
+
+    void OnAddCreatedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel)
+    {
+        AddBotToSegment(playerTransform, segment);
+    }
+
+    void AddBotToSegment(Transform playerTransform, SegmentGo segment)
+    {
+        if (playerTransform.gameObject.CompareTag(Consts.PlayerTag))
+        {
+            GameObject botGo = Spawn(BotType.Chaser);
+            Bot bot = botGo.GetComponent<Bot>();
+
+            bot.curSegment = SegmentManager.Instance.GetSegmentFromObject(segment.getTunnel());
+            InitBot(bot);
+        }
     }
 
     public void OnTunnelDisabled(List<GameObject> disabledTunnels)
@@ -81,39 +105,46 @@ public class BotManager : AgentManager
         bots.Remove(bot);
         Transform botObjective = bot.objective;
 
-        if (ChasingDict.ContainsKey(botObjective))
+        if (ObjectiveDict.ContainsKey(botObjective))
         {
-            ChasingDict[botObjective].Remove(bot);
+            ObjectiveDict[botObjective].Remove(bot);
         }
 
         bot.Destroy();
     }
 
-    /// <summary>
-    /// For testing chasing
-    /// </summary>
-    public void SpawnChaser()
-    {
-        GameObject Bot = CreateAgent(Chaser);
-        Bot bot = Bot.GetComponent<Bot>();
-        SetBotRoute(bot);
-        bots.Add(bot);
-    }
-
     GameObject Spawn(BotType type)
     {
-        GameObject Bot = null;
+        GameObject BotGo = null;
 
         if (type == BotType.Chaser)
         {
-            Bot = CreateAgent(Chaser); 
+            BotGo = CreateAgent(Chaser); 
         }
         else if (type == BotType.Simp)
         {
-            Bot = CreateAgent(SimpBot);
+            BotGo = CreateAgent(SimpBot);
         }
 
-        return Bot;
+        return BotGo;
+    }
+
+    /// <summary>
+    /// Set the bot's path and record it
+    /// </summary>
+    /// <param name="bot"></param>
+    void InitBot(Bot bot)
+    {
+        SetBotRoute(bot);
+        bots.Add(bot);
+
+        if (ObjectiveDict.ContainsKey((bot.objective))) {
+            ObjectiveDict[bot.objective].Add(bot);
+        }
+        else
+        {
+            ObjectiveDict[bot.objective] = new List<Bot>() { bot };
+        }
     }
 
     IEnumerator SpawnAtInterval()
@@ -122,18 +153,13 @@ public class BotManager : AgentManager
         {
             if (bots.Count <  maxBots)
             {
-                BotType type = bots.Count == 0 ? BotType.Simp : BotType.Chaser;
-                Debug.Log("Spawn bot of type " + type);
-                GameObject botGo = Spawn(type);
-                Bot bot = botGo.GetComponent<Bot>();
+                // temporary (Simp bot is just for testing)
 
+                GameObject botGo = bots.Count == 0 ? Spawn(BotType.Simp) : Spawn(BotType.Chaser);
+                Bot bot = botGo.GetComponent<Bot>();
                 try
                 {
-                    //Route route = GetBotRoute(bot.objective, RouteStrat.FollowSegment);
-                    SetBotRoute(bot);
-                    //Route route = GetBotRoute(bot.objective, RouteStrat.StraightPath);
-                    //bot.setRoute(route);
-                    bots.Add(bot);
+                    InitBot(bot);
                 }
                 catch (System.Exception error)
                 {
@@ -161,7 +187,7 @@ public class BotManager : AgentManager
         {
             strat = RouteStrat.StraightPath;
         }
-        else // (bot.botType == BotType.Chaser)
+        else
         {
             strat = RouteStrat.FollowSegment;
         }
@@ -185,6 +211,8 @@ public class BotManager : AgentManager
     private void OnDisable()
     {
         Disabler.OnDisableTunnels -= OnTunnelDisabled;
+        TunnelCreatorManager.OnAddCreatedTunnel -= OnAddCreatedTunnel;
+        TunnelIntersectorManager.OnAddIntersectedTunnelSuccess -= OnAddIntersectedTunnel;
     }
 }
 

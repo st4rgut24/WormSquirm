@@ -9,12 +9,15 @@ public class Guideline
 	public Vector3 start;
 	public Vector3 end;
 
+    public Vector3 center;
+
     public Vector3 direction;
 
 	public Guideline(Vector3 start, Vector3 end)
 	{
 		this.start = start;
 		this.end = end;
+        this.center = (start + end) / 2;
 
         this.direction = this.end - this.start;
 	}

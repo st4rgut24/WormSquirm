@@ -78,6 +78,14 @@ public class RouteFactory
             route.AddWaypoints(path);
         }
 
+        // if there is only one segment, add a starting WP so we don't spawn on top of the player
+        if (segments.Count == 1)
+        {
+            Vector3 segmentCenter = segments[0].GetCenterLineCenter();
+            Waypoint startWP = new Waypoint(segmentCenter);
+            route.AddWaypoint(startWP);
+        }
+
         route.AddWaypoint(endWP);
         return route;
     }
@@ -150,10 +158,6 @@ public class RouteFactory
         List<Segment> segments = isInSegment ?
             SearchUtils.dfsConnectSegments(goalSegment, curSegment) :
             StartFollowSegments(goalSegment);
-
-
-        //Waypoint startWaypoint = isInSegment ? new Waypoint(transform.position, segments[0]) : new Waypoint(segments[0].getCenter(), segments[0]);
-        // TODO: final waypoint will be a point along an existing guideline. Don't go to the target's position
 
         Waypoint endWaypoint = new Waypoint(targetTransform.position);
 

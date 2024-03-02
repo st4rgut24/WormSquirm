@@ -104,6 +104,15 @@ public class Segment
         this.center = center;
     }
 
+    /// <summary>
+    /// Get the point in the middle of the center guideline
+    /// </summary>
+    /// <returns></returns>
+    public Vector3 GetCenterLineCenter()
+    {
+        return centerLine.center;
+    }
+
 	public Vector3 getCenter()
 	{
 		if (center == DefaultUtils.DefaultVector3)

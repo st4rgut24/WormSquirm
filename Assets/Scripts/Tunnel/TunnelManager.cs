@@ -96,8 +96,7 @@ public class TunnelManager : Singleton<TunnelManager>
         GameObject endCap = segment.GetEndCap();
         List<GameObject> neighborTunnels = InitTunnelList(prevTunnel);
 		AddTunnel(playerTransform, segment, neighborTunnels, prevTunnel);
-		//ReplaceEndCap(playerTransform, endCap);
-        
+		//ReplaceEndCap(playerTransform, endCap);        
 	}
 
     /// <summary>
