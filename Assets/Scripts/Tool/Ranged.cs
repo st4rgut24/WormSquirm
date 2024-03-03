@@ -1,19 +1,19 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
+using UnityEngine;
 
-public abstract class Firearm : Tool
+public abstract class Ranged: Weapon
 {
     RectTransform crosshairUI;
-
-    private void OnEnable()
-    {
-        crosshairUI.gameObject.SetActive(true);
-    }
 
     protected override void Start()
     {
         base.Start();
         crosshairUI = ToolManager.Instance.crosshairUI;
+    }
+
+    private void OnEnable()
+    {
+        crosshairUI.gameObject.SetActive(true);
     }
 
     /// <summary>

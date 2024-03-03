@@ -1,8 +1,11 @@
 ﻿using System;
 using UnityEngine;
 
-public abstract class Tool : MonoBehaviour
+public abstract class Weapon : MonoBehaviour
 {
+    public ToolType toolType;
+    Collider weaponCollider; // used to trigger attacks
+
     protected Camera playerCamera;
 
     protected virtual void Start()
@@ -30,8 +33,12 @@ public abstract class Tool : MonoBehaviour
     public abstract Vector3 GetDirection();
 
     /// <summary>
-    /// Apply effects of using the tool
+    /// Apply effects of using the tool, if the weapon collider intersects with anything 
     /// </summary>
     /// <param name="direction">direction of tool</param>
-    public abstract void Use();
+    public virtual void Use()
+    {
+        ToolManager.Instance.PlayWeaponAnim(toolType);
+        // damage the gameobject that weapon collider intersects with her
+    }
 }

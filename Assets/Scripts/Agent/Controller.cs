@@ -110,7 +110,6 @@ public class Controller
     /// </summary> movement input</param>
     public Vector3 GetForwardMovement()
     {
-        // todo: check that our projection of player's next position is where the player actually will be
         currentSpeed = this.player.HasStamina() ? Consts.RunningSpeed : Consts.WalkingSpeed;
         float moveDistance = currentSpeed * Time.deltaTime;
 

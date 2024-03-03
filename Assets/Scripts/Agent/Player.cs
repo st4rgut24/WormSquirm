@@ -8,22 +8,35 @@ public class Player : Agent
     public delegate void ChangeSideRotation(float horRot, float? speed);
     public delegate void ChangeMoveDelegate(Vector3 destination, bool isContinuous, float speed);
 
-    public const string swingAnimName = "isSwinging";
-    public const string throwAnimName = "isThrowing";
+    protected PlayerAnimator playerAnimator;
 
-    string[] animNames = { swingAnimName, throwAnimName };
+    //public const string swingAnimName = "isSwinging";
+    //public const string throwAnimName = "isThrowing";
+
+    //string[] animNames = { swingAnimName, throwAnimName };
 
     protected override void Start()
     {
         // Start the coroutine
         base.Start();
 
-        string[] allAnimNames = animNames.Concat(agentAnimNames).ToArray();
-        charAnimator = new CharacterAnimator(animator, allAnimNames);
+        //string[] allAnimNames = animNames.Concat(agentAnimNames).ToArray();
+        playerAnimator = new PlayerAnimator(animator);
+        charAnimator = playerAnimator;
     }
 
     protected override void Update()
     {
         base.Update();
+    }
+
+    /// <summary>
+    /// Inflict damage on opponent if in proximity
+    /// </summary>
+    /// <param name="damage">amount of damage to inflict</param>
+    /// <param name="attackedAgent">agent that is attacked</param>
+    protected override void InflictDamage(float damage, Agent attackedAgent)
+    {
+        base.InflictDamage(damage, attackedAgent);
     }
 }

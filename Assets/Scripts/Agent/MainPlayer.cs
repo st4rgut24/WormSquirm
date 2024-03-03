@@ -10,6 +10,7 @@ public enum PlayerState
 
 public class MainPlayer : Player
 {
+    public Transform handTransform;
     PlayerState state;
 
     Controller controller;
@@ -62,6 +63,11 @@ public class MainPlayer : Player
         }
     }
 
+    public void EquipTool(GameObject tool)
+    {
+        tool.transform.parent = handTransform;
+    }
+
     public bool HasStamina()
     {
         return playerStamina.currentHealth > 0;
@@ -95,10 +101,18 @@ public class MainPlayer : Player
     {
         state = PlayerState.Dig;
         Debug.Log("Start Digging");
-        charAnimator.TriggerAnimation(swingAnimName);
+        //charAnimator.TriggerAnimation(swingAnimName);
         notifyDig(direction);
+    }
 
-        //controller.AccelerateInDirection(direction);
+    public void SetWeaponAnimation(ToolType weaponType)
+    {
+        playerAnimator.TriggerWeaponAnimation(weaponType);
+    } 
+
+    public void SetCharAnimation(string animName)
+    {
+        charAnimator.TriggerAnimation(animName);
     }
 
     private void OnDisable()

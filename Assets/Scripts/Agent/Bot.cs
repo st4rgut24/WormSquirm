@@ -30,7 +30,7 @@ public abstract class Bot : Agent
 
     protected float damage = 0; // can be overriden in child classes
 
-    string[] animNames = { isAttackingAnimName };
+    //string[] animNames = { isAttackingAnimName };
 
     protected virtual void Awake()
     {
@@ -45,8 +45,9 @@ public abstract class Bot : Agent
     {
         base.Start();
 
-        string[] allAnimNames = animNames.Concat(agentAnimNames).ToArray();
-        charAnimator = new CharacterAnimator(animator, allAnimNames);
+        //string[] allAnimNames = animNames.Concat(agentAnimNames).ToArray();
+        //charAnimator = new CharacterAnimator(animator, allAnimNames);
+        charAnimator = new BotAnimator(animator);
 
         startTime = Time.time;
 

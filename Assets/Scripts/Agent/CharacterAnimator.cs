@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 public class CharacterAnimator
 {
 	Animator animator;
+
+    protected string[] agentAnimNames = { Consts.DieAnim, Consts.MoveAnim };
+
     Dictionary<string, int> AnimNamesToIds = new Dictionary<string, int>();
 
     int speedAnimationId;
@@ -18,9 +23,11 @@ public class CharacterAnimator
 	{
         this.animator = animator;
 
-		for (int i = 0; i < animationNames.Length; i++)
+        string[] allAnimNames = animationNames.Concat(agentAnimNames).ToArray();
+
+        for (int i = 0; i < allAnimNames.Length; i++)
 		{
-            string name = animationNames[i];
+            string name = allAnimNames[i];
             int id = Animator.StringToHash(name);
             AnimNamesToIds[name] = id;
         }

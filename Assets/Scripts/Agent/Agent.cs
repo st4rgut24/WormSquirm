@@ -8,6 +8,7 @@ public class Agent : MonoBehaviour
     public CharacterAnimator charAnimator;
 
     protected AgentHealth health;
+    BoxCollider collider;
 
     public const string moveAnimName = "speed";
     public const string dieAnimName = "isDying";
@@ -45,6 +46,7 @@ public class Agent : MonoBehaviour
         isMoveInProgress = false;
         curSegmentForward = DefaultUtils.DefaultVector3;
         animator = GetComponent<Animator>();
+        collider = GetComponent<BoxCollider>();
     }
 
     // Update is called once per frame
@@ -63,12 +65,14 @@ public class Agent : MonoBehaviour
         }
     }
 
-    public void InflictDamage(float damage, Agent agent)
+    public void TakeDamage(float damage)
     {
-        AgentHealth attackedAgentHealth = agent.health;
+        health.ReduceHealth(damage);
+    }
 
-        // TODO: send event so the attacked agent reduce his own health
-        attackedAgentHealth.ReduceHealth(damage);
+    protected virtual void InflictDamage(float damage, Agent attackedAgent)
+    {
+        attackedAgent.TakeDamage(damage);
     }
 
     IEnumerator MoveToDestination(Vector3 targetPosition, float speed)

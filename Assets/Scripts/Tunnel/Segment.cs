@@ -15,8 +15,7 @@ public class Segment
     public Vector3 forward;
 
     Vector3 center = DefaultUtils.DefaultVector3;
-    // TODO: we only need nextTunnels list, prevTunnels list complicates things and is unnecessary
-	//List<GameObject> prevTunnel;
+
 	List<GameObject> nextTunnel;
 
     List<Guideline> segmentLines;
@@ -188,9 +187,6 @@ public class Segment
             float DistToEndCap = GetClosestDistance(position, endRing.GetRingLines());
             Debug.Log("In Tunnel " + tunnel.name + ". Projected Distance to end cap " + DistToEndCap + ". Should be less than " + SegmentManager.Instance.MinDistFromCap + " Current dist is " + curDistToEndCap);
 
-            //Debug.Log("Distance to end cap is " + distToEndCap + ". Min dist to end cap is " + SegmentManager.Instance.MinDistFromCap);
-            // TODO: There is a situation where an intersecting tunnel is within the min distance from cap, which immobilizes the player
-            // to remedy this, and situations like this, certain intersections should not be possible (perhaps by creating a unbreakable endcap?)
             if (DistToEndCap <= SegmentManager.Instance.MinDistFromCap)
             {
                 return true;
