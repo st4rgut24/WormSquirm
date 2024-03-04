@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public enum PlayerState
 {
@@ -10,18 +11,21 @@ public enum PlayerState
 
 public class MainPlayer : Player
 {
+    //bool isBlocked;
+    List<GameObject> CollidedObstacles;
+
     public Transform handTransform;
     PlayerState state;
 
     Controller controller;
     Joystick joystick;
 
-    bool isPositionClamped;
-
     protected PlayerHealth playerStamina;
 
     private void Awake()
     {
+        //isBlocked = false;
+        CollidedObstacles = new List<GameObject>();
         health = new PlayerHealth(Consts.HealthSlider, PlayerManager.PlayerHealth);
         playerStamina = new PlayerHealth(Consts.StaminaSlider, PlayerManager.PlayerHealth);
     }
@@ -30,6 +34,43 @@ public class MainPlayer : Player
     {
         Pickaxe.Dig += HandleDig;
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (TransformUtils.IsTransformMatchTags(other.transform, Consts.ObstacleTags))
+        {
+            // want to add the root parent
+            CollidedObstacles.Add(other.gameObject);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        // Debug.Log("Obstacle avoided");
+        RemoveCollidedObject(other.gameObject);
+    }
+
+    public void RemoveCollidedObject(GameObject hitObject)
+    {
+        if (CollidedObstacles.Contains(hitObject))
+        {
+            Debug.Log("Remove obstacle " + hitObject.name);
+            CollidedObstacles.Remove(hitObject);
+        }
+    }
+
+    public bool IsBlocked()
+    {
+        return CollidedObstacles.Count > 0;
+    }
+
+    /// <summary>
+    /// listener for when an attack animation is over
+    /// </summary>
+    public void OnAttackAnimationStopped() {
+        ToolManager.Instance.DisengageTool();
+    }
+
 
     protected override void Start()
     {        
@@ -41,8 +82,6 @@ public class MainPlayer : Player
         joystick = joystickGo.GetComponent<Joystick>();
 
         controller = new Controller(gameObject, new ChangeSideRotation(ChangeHorizontalRotation), new ChangeMoveDelegate(ChangePlayerMovement));
-
-        isPositionClamped = false;
     }
 
     protected override void Update()
@@ -76,8 +115,10 @@ public class MainPlayer : Player
     public void ChangePlayerMovement(Vector3 destination, bool isContinuous, float speed)
     {
         // adjust the speed based on stamina (get this from player health
-
-        ChangeMovement(destination, isContinuous, speed);
+        if (!IsBlocked())
+        {
+            ChangeMovement(destination, isContinuous, speed);
+        }
     }
 
     /// <summary>
@@ -100,7 +141,7 @@ public class MainPlayer : Player
     public void HandleDig(Vector3 direction)
     {
         state = PlayerState.Dig;
-        Debug.Log("Start Digging");
+        // Debug.Log("Start Digging");
         //charAnimator.TriggerAnimation(swingAnimName);
         notifyDig(direction);
     }

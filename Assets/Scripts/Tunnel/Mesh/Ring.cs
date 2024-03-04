@@ -21,7 +21,7 @@ public class Ring
         this.normal = normal;
 
         vertexLineList = new List<Guideline>();
-        Debug.Log("Center is " + center);
+        // Debug.Log("Center is " + center);
         float angularOffset = GetAngularOffset(vertexCount);
         Vector3[] vertices = SetVertices(vertexCount, normal, angularOffset, noiseScale);
         SetRingGuidelines(vertices, center);
@@ -83,9 +83,9 @@ public class Ring
             float angle = Mathf.Lerp(0, Consts.FullRevolution, i / (float)vertexCount) + angleOffset;
 
             Quaternion rotation = Quaternion.AngleAxis(angle, normal);
-            // Debug.Log("plane vector " + planeVector);
+            // // Debug.Log("plane vector " + planeVector);
             Vector3 point = this.center + rotation * (planeVector * tunnelRadiusAtPoint);
-            // Debug.Log("point " + point + " at angle " + angle);
+            // // Debug.Log("point " + point + " at angle " + angle);
             vertices[i] = point;
         }
 

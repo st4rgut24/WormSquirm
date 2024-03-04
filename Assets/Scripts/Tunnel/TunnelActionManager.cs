@@ -61,7 +61,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         if (!IsTunnelCreated)
         {
             // TODO: this case should not exist
-            Debug.Log("Tunnel Action Follow");
+            // Debug.Log("Tunnel Action Follow");
             OnFollowTunnel?.Invoke(playerTransform);
         }
 
@@ -75,7 +75,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     public bool CreateTunnel(Transform playerTransform, Heading TunnelHeading)
     {
         bool extendsTunnel = SegmentManager.Instance.IsExtendingTunnel(playerTransform);
-        Debug.Log("is extending tunnel");
+        // Debug.Log("is extending tunnel");
         List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(TunnelHeading.position, 1);
 
         // todo: intersection depends on direction of player instead of direction of swing?
@@ -101,13 +101,13 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         {
             if (isIntersecting) // intersect
             {
-                Debug.Log("Tunnel Action Intersect");
+                // Debug.Log("Tunnel Action Intersect");
                 GameObject prevSegment = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
                 OnIntersectTunnel?.Invoke(playerTransform, prevSegment, TunnelHeading, extendsTunnel, prevRing, hitInfo);
             }
             else
             {
-                Debug.Log("Tunnel Action Create");
+                // Debug.Log("Tunnel Action Create");
                 OnCreateTunnel?.Invoke(playerTransform, extendsTunnel, TunnelHeading, prevRing);
             }
             return true;
@@ -141,7 +141,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         {
             Heading playerHeading = new Heading(playerTransform.position, playerTransform.forward);
             Vector3 intersectionPoint = segment.GetIntersectionPoint(playerHeading);
-            Debug.Log("intersection point is " + intersectionPoint);
+            // Debug.Log("intersection point is " + intersectionPoint);
             prevRing = RingFactory.Create(playerTransform.forward, intersectionPoint);
         }
 

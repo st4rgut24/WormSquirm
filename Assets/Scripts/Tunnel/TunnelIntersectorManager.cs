@@ -70,7 +70,7 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 
         Vector3 center = TunnelUtils.GetCenterPoint(prevRing.GetCenter(), intersectHeading.position);
         List<GameObject> nearbyTunnels = tunnelGrid.GetGameObjects(center, 1);
-        Debug.Log("There are " + nearbyTunnels.Count + " tunnels with the viciting of position " + center);
+        // Debug.Log("There are " + nearbyTunnels.Count + " tunnels with the viciting of position " + center);
 
         RayRing endRayRing = new RayRing(_ringVertices, -intersectHeading.forward, intersectHeading.position, offsetMultiple, _rayInterval, _holeRadius);
         List<Ray> intersectingRays = new List<Ray>(endRayRing.rays);
@@ -101,7 +101,7 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 
             OnAddIntersectedTunnelSuccess?.Invoke(playerTransform, projectedSegment, prevTunnel, deletedTunnels);
         } catch (Exception e) {
-            Debug.LogError(e.Message);
+            // Debug.LogError(e.Message);
 
             if (projectedSegment != null)
             {
@@ -157,7 +157,7 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 
         Heading intersectHeading = new Heading(modHitInfo.hitCoord, rayDir.normalized);
 
-        Debug.Log("hit coord " + modHitInfo.hitCoord);
+        // Debug.Log("hit coord " + modHitInfo.hitCoord);
         return intersectHeading;
     }
 
@@ -169,7 +169,7 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
     bool ValidateIntersection(List<GameObject> intersectedTunnels, Heading intersectionHeading)
     {
         Vector3 intersectPoint = intersectionHeading.position;
-        Debug.Log("intersect position " + intersectPoint);
+        // Debug.Log("intersect position " + intersectPoint);
         // check if intersected tunnels have caps (meaning they are not continuous intermediary segments)
         // check the distance from the intersection point to any caps
         // if the distance is less than minimum allowed, throw an exception
@@ -207,7 +207,7 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
             float side = ring.radius;
             float height = Mathf.Sqrt(Mathf.Pow(hypotenuse, 2) - Mathf.Pow(side, 2));
             float minDist = ring.radius + SegmentManager.Instance.MinDistFromCap;
-            Debug.Log("intersection point is " + height + " units from cap center. min dist is " + minDist + " Units");
+            // Debug.Log("intersection point is " + height + " units from cap center. min dist is " + minDist + " Units");
             return height <= minDist; // if it is intersecting, then height is less than minimum
         }
         else

@@ -4,12 +4,15 @@ using UnityEngine;
 public abstract class Weapon : MonoBehaviour
 {
     public ToolType toolType;
-    Collider weaponCollider; // used to trigger attacks
+    public BoxCollider weaponCollider; // used to trigger attacks
+
+    protected float damage;
 
     protected Camera playerCamera;
 
     protected virtual void Start()
     {
+        DisengageWeapon();
         playerCamera = ToolManager.Instance.playerCamera;
     }
 
@@ -38,7 +41,27 @@ public abstract class Weapon : MonoBehaviour
     /// <param name="direction">direction of tool</param>
     public virtual void Use()
     {
+        weaponCollider.enabled = true;
         ToolManager.Instance.PlayWeaponAnim(toolType);
         // damage the gameobject that weapon collider intersects with her
+    }
+
+    public void DisengageWeapon()
+    {
+        weaponCollider.enabled = false;
+    }
+
+    //Upon collision with another GameObject, this GameObject will reverse direction
+    private void OnTriggerEnter(Collider other)
+    {
+        //Transform ancestor = TransformUtils.GetAncestorMatchTag(other.transform, Consts.EnemyTag);
+
+        if (other.transform.CompareTag(Consts.EnemyTag))
+        {
+            Bot bot = other.gameObject.GetComponent<Bot>();
+
+            // Debug.Log("Deal damage to enemy " + other.gameObject.name);
+            bot.TakeDamage(damage);
+        }
     }
 }

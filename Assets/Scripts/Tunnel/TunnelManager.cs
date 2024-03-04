@@ -87,7 +87,7 @@ public class TunnelManager : Singleton<TunnelManager>
 
 	public bool ExceedsMinSegmentLength(float segmentLength)
 	{
-		Debug.Log("Segment has length " + segmentLength);
+		// Debug.Log("Segment has length " + segmentLength);
 		return segmentLength >= minSegmentLength;
 	}
 
@@ -124,7 +124,7 @@ public class TunnelManager : Singleton<TunnelManager>
 
         AddTunnel(playerTransform, segment, connectingTunnels, prevTunnel);
 
-        Debug.Log("There are " + connectingTunnels.Count + " intersecting tunnels");
+        // Debug.Log("There are " + connectingTunnels.Count + " intersecting tunnels");
 
         if (connectingTunnels.Count > 1 || prevTunnel == null) // the new segment intersects the previous and another tunnel in front, creating a corridor (no need for cap)
         {
@@ -191,7 +191,7 @@ public class TunnelManager : Singleton<TunnelManager>
         Segment segment = SegmentManager.Instance.AddTunnelSegment(segmentGo, nextTunnels, endCap.ring, startCap.ring);
         AgentManager.Instance.InitTransformSegmentDict(playerTransform, segment);
 
-        Debug.Log("Add segment to grid at position " + segment.getCenter());
+        // Debug.Log("Add segment to grid at position " + segment.getCenter());
         tunnelGrid.AddGameObject(segment.getCenter(), segmentGo.getTunnel());
 
         if (prevTunnel != null)
@@ -223,11 +223,11 @@ public class TunnelManager : Singleton<TunnelManager>
 
 		if (UpdatedSegment != null) // if the player entered a new segment
 		{
-            Debug.Log("Player has moved to a new segment " + UpdatedSegment.tunnel.name);
+            // Debug.Log("Player has moved to a new segment " + UpdatedSegment.tunnel.name);
         }
         //else
         //{
-        //    Debug.Log("Player has not moved to a new segment. Stuck in " + TransformCreatedTunnelDict[playerTransform]?.name);
+        //    // Debug.Log("Player has not moved to a new segment. Stuck in " + TransformCreatedTunnelDict[playerTransform]?.name);
         //}
     }
 

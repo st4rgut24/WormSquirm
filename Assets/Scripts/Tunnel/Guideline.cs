@@ -46,7 +46,7 @@ public class Guideline
         // Calculate the closest point on the line segment
         Vector3 closestPoint = start + t * line;
 
-        Debug.Log("Closest point is " + closestPoint);
+        // Debug.Log("Closest point is " + closestPoint);
         return closestPoint;
     }
 }

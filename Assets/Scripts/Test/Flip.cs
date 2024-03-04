@@ -8,7 +8,7 @@ public class Flip : MonoBehaviour
         MeshFilter meshFilter = GetComponent<MeshFilter>();
         if (meshFilter == null)
         {
-            Debug.LogError("MeshFilter component not found on the GameObject");
+            // Debug.LogError("MeshFilter component not found on the GameObject");
             return;
         }
 

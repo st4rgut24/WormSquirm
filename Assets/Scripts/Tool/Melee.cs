@@ -3,13 +3,20 @@ using UnityEngine;
 
 public abstract class Melee: Weapon
 {
+    bool IsTouchBeginInMeleeCanvas = false;
+
     Vector3 meleeStartPos;
     Vector3 meleeEndPos;
+
+    public bool IsTouchInsideMeleeCanvas(Vector3 screenPos)
+    {
+        return RectTransformUtility.RectangleContainsScreenPoint(ToolManager.Instance.MeleeCanvas, screenPos);
+    }
 
     void Update()
     {
         #if UNITY_EDITOR || UNITY_STANDALONE
-        if (Input.GetMouseButtonUp(1)) // 0 represents the left mouse button
+        if (Input.GetMouseButtonUp(1) && IsTouchInsideMeleeCanvas(Input.mousePosition)) // 0 represents the left mouse button
         {
             Vector3 mousePosition = Input.mousePosition;
 
@@ -27,14 +34,19 @@ public abstract class Melee: Weapon
             switch (touch.phase)
             {
                 case TouchPhase.Began:
+                    IsTouchBeginInMeleeCanvas = IsTouchInsideMeleeCanvas(touch.position);
                     break;
 
                 case TouchPhase.Moved:
                     break;
 
                 case TouchPhase.Ended:
-                    meleeEndPos = touch.position;
-                    Use();
+                    // Use melee weapon if the touches were made within permissable area
+                    if (IsTouchBeginInMeleeCanvas && IsTouchInsideMeleeCanvas(touch.position)) {
+                        IsTouchBeginInMeleeCanvas = false; // reset variable for next touch
+                        meleeEndPos = touch.position;
+                        Use();
+                    }
                     break;
             }
         }

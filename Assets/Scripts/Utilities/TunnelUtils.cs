@@ -41,7 +41,7 @@ public class TunnelUtils
                 }
                 else
                 {
-                    Debug.Log("segment " + targetObject.name + " does not intersect object " + otherObject.name);
+                    // Debug.Log("segment " + targetObject.name + " does not intersect object " + otherObject.name);
                 }
             }
         }

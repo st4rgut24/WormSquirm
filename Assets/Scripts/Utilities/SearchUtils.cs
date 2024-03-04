@@ -13,7 +13,7 @@ public class SearchUtils
     /// <returns>list of segments connecting start segment to final segment</returns>
     public static List<Segment> dfsConnectSegments(Segment finalSegment, Segment startSegment)
     {
-        Debug.Log("Get path from start tunnel " + startSegment.tunnel.name + " to end tunnel " + finalSegment.tunnel.name);
+        // Debug.Log("Get path from start tunnel " + startSegment.tunnel.name + " to end tunnel " + finalSegment.tunnel.name);
 
         List<Segment> path = new List<Segment>();
         HashSet<GameObject> visited = new HashSet<GameObject>();

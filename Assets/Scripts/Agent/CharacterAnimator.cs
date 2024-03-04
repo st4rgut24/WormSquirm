@@ -43,7 +43,7 @@ public class CharacterAnimator
     {
         if (animator != null)
         {
-            Debug.Log("Set aniamtion movement for gameobject " + this.animator.gameObject.name + " to speed " + speed);
+            // Debug.Log("Set aniamtion movement for gameobject " + this.animator.gameObject.name + " to speed " + speed);
             animator.SetFloat(speedAnimationId, speed);
         }
     }

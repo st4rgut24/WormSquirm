@@ -9,9 +9,6 @@ public class AgentManager : Singleton<AgentManager>
 
     public Transform agentsParent;
 
-    public PlayerManager playerManager;
-    public BotManager botManager;
-
     public static event Action<Transform> OnSpawn;
 
     private void OnEnable()
@@ -19,11 +16,9 @@ public class AgentManager : Singleton<AgentManager>
         SegmentManager.OnEnterNewSegment += OnEnterNewSegment;
     }
 
-    protected virtual void Awake()
+    private void Awake()
     {
         TransformSegmentDict = new Dictionary<Transform, Segment>();
-        playerManager = GameObject.Find("PlayerManager").GetComponent<PlayerManager>();
-        botManager = GameObject.Find("BotManager").GetComponent<BotManager>();
     }
 
     /// <summary>
@@ -65,12 +60,12 @@ public class AgentManager : Singleton<AgentManager>
         movedAgent.UpdateSegment(segment);
         float xRot = DirectionUtils.GetUpDownRotation(transform.forward, movedAgent.curSegmentForward);
         //Vector3 rotation = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
-        movedAgent.ChangeVerticalRotation(xRot, Consts.rotationSpeed); // instantaneous update
-        //Debug.Log("Enter new segment " + segment.tunnel.name + ". Target rotation is " + rotation);
+        movedAgent.ChangeVerticalRotation(xRot, Consts.defaultRotationSpeed); // instantaneous update
+        //// Debug.Log("Enter new segment " + segment.tunnel.name + ". Target rotation is " + rotation);
         TransformSegmentDict[transform] = segment;
     }
 
-    protected GameObject CreateAgent(GameObject agentGo)
+    public GameObject CreateAgent(GameObject agentGo)
     {
         GameObject agent = Instantiate(agentGo, agentsParent);
         OnSpawn?.Invoke(agent.transform);

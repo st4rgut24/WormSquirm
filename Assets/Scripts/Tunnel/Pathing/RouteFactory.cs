@@ -47,7 +47,7 @@ public class RouteFactory
     public static Route CreateStraightPath(Transform targetTransform)
     {
         Route route = new Route();
-        Transform[] simpWPs = AgentManager.Instance.botManager.SimpWPs;
+        Transform[] simpWPs = BotManager.Instance.SimpWPs;
 
         for (int i = 0; i < simpWPs.Length; i++)
         {

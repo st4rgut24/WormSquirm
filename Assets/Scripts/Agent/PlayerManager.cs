@@ -2,48 +2,59 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
 
-public class PlayerManager : AgentManager
+public class PlayerManager: Singleton<PlayerManager>
 {
 	public GameObject MainPlayerGo;
 	public GameObject PlayerGo;
 
 	public GameObject MainPlayerInst;
+	public MainPlayer mainPlayer;
 
-    public List<GameObject> Players;
+	public List<GameObject> Players;
 
-    public const float PlayerHealth = 100;
+	public const float PlayerHealth = 100;
 
-    Vector3 defaultSpawnLoc = new Vector3(26, 10, 7);
+	Vector3 defaultSpawnLoc = new Vector3(26, 10, 7);
 
-    protected override void Awake()
+    protected void OnEnable()
     {
-		base.Awake();
-		Players = new List<GameObject>();
+		BotManager.Instance.DestroyBotEvent += OnRemoveBot;
     }
 
-    public GameObject GetMainPlayer()
+    protected void Awake()
+	{
+		Players = new List<GameObject>();
+	}
+
+	public GameObject GetMainPlayer()
 	{
 		return MainPlayerInst;
+	}
+
+	public void OnRemoveBot(GameObject HitObject)
+	{
+		mainPlayer.RemoveCollidedObject(HitObject);
 	}
 
     // Use this for initialization
     void Start()
 	{
         MainPlayerInst = Spawn(MainPlayerGo);
+		mainPlayer = MainPlayerInst.GetComponent<MainPlayer>();
 
         Ray ray = new Ray(MainPlayerInst.transform.position, MainPlayerInst.transform.forward);
     }
 
     GameObject Spawn(GameObject Player)
 	{
-		GameObject player = CreateAgent(Player);
+		GameObject player = AgentManager.Instance.CreateAgent(Player);
 		player.transform.position = defaultSpawnLoc;
 		Players.Add(player);
 
 		return player;
 	}
-
 
 	public bool hasPlayers()
 	{
@@ -55,5 +66,10 @@ public class PlayerManager : AgentManager
 	{
 			
 	}
+
+    protected void OnDisable()
+    {
+        BotManager.Instance.DestroyBotEvent += OnRemoveBot;
+    }
 }
 

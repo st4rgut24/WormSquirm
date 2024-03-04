@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -69,6 +70,24 @@ public abstract class Bot : Agent
         InflictDamage(damage, attackedAgent);
     }
 
+    public override bool TakeDamage(float damage)
+    {
+        bool isDead = base.TakeDamage(damage);
+
+        if (isDead)
+        {
+            StartCoroutine(DieCoroutine());
+        }
+
+        return isDead;
+    }
+
+    IEnumerator DieCoroutine()
+    {
+        yield return new WaitForSeconds(Consts.SecondsToDisappear);
+        BotManager.Instance.RemoveBot(this);
+    }
+
     public void initRoute(Route route)
     {
         if (!hasRoute)
@@ -98,8 +117,8 @@ public abstract class Bot : Agent
         if (moveDirection != Vector3.zero)
         {
             Quaternion rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
-            Debug.Log("rotate bot " + transform.rotation);
-            ChangeRotation(rotation, Consts.rotationSpeed);
+            // Debug.Log("rotate bot " + transform.rotation);
+            ChangeRotation(rotation, Consts.botRotationSpeed);
         }
     }
 
@@ -113,12 +132,12 @@ public abstract class Bot : Agent
         Waypoint curWP = route.GetCurWaypoint();
         Waypoint finalWP = route.GetLastWaypoint();
 
-        Debug.Log("Waypoint is " + curWP.position);
+        //// Debug.Log("Waypoint is " + curWP.position);
 
         if (IsReachedFinalDestination(finalWP))
         {
             charAnimator.TriggerAnimation(isAttackingAnimName);
-            Debug.Log("Reached final waypoint");
+            //// Debug.Log("Reached final waypoint");
             ReachDestination();
         }
         else if (transform.position == curWP.position) // reached destination

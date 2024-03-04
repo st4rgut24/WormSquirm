@@ -45,7 +45,7 @@ public class MeshObjectFactory
 
 		Mesh mesh;
 
-        Debug.Log("Testing");
+        // Debug.Log("Testing");
 
         switch (type)
 		{

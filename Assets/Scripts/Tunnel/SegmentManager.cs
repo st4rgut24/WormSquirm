@@ -52,12 +52,12 @@ public class SegmentManager : Singleton<SegmentManager>
             UpdatedSegment = GetEnclosingSegment(curSegment, transform);
             if (UpdatedSegment != null)
             {
-                Debug.Log("Player has moved to the new segment " + UpdatedSegment.tunnel.name);
+                // Debug.Log("Player has moved to the new segment " + UpdatedSegment.tunnel.name);
                 OnEnterNewSegment?.Invoke(transform, UpdatedSegment);
             }
             else
             {
-                Debug.LogWarning("Player has not been detected in current segment or any adjoining segments. Default to current segment " + curSegment.tunnel.name);
+                // Debug.LogWarning("Player has not been detected in current segment or any adjoining segments. Default to current segment " + curSegment.tunnel.name);
             }
         }
 

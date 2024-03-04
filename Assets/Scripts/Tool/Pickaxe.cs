@@ -11,6 +11,7 @@ public class Pickaxe : Melee
     private void Awake()
     {
         toolType = ToolType.Pickaxe;
+        damage = 100;
     }
 
     public override void Use()

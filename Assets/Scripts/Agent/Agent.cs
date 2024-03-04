@@ -61,13 +61,20 @@ public class Agent : MonoBehaviour
             float xRot = DirectionUtils.GetUpDownRotation(transform.forward, curSegment.forward);
             //Vector3 verticalRotate = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
             // Rotations happen over several frames until playerr reaches target destination
-            ChangeVerticalRotation(xRot, Consts.rotationSpeed);
+            ChangeVerticalRotation(xRot, Consts.defaultRotationSpeed);
         }
     }
 
-    public void TakeDamage(float damage)
+    public virtual bool TakeDamage(float damage)
     {
-        health.ReduceHealth(damage);
+        bool isDead = health.ReduceHealth(damage);
+
+        if (isDead)
+        {
+            charAnimator.TriggerAnimation(Consts.DieAnim);
+        }
+
+        return isDead;
     }
 
     protected virtual void InflictDamage(float damage, Agent attackedAgent)
@@ -124,7 +131,7 @@ public class Agent : MonoBehaviour
     /// <returns></returns>
     public void ChangeVerticalRotation(float vertRot, float? rotateSpeed=null)
     {
-        Debug.Log("Change vertical rotation to " + vertRot + " at speed " + rotateSpeed);
+        // Debug.Log("Change vertical rotation to " + vertRot + " at speed " + rotateSpeed);
         Vector3 rot = new Vector3(vertRot, this.targetRotation.eulerAngles.y, this.targetRotation.eulerAngles.z);
         ChangeRotation(rot, rotateSpeed);
         // Check if the current rotation is close enough to the target rotation
@@ -187,7 +194,7 @@ public class Agent : MonoBehaviour
     {
         if (transform.position != prevPosition)
         {
-            Debug.Log("Notify dig. Current position " + transform.position + " Previous position " + prevPosition);
+            // Debug.Log("Notify dig. Current position " + transform.position + " Previous position " + prevPosition);
             prevPosition = transform.position;
             OnDig?.Invoke(transform, digDirection);
         }

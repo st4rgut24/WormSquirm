@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using static UnityEngine.GraphicsBuffer;
+using System;
 
 /// <summary>
 /// Manages the creation, destruction and decision-making behavior Bots in the game. Operates the 'swarm'
 /// </summary>
-public class BotManager : AgentManager
+public class BotManager : Singleton<BotManager>
 {
     // Testing
     public Transform SimpStartBlock;
@@ -28,6 +28,8 @@ public class BotManager : AgentManager
 
 	List<Bot> bots;
 
+    public event Action<GameObject> DestroyBotEvent;
+
     public enum BotType {
         Chaser,
         Simp
@@ -35,16 +37,15 @@ public class BotManager : AgentManager
 
     public int spawnDistance = 13; // number of segments away from the player the bot should spawns
 
-    private void OnEnable()
+    protected void OnEnable()
     {
         TunnelCreatorManager.OnAddCreatedTunnel += OnAddCreatedTunnel;
         TunnelIntersectorManager.OnAddIntersectedTunnelSuccess += OnAddIntersectedTunnel;
         Disabler.OnDisableTunnels += OnTunnelDisabled;
     }
 
-    protected override void Awake()
+    protected void Awake()
     {
-        base.Awake();
         bots = new List<Bot>();
         ObjectiveDict = new Dictionary<Transform, List<Bot>>();
 
@@ -109,7 +110,8 @@ public class BotManager : AgentManager
         {
             ObjectiveDict[botObjective].Remove(bot);
         }
-
+        // todo: Remove from main player's list of colliders if this bot was in contact with main player
+        DestroyBotEvent?.Invoke(bot.gameObject);
         bot.Destroy();
     }
 
@@ -119,11 +121,11 @@ public class BotManager : AgentManager
 
         if (type == BotType.Chaser)
         {
-            BotGo = CreateAgent(Chaser); 
+            BotGo = AgentManager.Instance.CreateAgent(Chaser); 
         }
         else if (type == BotType.Simp)
         {
-            BotGo = CreateAgent(SimpBot);
+            BotGo = AgentManager.Instance.CreateAgent(SimpBot);
         }
 
         return BotGo;
@@ -165,8 +167,8 @@ public class BotManager : AgentManager
                 {
                     bots.Remove(bot);
                     Destroy(botGo);
-                    Debug.Log("Error creating bot: " + error.Message);
-                    Debug.Log(error.StackTrace);
+                    // Debug.Log("Error creating bot: " + error.Message);
+                    // Debug.Log(error.StackTrace);
                 }
             }
 
@@ -196,7 +198,7 @@ public class BotManager : AgentManager
 
         // TESTING WAYPOINTS
         WaypointDrawer wpDrawer = GameObject.Find("WaypointDrawer").GetComponent<WaypointDrawer>();
-        Debug.Log("Set " + route.waypoints.Count + " waypoints");
+        // Debug.Log("Set " + route.waypoints.Count + " waypoints");
         wpDrawer.SetWaypoints(route.waypoints);
 
         bot.initRoute(route);
@@ -208,7 +210,7 @@ public class BotManager : AgentManager
 			
 	}
 
-    private void OnDisable()
+    protected void OnDisable()
     {
         Disabler.OnDisableTunnels -= OnTunnelDisabled;
         TunnelCreatorManager.OnAddCreatedTunnel -= OnAddCreatedTunnel;

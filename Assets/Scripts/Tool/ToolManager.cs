@@ -12,6 +12,8 @@ public enum ToolType
 
 public class ToolManager : Singleton<ToolManager>
 {
+    public RectTransform MeleeCanvas;
+
     public GameObject PickaxePrefab;
     public GameObject ChainPrefab;
     public GameObject CrossbowPrefab;
@@ -31,9 +33,7 @@ public class ToolManager : Singleton<ToolManager>
     // Use this for initialization
     void Start()
     {
-        PlayerManager pm = AgentManager.Instance.playerManager;
-
-        GameObject mainPlayerGo = pm.GetMainPlayer();
+        GameObject mainPlayerGo = PlayerManager.Instance.GetMainPlayer();
         player = mainPlayerGo.GetComponent<MainPlayer>();
 
         playerTransform = mainPlayerGo.transform;
@@ -94,6 +94,14 @@ public class ToolManager : Singleton<ToolManager>
 
         activeTool = equippedTool.GetComponent<Weapon>();
         equippedTool.SetActive(true);
+    }
+
+    /// <summary>
+    /// Disengage the tool so that it does not interact with its surroundings unless it's being used
+    /// </summary>
+    public void DisengageTool()
+    {
+        activeTool.DisengageWeapon();
     }
 
     GameObject CreateTool(ToolType type)

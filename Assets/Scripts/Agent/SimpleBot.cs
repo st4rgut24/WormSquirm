@@ -16,7 +16,7 @@ public class SimpleBot : Bot
 
     protected override void ReachDestination()
     {
-        Debug.Log("Reached destination");
+        // Debug.Log("Reached destination");
         //notifyDig(transform.forward);
     }
 
