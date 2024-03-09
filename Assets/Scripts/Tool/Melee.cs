@@ -48,6 +48,13 @@ public abstract class Melee: Weapon
         #endif
     }
 
+    //Upon collision with another GameObject, this GameObject will reverse direction
+    private void OnTriggerEnter(Collider other)
+    {
+        //Transform ancestor = TransformUtils.GetAncestorMatchTag(other.transform, Consts.EnemyTag);
+        DamageCollidedObject(other);
+    }
+
     public override bool GetPauseAnimStatus()
     {
         return false; // melee weapons never pause char animations

@@ -142,7 +142,7 @@ public abstract class Ranged : Weapon
     protected Collider ShootRay(Vector3 direction)
     {
         Ray ray = new Ray(transform.position, direction);
-
+        Debug.DrawRay(transform.position, direction * 10, Color.red, 100);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit))
@@ -161,9 +161,7 @@ public abstract class Ranged : Weapon
     /// <returns>direction</returns>
     public override Vector3 GetDirection()
     {
-        // Get the screen position of the crosshair UI element
-        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(playerCamera, projectileTransform.position);
-        return ProjectScreenPosition(screenPos);
+        return -projectileTransform.up;
     }
 
     protected override void OnDisable()

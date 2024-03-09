@@ -62,20 +62,13 @@ public abstract class Weapon : MonoBehaviour
         weaponCollider.enabled = false;
     }
 
-    //Upon collision with another GameObject, this GameObject will reverse direction
-    private void OnTriggerEnter(Collider other)
-    {
-        //Transform ancestor = TransformUtils.GetAncestorMatchTag(other.transform, Consts.EnemyTag);
-        DamageCollidedObject(other);
-    }
-
     protected void DamageCollidedObject(Collider other)
     {
         if (other.transform.CompareTag(Consts.EnemyTag))
         {
             Bot bot = other.gameObject.GetComponent<Bot>();
 
-            // Debug.Log("Deal damage to enemy " + other.gameObject.name);
+            Debug.Log("Deal damage to enemy " + other.gameObject.name);
             bot.TakeDamage(damage);
         }
     }
