@@ -3,6 +3,7 @@ using UnityEngine;
 
 public abstract class Weapon : MonoBehaviour
 {
+    public bool isEquipped = false;
     public ToolType toolType;
     public BoxCollider weaponCollider; // used to trigger attacks
 
@@ -14,6 +15,11 @@ public abstract class Weapon : MonoBehaviour
     {
         DisengageWeapon();
         playerCamera = ToolManager.Instance.playerCamera;
+    }
+
+    protected bool IsTouchInsideWeaponCanvas(Vector3 screenPos)
+    {
+        return RectTransformUtility.RectangleContainsScreenPoint(ToolManager.Instance.WeaponCanvas, screenPos);
     }
 
     public Vector3 ProjectScreenPosition(Vector2 screenPos)
@@ -31,6 +37,12 @@ public abstract class Weapon : MonoBehaviour
     }
 
     /// <summary>
+    /// Get the status of the weapon animation that the player uses when equipping the weapon
+    /// </summary>
+    /// <returns>returns true if the weapon's animation is paused, for example for sniping</returns>
+    public abstract bool GetPauseAnimStatus();
+
+    /// <summary>
     /// Get the direction which the tool is being used
     /// </summary>
     public abstract Vector3 GetDirection();
@@ -42,7 +54,6 @@ public abstract class Weapon : MonoBehaviour
     public virtual void Use()
     {
         weaponCollider.enabled = true;
-        ToolManager.Instance.PlayWeaponAnim(toolType);
         // damage the gameobject that weapon collider intersects with her
     }
 
@@ -55,7 +66,11 @@ public abstract class Weapon : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         //Transform ancestor = TransformUtils.GetAncestorMatchTag(other.transform, Consts.EnemyTag);
+        DamageCollidedObject(other);
+    }
 
+    protected void DamageCollidedObject(Collider other)
+    {
         if (other.transform.CompareTag(Consts.EnemyTag))
         {
             Bot bot = other.gameObject.GetComponent<Bot>();
@@ -63,5 +78,20 @@ public abstract class Weapon : MonoBehaviour
             // Debug.Log("Deal damage to enemy " + other.gameObject.name);
             bot.TakeDamage(damage);
         }
+    }
+
+    protected void StopWeaponAnim(bool isPaused)
+    {
+        ToolManager.Instance.StopWeaponAnim(toolType, isPaused);
+    }
+
+    protected void PlayWeaponAnim(bool isPaused)
+    {
+        ToolManager.Instance.PlayWeaponAnim(toolType, isPaused);
+    }
+
+    protected virtual void OnDisable()
+    {
+        isEquipped = false;
     }
 }

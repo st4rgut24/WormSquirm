@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 public class TunnelUtils
@@ -93,39 +92,6 @@ public class TunnelUtils
 
         return TunnelGoList;
     }
-
-    /// <summary>
-    /// Get the object that contains the targetObject
-    /// </summary>
-    /// <param name="targetPosition">The target GameObject</param>
-    /// <param name="objectList">List of candidate GameObjects that may contain targetObject</param>
-    /// <returns>null if no enclosing object</returns>
-    //public static GameObject getEnclosingObject(Vector3 targetPosition, List<GameObject> objectList)
-    //{
-    //    GameObject enclosingObject = null;
-
-    //    foreach (GameObject otherObject in objectList)
-    //    {
-    //        if (otherObject != null) // Ensure the GameObject in the list is not null
-    //        {
-    //            Bounds otherBounds = otherObject.GetComponent<Renderer>().bounds;
-
-    //            if (otherBounds.Contains(targetPosition))
-    //            {
-    //                if (enclosingObject == null)
-    //                {
-    //                    enclosingObject = otherObject;
-    //                }
-    //                else
-    //                {
-    //                    throw new Exception("There is more than one enclosing object for a transform.position " + targetPosition);
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //    return enclosingObject;
-    //}
 
     public static HitInfo GetHitInfoFromRay(Ray ray, GameObject go, float rayDistance)
     {

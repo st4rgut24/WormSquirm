@@ -6,9 +6,28 @@ using UnityEngine;
 
 public class CharacterAnimator
 {
-	Animator animator;
+    Animator animator;
 
-    protected string[] agentAnimNames = { Consts.DieAnim, Consts.MoveAnim };
+    public enum ActivateType
+    {
+        SetBool,
+        SetTrigger
+    }
+
+    public struct Anim
+    {
+        public string name;
+        public ActivateType activateType; // if false it is a trigger animation
+
+        public Anim(string name, ActivateType activateType)
+        {
+            this.name = name;
+            this.activateType = activateType; // if false it is a trigger animation
+        }
+    }
+
+
+protected string[] agentAnimNames = { Consts.DieAnim, Consts.MoveAnim };
 
     Dictionary<string, int> AnimNamesToIds = new Dictionary<string, int>();
 
@@ -58,6 +77,15 @@ public class CharacterAnimator
         {
             int animId = AnimNamesToIds[name];
             animator.SetTrigger(animId);
+        }
+    }
+
+    public void SetLoopAnimation(string name, bool isLooping)
+    {
+        if (animator != null)
+        {
+            int animId = AnimNamesToIds[name];
+            animator.SetBool(animId, isLooping);
         }
     }
 }

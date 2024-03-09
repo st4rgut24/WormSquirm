@@ -6,6 +6,8 @@ using UnityEngine.UIElements;
 
 public class PlayerManager: Singleton<PlayerManager>
 {
+	public static event Action<GameObject> SpawnMainPlayerEvent;
+
 	public GameObject MainPlayerGo;
 	public GameObject PlayerGo;
 
@@ -26,7 +28,10 @@ public class PlayerManager: Singleton<PlayerManager>
     protected void Awake()
 	{
 		Players = new List<GameObject>();
-	}
+
+        MainPlayerInst = Spawn(MainPlayerGo);
+        mainPlayer = MainPlayerInst.GetComponent<MainPlayer>();
+    }
 
 	public GameObject GetMainPlayer()
 	{
@@ -41,8 +46,7 @@ public class PlayerManager: Singleton<PlayerManager>
     // Use this for initialization
     void Start()
 	{
-        MainPlayerInst = Spawn(MainPlayerGo);
-		mainPlayer = MainPlayerInst.GetComponent<MainPlayer>();
+		SpawnMainPlayerEvent?.Invoke(mainPlayer.gameObject);
 
         Ray ray = new Ray(MainPlayerInst.transform.position, MainPlayerInst.transform.forward);
     }

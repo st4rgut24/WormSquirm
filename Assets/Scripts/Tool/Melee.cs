@@ -3,20 +3,15 @@ using UnityEngine;
 
 public abstract class Melee: Weapon
 {
-    bool IsTouchBeginInMeleeCanvas = false;
+    protected bool IsTouchBeginInWeaponCanvas = false;
 
     Vector3 meleeStartPos;
     Vector3 meleeEndPos;
 
-    public bool IsTouchInsideMeleeCanvas(Vector3 screenPos)
-    {
-        return RectTransformUtility.RectangleContainsScreenPoint(ToolManager.Instance.MeleeCanvas, screenPos);
-    }
-
     void Update()
     {
         #if UNITY_EDITOR || UNITY_STANDALONE
-        if (Input.GetMouseButtonUp(1) && IsTouchInsideMeleeCanvas(Input.mousePosition)) // 0 represents the left mouse button
+        if (Input.GetMouseButtonUp(1) && IsTouchInsideWeaponCanvas(Input.mousePosition)) // 0 represents the left mouse button
         {
             Vector3 mousePosition = Input.mousePosition;
 
@@ -34,7 +29,7 @@ public abstract class Melee: Weapon
             switch (touch.phase)
             {
                 case TouchPhase.Began:
-                    IsTouchBeginInMeleeCanvas = IsTouchInsideMeleeCanvas(touch.position);
+                    IsTouchBeginInWeaponCanvas = IsTouchInsideWeaponCanvas(touch.position);
                     break;
 
                 case TouchPhase.Moved:
@@ -42,8 +37,8 @@ public abstract class Melee: Weapon
 
                 case TouchPhase.Ended:
                     // Use melee weapon if the touches were made within permissable area
-                    if (IsTouchBeginInMeleeCanvas && IsTouchInsideMeleeCanvas(touch.position)) {
-                        IsTouchBeginInMeleeCanvas = false; // reset variable for next touch
+                    if (IsTouchBeginInWeaponCanvas && IsTouchInsideWeaponCanvas(touch.position)) {
+                        IsTouchBeginInWeaponCanvas = false; // reset variable for next touch
                         meleeEndPos = touch.position;
                         Use();
                     }
@@ -51,6 +46,18 @@ public abstract class Melee: Weapon
             }
         }
         #endif
+    }
+
+    public override bool GetPauseAnimStatus()
+    {
+        return false; // melee weapons never pause char animations
+    }
+
+    public override void Use()
+    {
+        base.Use();
+        // play the melee animation when we are using the tool
+        PlayWeaponAnim(false);        
     }
 
     /// <summary>

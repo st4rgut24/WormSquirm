@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using DanielLochner.Assets.SimpleScrollSnap;
 
 public enum ToolType
 {
@@ -12,17 +13,23 @@ public enum ToolType
 
 public class ToolManager : Singleton<ToolManager>
 {
-    public RectTransform MeleeCanvas;
+
+    public RectTransform WeaponCanvas;
+
+    SimpleScrollSnap scrollSnap;
+    ToolSlider toolSlider;
+    public GameObject PickaxeUIPrefab;
+    public GameObject CrossbowUIPrefab;
 
     public GameObject PickaxePrefab;
     public GameObject ChainPrefab;
     public GameObject CrossbowPrefab;
 
     static Dictionary<ToolType, GameObject> WeaponPrefabDict = new Dictionary<ToolType, GameObject>();
+    static Dictionary<ToolType, GameObject> WeaponUIPrefabDict = new Dictionary<ToolType, GameObject>();
 
     public GameObject toolboxGo;
 
-    public RectTransform crosshairUI;
     public Camera playerCamera;
     MainPlayer player;
 
@@ -30,8 +37,13 @@ public class ToolManager : Singleton<ToolManager>
     
     Transform playerTransform;
 
-    // Use this for initialization
-    void Start()
+    private void OnEnable()
+    {
+        PlayerManager.SpawnMainPlayerEvent += OnSpawnMainPlayer;
+        SimpleScrollSnap.SelctedItemEvent += OnSelectedItem;
+    }
+
+    private void Awake()
     {
         GameObject mainPlayerGo = PlayerManager.Instance.GetMainPlayer();
         player = mainPlayerGo.GetComponent<MainPlayer>();
@@ -40,17 +52,54 @@ public class ToolManager : Singleton<ToolManager>
         Camera[] cameras = mainPlayerGo.GetComponentsInChildren<Camera>();
         playerCamera = cameras[0];
 
-        InitWeaponPrefabDict(); // depends on player being initialized
+        InitWeaponPrefabDict(); // depends on player being initialized   
+    }
 
-        GameObject pickaxeTool = CreateTool(ToolType.Pickaxe); // depends on WeaponPrefabDict being initialized
-        Equip(pickaxeTool);
+    // Use this for initialization
+    void Start()
+    {
+
+        //EquipTool(Consts.PickaxeTag); // depends on WeaponPrefabDict being initialized
+    }
+
+    /// <summary>
+    /// Initialize whatever depends on main player
+    /// </summary>
+    /// <param name="mainPlayer"></param>
+    public void OnSpawnMainPlayer(GameObject mainPlayer)
+    {
+        InitWeaponUIPrefabDict();
+
+        scrollSnap = mainPlayer.GetComponentInChildren<SimpleScrollSnap>();
+        toolSlider = new ToolSlider(scrollSnap, WeaponUIPrefabDict);
+
+    }
+
+    public ToolType GetToolTypeFromTag(string tag)
+    {
+        switch (tag)
+        {
+            case Consts.ChainTag:
+                return ToolType.Chain;
+            case Consts.PickaxeTag:
+                return ToolType.Pickaxe;
+            case Consts.CrossbowTag:
+                return ToolType.Crossbow;
+            default:
+                return ToolType.Pickaxe;
+        }
+    }
+
+    public void InitWeaponUIPrefabDict()
+    {
+        WeaponUIPrefabDict[ToolType.Pickaxe] = Instantiate(PickaxeUIPrefab);
+        WeaponUIPrefabDict[ToolType.Crossbow] = Instantiate(CrossbowUIPrefab);
     }
 
     public void InitWeaponPrefabDict()
     {
         WeaponPrefabDict[ToolType.Pickaxe] = InitWeaponPrefab(PickaxePrefab);
-        // TODO: create the prefabs for other weapons below
-        //WeaponPrefabDict[ToolType.Crossbow] = InitWeaponPrefab(CrossbowPrefab);
+        WeaponPrefabDict[ToolType.Crossbow] = InitWeaponPrefab(CrossbowPrefab);
         //WeaponPrefabDict[ToolType.Chain] = InitWeaponPrefab(ChainPrefab);
 
     }
@@ -58,14 +107,19 @@ public class ToolManager : Singleton<ToolManager>
     public GameObject InitWeaponPrefab(GameObject WeaponPrefab)
     {
         GameObject WeaponGo = Instantiate(WeaponPrefab, player.handTransform, false);
-        Weapon weapon = WeaponGo.GetComponent<Weapon>();
         WeaponGo.SetActive(false);
+        Weapon weapon = WeaponGo.GetComponent<Weapon>();
         return WeaponGo;
     }
 
-    public void PlayWeaponAnim(ToolType type)
+    public void PlayWeaponAnim(ToolType type, bool isPaused)
     {
-        player.SetWeaponAnimation(type);
+        player.PlayWeayponAnimation(type, isPaused);
+    }
+
+    public void StopWeaponAnim(ToolType type, bool isPaused)
+    {
+        player.StopWeaponAnimation(type, isPaused);
     }
 
     public GameObject GetWeaponPrefab(ToolType type)
@@ -81,18 +135,26 @@ public class ToolManager : Singleton<ToolManager>
         activeTool.Use();
     }
 
+    public void OnSelectedItem(GameObject item)
+    {
+        EquipTool(item.tag);
+    }
+
     /// <summary>
     /// Enable the active tool and disable the previously active tool
     /// </summary>
     /// <param name="equippedTool">active tool</param>
-    void Equip(GameObject equippedTool)
+    void SwapTool(GameObject equippedTool)
     {
         if (activeTool != null)
         {
             activeTool.gameObject.SetActive(false);
+            player.StopWeaponAnimation(activeTool.toolType, false);
         }
 
         activeTool = equippedTool.GetComponent<Weapon>();
+        activeTool.isEquipped = true;
+
         equippedTool.SetActive(true);
     }
 
@@ -104,12 +166,26 @@ public class ToolManager : Singleton<ToolManager>
         activeTool.DisengageWeapon();
     }
 
-    GameObject CreateTool(ToolType type)
+    /// <summary>
+    /// Equip a tool if not already equipped
+    /// </summary>
+    /// <param name="toolTag">tag of tool gameobject</param>
+    public void EquipTool(string toolTag)
     {
-        GameObject toolGo = GetWeaponPrefab(type);
-        player.EquipTool(toolGo);
+        // TODO: play some animation (RunShoot for crossbow for example)
+        if (activeTool == null || !activeTool.CompareTag(toolTag))
+        {
+            ToolType type = GetToolTypeFromTag(toolTag);
+            GameObject toolGo = GetWeaponPrefab(type);
+            SwapTool(toolGo);
+            player.EquipTool(toolGo);
+        }
+    }
 
-        return toolGo;
+    private void OnDisable()
+    {
+        PlayerManager.SpawnMainPlayerEvent -= OnSpawnMainPlayer;
+        SimpleScrollSnap.SelctedItemEvent -= OnSelectedItem;
     }
 }
 

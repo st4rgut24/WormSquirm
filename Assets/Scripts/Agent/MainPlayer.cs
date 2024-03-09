@@ -146,10 +146,15 @@ public class MainPlayer : Player
         notifyDig(direction);
     }
 
-    public void SetWeaponAnimation(ToolType weaponType)
+    public void PlayWeayponAnimation(ToolType weaponType, bool isPaused)
     {
-        playerAnimator.TriggerWeaponAnimation(weaponType);
-    } 
+        playerAnimator.PlayWeaponAnimation(weaponType, isPaused);
+    }
+
+    public void StopWeaponAnimation(ToolType weaponType, bool isPaused)
+    {
+        playerAnimator.StopWeaponAnimation(weaponType, isPaused);
+    }
 
     public void SetCharAnimation(string animName)
     {

@@ -3,6 +3,12 @@
 public class Consts
 {
     // tags
+    public const string PickaxeTag = "pickaxe";
+    public const string CrossbowTag = "crossbow";
+    public const string ChainTag = "chain";
+
+    public const string MainCameraTag = "MainCamera";
+
     public const string EnemyTag = "Enemy";
     public const string PlayerTag = "Player";
     public const string TunnelTag = "tunnel";
@@ -31,11 +37,15 @@ public class Consts
     public const string DieAnim = "isDying";
     public const string SwingAnim = "isSwinging";
     public const string ThrowAnim = "isThrowing";
-    public const string ShootAnim = "isShooting";
     public const string ChainAnim = "isChaining";
+    public const string ShootAnim = "isShooting";
+    public const string SnipeAnim = "isSniping";
 
     // bot animation
     public const string SlamAttackAnim = "isAttacking";
     public const float SecondsToDisappear = 3;
+
+    // weapon animation
+    public const string FireWeaponAnim = "isFire";
 }
 
