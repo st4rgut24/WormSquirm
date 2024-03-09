@@ -11,6 +11,7 @@ public abstract class Ranged : Weapon
     private Transform projectileTransform;
 
     protected int animShootFrame; // frame to freeze the animation while shooting to prevent sway
+    private bool hasInputBeenProcessed = false;
 
     GameObject mainCameraGo;
     GameObject shootCameraGo;
@@ -89,7 +90,6 @@ public abstract class Ranged : Weapon
         {
             // ranged camera is already enabled, fire the weapon
             FireWeapon();
-
         }
     }
 
@@ -101,7 +101,11 @@ public abstract class Ranged : Weapon
 
 
         Collider collider = ShootRay(direction);
-        DamageCollidedObject(collider);
+
+        if (collider != null)
+        {
+            DamageCollidedObject(collider);
+        }
     }
 
     public void ExitSniperMode()
@@ -119,7 +123,8 @@ public abstract class Ranged : Weapon
         SwapInRangedCamera();
         ExitShootCameraButton.enabled = true;
         ExitShootCameraImage.enabled = true;
-        PlayWeaponAnim(isSniping);
+
+        PlayWeaponAnim(isSniping); // freeze position in sniper mode
     }
 
     public void SwapInRangedCamera()

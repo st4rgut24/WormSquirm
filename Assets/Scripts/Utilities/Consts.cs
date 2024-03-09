@@ -17,6 +17,7 @@ public class Consts
     // names
     public const string HealthSlider = "HealthBar";
     public const string StaminaSlider = "StaminaBar";
+    public const string Arrow = "arrow";
 
     // transforms
     public const float FullRevolution = 360;
@@ -47,5 +48,6 @@ public class Consts
 
     // weapon animation
     public const string FireWeaponAnim = "isFire";
+    public const string ReloadWeaponAnim = "isFill";
 }
 
