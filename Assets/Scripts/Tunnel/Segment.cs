@@ -39,6 +39,16 @@ public class Segment
         this.segmentLines.Add(centerLine);
     }
 
+    /// <summary>
+    /// Get the y position based off the center line
+    /// </summary>
+    /// <returns>elevation</returns>
+    public float GetElevation()
+    {
+        Vector3 center = GetCenterLineCenter();
+        return center.y;
+    }
+
     public void AddGuideline(Guideline line)
     {
         segmentLines.Add(line);

@@ -16,6 +16,11 @@ public class Route
 		waypoints = new List<Waypoint>();
 	}
 
+	public int GetLength()
+	{
+		return waypoints.Count;
+	}
+
 	public Segment GetInitSegment()
 	{
 		if (waypoints.Count > 0)
@@ -38,7 +43,7 @@ public class Route
 		return waypoint == lastWP;
 	}
 
-	public Vector3 GetDestination()
+	public Vector3 GetCurrentPosition()
 	{
 		Waypoint curWP = GetCurWaypoint();
 		return curWP.position;

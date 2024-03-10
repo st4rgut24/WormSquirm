@@ -49,5 +49,9 @@ public class Consts
     // weapon animation
     public const string FireWeaponAnim = "isFire";
     public const string ReloadWeaponAnim = "isFill";
+
+    // test
+    public const string BotRouteDrawer = "BotWaypointDrawer";
+    public const string RockRouteDrawer = "RockWaypointDrawer";
 }
 

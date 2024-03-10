@@ -39,8 +39,6 @@ public class BotManager : Singleton<BotManager>
 
     protected void OnEnable()
     {
-        TunnelCreatorManager.OnAddCreatedTunnel += OnAddCreatedTunnel;
-        TunnelIntersectorManager.OnAddIntersectedTunnelSuccess += OnAddIntersectedTunnel;
         Disabler.OnDisableTunnels += OnTunnelDisabled;
     }
 
@@ -59,24 +57,14 @@ public class BotManager : Singleton<BotManager>
         StartCoroutine(SpawnAtInterval());
     }
 
-    void OnAddIntersectedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel, List<GameObject> intersectedTunnels)
-    {
-        AddBotToSegment(playerTransform, segment);
-    }
-
-    void OnAddCreatedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel)
-    {
-        AddBotToSegment(playerTransform, segment);
-    }
-
-    void AddBotToSegment(Transform playerTransform, SegmentGo segment)
+    public void AddBotToSegment(Transform playerTransform, Segment segment)
     {
         if (playerTransform.gameObject.CompareTag(Consts.PlayerTag))
         {
             GameObject botGo = Spawn(BotType.Chaser);
             Bot bot = botGo.GetComponent<Bot>();
 
-            bot.curSegment = SegmentManager.Instance.GetSegmentFromObject(segment.getTunnel());
+            bot.curSegment = segment;
             InitBot(bot);
         }
     }
@@ -197,9 +185,9 @@ public class BotManager : Singleton<BotManager>
         Route route = RouteFactory.Get(strat, bot, bot.objective);
 
         // TESTING WAYPOINTS
-        WaypointDrawer wpDrawer = GameObject.Find("WaypointDrawer").GetComponent<WaypointDrawer>();
+        WaypointDrawer wpDrawer = GameObject.Find(Consts.BotRouteDrawer).GetComponent<WaypointDrawer>();
         // Debug.Log("Set " + route.waypoints.Count + " waypoints");
-        wpDrawer.SetWaypoints(route.waypoints);
+        wpDrawer.SetWaypoints(route.waypoints, Color.red);
 
         bot.initRoute(route);
     }
@@ -213,8 +201,6 @@ public class BotManager : Singleton<BotManager>
     protected void OnDisable()
     {
         Disabler.OnDisableTunnels -= OnTunnelDisabled;
-        TunnelCreatorManager.OnAddCreatedTunnel -= OnAddCreatedTunnel;
-        TunnelIntersectorManager.OnAddIntersectedTunnelSuccess -= OnAddIntersectedTunnel;
     }
 }
 

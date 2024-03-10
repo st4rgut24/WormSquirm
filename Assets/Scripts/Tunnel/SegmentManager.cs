@@ -64,12 +64,11 @@ public class SegmentManager : Singleton<SegmentManager>
         return UpdatedSegment;
     }
 
-    //public Segment GetSegmentFromTransform(Transform transform)
-    //{
-    //    GameObject tunnelGo = TunnelManager.Instance.GetGameObjectTunnel(transform);
-
-    //    return GetSegmentFromObject(tunnelGo);
-    //}
+    public Segment GetSegmentFromSegmentGo(SegmentGo segmentGo)
+    {
+        GameObject tunnel = segmentGo.getTunnel();
+        return GetSegmentFromObject(tunnel);
+    }
 
     public Segment GetSegmentFromObject(GameObject tunnel)
     {

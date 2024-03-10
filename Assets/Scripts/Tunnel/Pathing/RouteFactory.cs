@@ -2,13 +2,13 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
-using static UnityEngine.Rendering.HableCurve;
 
 
 public enum RouteStrat
 {
     FollowSegment,
-    StraightPath
+    StraightPath,
+    Gravity
 }
 
 /// <summary>
@@ -34,6 +34,8 @@ public class RouteFactory
                 return FollowSegments(agent.curSegment, targetTransform, agent.transform);
             case RouteStrat.StraightPath:
                 return CreateStraightPath(targetTransform);
+            case RouteStrat.Gravity:
+                return CreateDownhillRoute(agent.curSegment);
             default:
                 return FollowSegments(agent.curSegment, targetTransform, agent.transform);
         }
@@ -59,17 +61,40 @@ public class RouteFactory
         return route;
     }
 
+    public static List<Segment> CreateDownhillPath(Segment startSegment)
+    {
+        Segment segment = startSegment;
+        List<Segment> downhillSegmentPath = new List<Segment>();
+        HashSet<GameObject> SeenTunnels = new HashSet<GameObject>();
+
+        // while there is a segment that is active keep adding to the downhill path
+        while (IsNewActiveTunnel(segment?.tunnel, SeenTunnels) )
+        {
+            SeenTunnels.Add(segment.tunnel);
+            downhillSegmentPath.Add(segment);
+
+            segment = SegmentUtils.GetNextTunnelWithSteepestDescent(segment);
+        }
+
+        return downhillSegmentPath;
+    }
+
+    private static bool IsNewActiveTunnel(GameObject tunnel, HashSet<GameObject> SeenTunnels)
+    {
+        return tunnel != null && tunnel.activeSelf && !SeenTunnels.Contains(tunnel);
+    }
+
     /// <summary>
     /// Get the route that traverses segments
     /// </summary>
     /// <param name="segments">The segments that are part of the route</param>
-    /// <param name="endWP">The destination waypoint</param>
+    /// <param name="endWaypoint">The final waypoint</param>
     /// <returns>the route</returns>
-    public static Route GetFollowSegmentsRoute(List<Segment> segments, Waypoint endWP)
+    public static Route GetFollowSegmentsRoute(List<Segment> segments, Waypoint endWaypoint)
     {
         Route route = new Route();
 
-        for (int i=1;i<segments.Count; i++)
+        for (int i=1;i<segments.Count; i++)             
         {
             Segment startSegment = segments[i - 1];
             Segment destSegment = segments[i];
@@ -79,6 +104,7 @@ public class RouteFactory
         }
 
         // if there is only one segment, add a starting WP so we don't spawn on top of the player
+        // not really relevant because agent should never spawn in the same segment as player
         if (segments.Count == 1)
         {
             Vector3 segmentCenter = segments[0].GetCenterLineCenter();
@@ -86,7 +112,8 @@ public class RouteFactory
             route.AddWaypoint(startWP);
         }
 
-        route.AddWaypoint(endWP);
+        route.AddWaypoint(endWaypoint);
+
         return route;
     }
 
@@ -121,7 +148,7 @@ public class RouteFactory
                 GameObject neighborTunnel = neighborTunnels[i];
 
                 // make sure the path does not go in loops, and the tunnels in the path are currently active
-                if (neighborTunnel.activeSelf && !seenTunnels.Contains(neighborTunnel))
+                if (IsNewActiveTunnel(neighborTunnel, seenTunnels))
                 {
                     seenTunnels.Add(neighborTunnel);
                     prevTunnel = neighborTunnel;
@@ -143,6 +170,17 @@ public class RouteFactory
         return segments;
     }
 
+    public static Route CreateDownhillRoute(Segment startSegment)
+    {
+        List<Segment> DownhillSegments = CreateDownhillPath(startSegment);
+        Segment destSegment = DownhillSegments[DownhillSegments.Count - 1];
+
+        Waypoint endWaypoint = new Waypoint(destSegment.GetCenterLineCenter(), destSegment);
+        Route route = GetFollowSegmentsRoute(DownhillSegments, endWaypoint);
+
+        return route;
+    }
+
     /// <summary>
     /// Create a route that reaches target by following existing segments
     /// </summary>
@@ -159,10 +197,10 @@ public class RouteFactory
             SearchUtils.dfsConnectSegments(goalSegment, curSegment) :
             StartFollowSegments(goalSegment);
 
-        Waypoint endWaypoint = new Waypoint(targetTransform.position);
-
         // convert a list of segments to a list of waypoints
-        Route route = GetFollowSegmentsRoute(segments, endWaypoint);
+        Waypoint endWP = new Waypoint(targetTransform.position);
+        Route route = GetFollowSegmentsRoute(segments, endWP);
+
         return route;
     }
 }

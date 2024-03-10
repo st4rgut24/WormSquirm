@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 public class AgentManager : Singleton<AgentManager>
 {
+    public bool SpawnRock;
+    public bool SpawnBot;
+
     public Dictionary<Transform, Segment> TransformSegmentDict; // <GameObject Transform, Last Enclosing Segment>
 
     public Transform agentsParent;
@@ -14,11 +17,45 @@ public class AgentManager : Singleton<AgentManager>
     private void OnEnable()
     {
         SegmentManager.OnEnterNewSegment += OnEnterNewSegment;
+
+        TunnelCreatorManager.OnAddCreatedTunnel += OnAddCreatedTunnel;
+        TunnelIntersectorManager.OnAddIntersectedTunnelSuccess += OnAddIntersectedTunnel;
     }
 
     private void Awake()
     {
         TransformSegmentDict = new Dictionary<Transform, Segment>();
+    }
+
+    void Spawn(Transform playerTransform, SegmentGo segmentGo, GameObject prevTunnel)
+    {
+        Segment segment = SegmentManager.Instance.GetSegmentFromSegmentGo(segmentGo);
+        // TODO: Game spawning logic to decide what to spawn
+        if (SpawnRock)
+        {
+            if (SegmentUtils.IsSegmentsDownhill(segment, prevTunnel))
+            {
+                RockManager.Instance.Spawn(segment);
+            }
+            else
+            {
+                Debug.LogWarning("Segments do not allow rock to roll downhill");
+            }
+        }
+        else if (SpawnBot)
+        {
+            BotManager.Instance.AddBotToSegment(playerTransform, segment);
+        }
+    }
+
+    void OnAddIntersectedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel, List<GameObject> intersectedTunnels)
+    {
+        Spawn(playerTransform, segment, prevTunnel);
+    }
+
+    void OnAddCreatedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel)
+    {
+        Spawn(playerTransform, segment, prevTunnel);
     }
 
     /// <summary>
@@ -76,6 +113,9 @@ public class AgentManager : Singleton<AgentManager>
     private void OnDisable()
     {
         SegmentManager.OnEnterNewSegment -= OnEnterNewSegment;
+
+        TunnelCreatorManager.OnAddCreatedTunnel -= OnAddCreatedTunnel;
+        TunnelIntersectorManager.OnAddIntersectedTunnelSuccess -= OnAddIntersectedTunnel;
     }
 }
 

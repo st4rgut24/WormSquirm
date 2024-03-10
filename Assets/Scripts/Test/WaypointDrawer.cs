@@ -5,15 +5,17 @@ using System.Collections.Generic;
 public class WaypointDrawer : MonoBehaviour
 {
     public List<Waypoint> waypoints;
+    Color gizmoColor;
 
-    public void SetWaypoints(List<Waypoint> waypoints)
+    public void SetWaypoints(List<Waypoint> waypoints, Color color)
     {
         this.waypoints = waypoints;
+        this.gizmoColor = color;
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
+        Gizmos.color = gizmoColor;
 
         if (waypoints != null)
         {

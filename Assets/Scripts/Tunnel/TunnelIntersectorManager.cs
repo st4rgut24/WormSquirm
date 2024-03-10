@@ -61,13 +61,6 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
     {
         Heading intersectHeading = hitInfo != null ? GetHitHeading(hitInfo, playerTransform) : heading;
 
-
-        //if (hitInfo != null)
-        //{
-        //    ModifyHitPosition()
-        //    heading.position = hitInfo.hitCoord; // the end of the intersecting segment will be the point of intersection obtained from hit info
-        //}
-
         Vector3 center = TunnelUtils.GetCenterPoint(prevRing.GetCenter(), intersectHeading.position);
         List<GameObject> nearbyTunnels = tunnelGrid.GetGameObjects(center, 1);
         // Debug.Log("There are " + nearbyTunnels.Count + " tunnels with the viciting of position " + center);

@@ -7,6 +7,11 @@ public class Waypoint
 	public Vector3 position;
 	public Segment segment;
 
+    /// <summary>
+    /// A marker along a route
+    /// </summary>
+    /// <param name="position">position of waypoint</param>
+    /// <param name="segment">the destination segment of the waypoint</param>
 	public Waypoint(Vector3 position, Segment segment = null)
 	{
 		this.position = position;

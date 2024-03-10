@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using static UnityEngine.Rendering.HableCurve;
+using UnityEngine;
 
 public class Connector
 {
@@ -57,7 +57,7 @@ public class Connector
     /// Set a continous path between two segments
     /// The start of the segment is the point of connection
     /// </summary>
-    /// <param name="connectingSegment">segment whose start is the adjacent segment's end</param>
+    /// <param name="connectingSegment">segment whose start is the adjacent segment's end. Newly added segment that is continuous with connectedSegment</param>
     public void SetContinuousPath(Segment connectingSegment, Segment connectedSegment)
     {
         Guideline connectingCenterline = connectingSegment.centerLine;
@@ -78,13 +78,14 @@ public class Connector
     /// <param name="intersectingLine">the line that intersects one segment</param>
     public void SetIntersectingPath(Segment intersectedSegment, Segment intersectingSegment, Guideline intersectingLine)
     {
-        Guideline intersectedGuideline = intersectingSegment.centerLine;
+        Guideline intersectingGuideline = intersectingSegment.centerLine;
 
-        // one paths from intersected segment to other segment
+        // one paths from intersected segment to intersecting segment
         List<Waypoint> intersectedPath = new List<Waypoint>() { new Waypoint(intersectingLine.start, intersectedSegment), new Waypoint(intersectingLine.end, intersectingSegment) };
 
-        // one path from intersecting segment to other segment
-        List<Waypoint> intersectingPath = new List<Waypoint>() { new Waypoint(intersectedGuideline.end, intersectedSegment) };
+        // one path from intersecting segment to intersected segment
+            Vector3 connectingEnd = SegmentUtils.GetConnectingEndFromGuideline(intersectingGuideline, intersectedSegment);
+        List<Waypoint> intersectingPath = new List<Waypoint>() { new Waypoint(connectingEnd, intersectedSegment) };
 
         AddPath(intersectingSegment, intersectingPath);
         AddPath(intersectedSegment, intersectedPath);

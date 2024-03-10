@@ -137,7 +137,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
                 prevRing = RingFactory.Create(playerTransform.forward, playerTransform.position);
             }
         }
-        else
+        else // create ring at the point of intersection when bisecting from inside an existing tunnel 
         {
             Heading playerHeading = new Heading(playerTransform.position, playerTransform.forward);
             Vector3 intersectionPoint = segment.GetIntersectionPoint(playerHeading);
