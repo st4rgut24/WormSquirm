@@ -64,5 +64,8 @@ public class Consts
 
     // timers
     public const float BoulderDestructTimer = 2;
+
+    // tunnels
+    public const float IntersectionOffset = 1; // intended to create an overlap between interecting segments to hide void in between
 }
 

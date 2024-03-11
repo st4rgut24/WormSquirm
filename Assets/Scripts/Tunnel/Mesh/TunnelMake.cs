@@ -48,7 +48,24 @@ public class TunnelMake: MonoBehaviour
         Vector3 position = heading.position;
 
         return CreateSegment(direction, position, playerTransform, prevRing);
+    }
 
+    /// <summary>
+    /// Creates an Offset Tunnel, extended on both sides
+    /// </summary>
+    /// <param name="offset">amount to extend the tunnel on either end</param>
+    /// <returns>offset tunnel, typically used for overlapping segments</returns>
+    public SegmentGo GrowExtendedTunnel(Transform playerTransform, Heading heading, Ring prevRing, float offset)
+    {
+        Vector3 tunnelDir = heading.forward;
+
+        Vector3 prevRingDir = -tunnelDir;
+        Vector3 prevRingCenter = prevRing.center + prevRingDir * offset;
+        Ring offsetPrevRing = RingFactory.Create(tunnelDir, prevRingCenter);
+
+        Vector3 position = heading.position + tunnelDir * offset;
+
+        return CreateSegment(tunnelDir, position, playerTransform, offsetPrevRing); // TODO: not working properly on game start intersection
     }
 
     private SegmentGo CreateSegment(Vector3 direction, Vector3 position, Transform playerTransform, Ring prevRing)
@@ -65,8 +82,6 @@ public class TunnelMake: MonoBehaviour
         tunnelObject.name = "Tunnel " + tunnelCounter;
         tunnelCounter++;
 
-        //GameObject capObject = MeshObjectFactory.Get(MeshType.EndCap, Cap, endRing, new OptionalMeshProps());    
-        //return new SegmentGo(corridor);
         return new SegmentGo(tunnelObject, Cap, endRing, prevRing);
     }
 

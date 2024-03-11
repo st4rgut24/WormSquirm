@@ -142,6 +142,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
             Heading playerHeading = new Heading(playerTransform.position, playerTransform.forward);
             Vector3 intersectionPoint = segment.GetIntersectionPoint(playerHeading);
             // Debug.Log("intersection point is " + intersectionPoint);
+
             prevRing = RingFactory.Create(playerTransform.forward, intersectionPoint);
         }
 

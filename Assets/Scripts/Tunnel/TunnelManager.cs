@@ -30,7 +30,7 @@ public class TunnelManager : Singleton<TunnelManager>
 
     public const float tunnelRadius = 5.13f;
 
-	const int tunnelSides = 8;
+    const int tunnelSides = 16; // 8;
     const float segmentSpacing = 1.33f;
     // issue with noiseScale != 0: dist from center line to ring edge should be constant to
     // avoid any error when calculating tunnel edges

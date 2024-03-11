@@ -82,9 +82,13 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
     {
         SegmentGo projectedSegment = null;
 
+        // offset in the direction opposite to which player creates intesecting tunnel, so the intersecting tunnel
+        // juts into the exist tunnel, creating an overlap
+        //Vector3 offsetIntersectionPoint = TunnelUtils.OffsetIntersectionPoint(intersectionPoint, -playerTransform.forward);
+
         try
         {
-            projectedSegment = tunnelMaker.GrowTunnel(playerTransform, heading, prevRing);
+            projectedSegment = tunnelMaker.GrowExtendedTunnel(playerTransform, heading, prevRing, Consts.IntersectionOffset);
             projectedSegment.IntersectStartCap(); // start of intersected tunnel segment will have a hole in it
 
             List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment.getTunnel(), otherTunnels, intersectBuffer);
