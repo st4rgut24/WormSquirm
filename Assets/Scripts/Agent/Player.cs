@@ -10,11 +10,6 @@ public class Player : Agent
 
     protected PlayerAnimator playerAnimator;
 
-    //public const string swingAnimName = "isSwinging";
-    //public const string throwAnimName = "isThrowing";
-
-    //string[] animNames = { swingAnimName, throwAnimName };
-
     protected override void Start()
     {
         // Start the coroutine
@@ -38,5 +33,12 @@ public class Player : Agent
     protected override void InflictDamage(float damage, Agent attackedAgent)
     {
         base.InflictDamage(damage, attackedAgent);
+    }
+
+    protected override IEnumerator DieCoroutine()
+    {
+        charAnimator.TriggerAnimation(Consts.DieAnim);
+        yield return null;
+        // TODO: maybe emit an event to trigger some end screen
     }
 }

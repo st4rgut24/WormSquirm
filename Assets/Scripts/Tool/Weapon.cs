@@ -10,11 +10,14 @@ public abstract class Weapon : MonoBehaviour
     protected float damage;
 
     protected Camera playerCamera;
+    protected GameObject player;
 
     protected virtual void Start()
     {
         DisengageWeapon();
+
         playerCamera = ToolManager.Instance.playerCamera;
+        player = ToolManager.Instance.player.gameObject;
     }
 
     protected bool IsTouchInsideWeaponCanvas(Vector3 screenPos)
@@ -64,12 +67,13 @@ public abstract class Weapon : MonoBehaviour
 
     protected void DamageCollidedObject(Collider other)
     {
-        if (other.transform.CompareTag(Consts.EnemyTag))
+        // check if colliding with any gameobject except its owner
+        if (TransformUtils.IsPlayerDamageableObject(other.transform))
         {
-            Bot bot = other.gameObject.GetComponent<Bot>();
+            Agent agent = other.gameObject.GetComponent<Agent>();
 
             Debug.Log("Deal damage to enemy " + other.gameObject.name);
-            bot.TakeDamage(damage);
+            agent.TakeDamage(damage);
         }
     }
 

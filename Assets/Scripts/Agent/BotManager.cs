@@ -59,7 +59,7 @@ public class BotManager : Singleton<BotManager>
 
     public void AddBotToSegment(Transform playerTransform, Segment segment)
     {
-        if (playerTransform.gameObject.CompareTag(Consts.PlayerTag))
+        if (playerTransform.gameObject.CompareTag(Consts.MainPlayerTag))
         {
             GameObject botGo = Spawn(BotType.Chaser);
             Bot bot = botGo.GetComponent<Bot>();

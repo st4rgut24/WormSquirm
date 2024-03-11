@@ -56,8 +56,15 @@ public class Route
 
     public Waypoint GetCurWaypoint()
 	{
-		return waypoints[waypointIdx];
-	}
+		if (waypointIdx < waypoints.Count)
+		{
+            return waypoints[waypointIdx];
+        }
+		else
+		{
+			return null;
+		}
+    }
 
     public void AdvanceWaypoint()
     {

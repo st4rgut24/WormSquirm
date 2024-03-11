@@ -31,7 +31,7 @@ public class ToolManager : Singleton<ToolManager>
     public GameObject toolboxGo;
 
     public Camera playerCamera;
-    MainPlayer player;
+    public MainPlayer player;
 
     Weapon activeTool = null;
     

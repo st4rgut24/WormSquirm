@@ -10,14 +10,21 @@ public class Consts
     public const string MainCameraTag = "MainCamera";
 
     public const string EnemyTag = "Enemy";
+    public const string RockTag = "Rock";
     public const string PlayerTag = "Player";
+    public const string MainPlayerTag = "MainPlayer";
     public const string TunnelTag = "tunnel";
+
+    public static readonly string[] PlayerTags = { PlayerTag, MainPlayerTag };
     public static readonly string[] ObstacleTags = { EnemyTag };
+    public static readonly string[] PlayerDamageableTags = { EnemyTag, RockTag, PlayerTag }; // main player tag is ommitted because cannot damage self
+    public static readonly string[] AllDamageableTags = { EnemyTag, RockTag, PlayerTag, MainPlayerTag };
 
     // names
     public const string HealthSlider = "HealthBar";
     public const string StaminaSlider = "StaminaBar";
     public const string Arrow = "arrow";
+    public const string SplitBoulder = "split_parent";
 
     // transforms
     public const float FullRevolution = 360;
@@ -25,8 +32,8 @@ public class Consts
     public const float defaultRotationSpeed = 5f;
 
     // player movement
-    public const float ReduceStaminaAmt = .1f;
-    public const float WalkingSpeed = 1f;
+    public const float ReduceStaminaAmt = .05f;
+    public const float WalkingSpeed = 2f;
     public const float RunningSpeed = 6f;
     public const float playerRotationSpeed = 15;
 
@@ -54,5 +61,8 @@ public class Consts
     // test
     public const string BotRouteDrawer = "BotWaypointDrawer";
     public const string RockRouteDrawer = "RockWaypointDrawer";
+
+    // timers
+    public const float BoulderDestructTimer = 2;
 }
 

@@ -4,8 +4,13 @@ using System.Collections.Generic;
 
 public class RockManager : Singleton<RockManager>
 {
+
     [SerializeField]
     private GameObject RockPrefab;
+
+    public static float RockHealth = 1000f;
+
+    // TODO: Rock Manager determines the HP of the rocks. 'Tougher' rocks can crush a player
 
     public GameObject Spawn(Segment segment)
     {        
@@ -23,5 +28,7 @@ public class RockManager : Singleton<RockManager>
 
         return RockGo;
     }
+
+
 }
 

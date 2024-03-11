@@ -5,7 +5,7 @@ using System;
 /// <summary>
 /// Live agents have controlled movements, hence the functions for controlling rotation, etc.
 /// </summary>
-public class Agent : MonoBehaviour
+public abstract class Agent : MonoBehaviour
 {
     public Segment curSegment;
 
@@ -35,7 +35,9 @@ public class Agent : MonoBehaviour
     public float rotationThreshold = 0.1f;
     public float distanceThreshold = 0.1f;
 
-    Quaternion targetRotation;
+    protected Quaternion targetRotation;
+
+    protected abstract IEnumerator DieCoroutine();
 
     //protected bool isMoveInProgress; // a move is in progress that must complete before any other movements can be processed
 
@@ -63,18 +65,19 @@ public class Agent : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
 	{
+        //transform.rotation = targetRotation; // more appropriate for rock rotation
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         // check if player's rotation changes based on direction within tunnel
 
-        //if (curSegment != null && !DirectionUtils.isDirectionsAligned(transform.forward, curSegmentForward)) // for ex. if player has turned around in the current tunnel
-        //{
-        //    // if traveling to the other end of the segment, update the segment forward vector
-        //    curSegmentForward = -curSegmentForward;
-        //    float xRot = DirectionUtils.GetUpDownRotation(transform.forward, curSegment.forward);
-        //    //Vector3 verticalRotate = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
-        //    // Rotations happen over several frames until playerr reaches target destination
-        //    ChangeVerticalRotation(xRot, Consts.defaultRotationSpeed);
-        //}
+        if (curSegment != null && !DirectionUtils.isDirectionsAligned(transform.forward, curSegmentForward)) // for ex. if player has turned around in the current tunnel
+        {
+            // if traveling to the other end of the segment, update the segment forward vector
+            curSegmentForward = -curSegmentForward;
+            float xRot = DirectionUtils.GetUpDownRotation(transform.forward, curSegment.forward);
+            //Vector3 verticalRotate = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
+            // Rotations happen over several frames until playerr reaches target destination
+            ChangeVerticalRotation(xRot, Consts.defaultRotationSpeed);
+        }
     }
 
     /// <summary>
@@ -133,7 +136,7 @@ public class Agent : MonoBehaviour
 
         if (isDead)
         {
-            charAnimator.TriggerAnimation(Consts.DieAnim);
+            StartCoroutine(DieCoroutine());
         }
 
         return isDead;

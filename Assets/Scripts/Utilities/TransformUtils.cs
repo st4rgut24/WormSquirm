@@ -3,6 +3,16 @@ using UnityEngine;
 
 public class TransformUtils
 {
+    public static bool IsAnyDamageableObject(Transform transform)
+    {
+        return IsTransformMatchTags(transform, Consts.AllDamageableTags);
+    }
+
+    public static bool IsPlayerDamageableObject(Transform transform)
+    {
+        return IsTransformMatchTags(transform, Consts.PlayerDamageableTags);
+    }
+
     public static Transform GetAncestorMatchTags(Transform transform, string[] tags)
     {
         while (transform != null)

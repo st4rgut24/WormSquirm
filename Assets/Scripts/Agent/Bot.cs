@@ -72,6 +72,22 @@ public abstract class Bot : Automaton
         ChangeMovement(destination, true, velocity);
     }
 
+    public override bool initRoute(Route route)
+    {
+        bool isFirstRoute = base.initRoute(route);
+        this.route = route;
+
+        if (isFirstRoute)
+        {
+            Waypoint CurWP = route.GetCurWaypoint();
+            Waypoint NextWP = route.GetNextWaypoint();
+
+            Vector3 initDir = (NextWP.position - CurWP.position).normalized;
+            transform.rotation = Quaternion.LookRotation(initDir, Vector3.up);
+        }
+
+        return isFirstRoute;
+    }
 
     protected override void Rotate(Vector3 moveDirection)
     {
@@ -94,20 +110,10 @@ public abstract class Bot : Automaton
         InflictDamage(damage, attackedAgent);
     }
 
-    public override bool TakeDamage(float damage)
+    protected override IEnumerator DieCoroutine()
     {
-        bool isDead = base.TakeDamage(damage);
+        charAnimator.TriggerAnimation(Consts.DieAnim);
 
-        if (isDead)
-        {
-            StartCoroutine(DieCoroutine());
-        }
-
-        return isDead;
-    }
-
-    IEnumerator DieCoroutine()
-    {
         yield return new WaitForSeconds(Consts.SecondsToDisappear);
         BotManager.Instance.RemoveBot(this);
     }

@@ -33,9 +33,10 @@ public abstract class Automaton : Agent
         route.AdvanceWaypoint();
     }
 
-    public void initRoute(Route route)
+    public virtual bool initRoute(Route route)
     {
         this.route = route;
+        bool isFirstRoute = hasRoute;
 
         if (!hasRoute)
         {
@@ -49,6 +50,8 @@ public abstract class Automaton : Agent
             Vector3 initDir = (NextWP.position - CurWP.position).normalized;
             transform.rotation = Quaternion.LookRotation(initDir, Vector3.up);
         }
+
+        return isFirstRoute;
     }
 
     protected Vector3 GetMoveDirection(Vector3 destination)
@@ -72,7 +75,19 @@ public abstract class Automaton : Agent
             //// Debug.Log("Reached final waypoint");
             ReachDestination();
         }
-        else if (transform.position == curWP.position) // reached destination
+        else if (curWP != null)
+        {
+            AdvanceToCurrentWP(curWP);
+        }
+        else
+        {
+            Debug.LogError("Current waypoint is undefined, and we have not reached final destination");
+        }
+    }
+
+    protected void AdvanceToCurrentWP(Waypoint curWP)
+    {
+        if (transform.position == curWP.position) // reached destination
         {
             if (curWP.segment != null)
             {
