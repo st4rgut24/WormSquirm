@@ -30,8 +30,9 @@ public class Consts
     public const float RunningSpeed = 6f;
     public const float playerRotationSpeed = 15;
 
-    // bot moveent
+    // bot movement
     public const float botRotationSpeed = 5;
+    public const float rockRotationSpeed = 100;
 
     // player animation
     public const string MoveAnim = "speed";

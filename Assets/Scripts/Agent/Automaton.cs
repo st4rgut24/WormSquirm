@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Unity.VisualScripting;
 
 /// <summary>
 /// An agent whose movements are automated, not controlled by player
@@ -22,6 +23,8 @@ public abstract class Automaton : Agent
     protected abstract void ReachDestination();
 
     protected abstract void Move(Waypoint wp);
+
+    protected abstract void Rotate(Vector3 direction);
 
     protected abstract Vector3 GetSpawnLocation();
 
@@ -46,6 +49,12 @@ public abstract class Automaton : Agent
             Vector3 initDir = (NextWP.position - CurWP.position).normalized;
             transform.rotation = Quaternion.LookRotation(initDir, Vector3.up);
         }
+    }
+
+    protected Vector3 GetMoveDirection(Vector3 destination)
+    {
+        Vector3 moveDir = destination - transform.position;
+        return moveDir.normalized;
     }
 
     protected virtual void FixedUpdate()

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
@@ -65,11 +66,23 @@ public abstract class Bot : Automaton
     {
         Vector3 destination = wp.position;
 
-        FaceMovementDirection(transform.position, destination);
+        Vector3 moveDir = GetMoveDirection(destination);
+        Rotate(moveDir);
 
         ChangeMovement(destination, true, velocity);
     }
 
+
+    protected override void Rotate(Vector3 moveDirection)
+    {
+        // Rotate the bot to face the direction it is moving in
+        if (moveDirection != Vector3.zero)
+        {
+            Quaternion rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+            // Debug.Log("rotate bot " + transform.rotation);
+            ChangeRotation(rotation, Consts.botRotationSpeed);
+        }
+    }
 
     /// <summary>
     /// Called when bot is inflicting damage on objective gameobject
@@ -98,76 +111,6 @@ public abstract class Bot : Automaton
         yield return new WaitForSeconds(Consts.SecondsToDisappear);
         BotManager.Instance.RemoveBot(this);
     }
-
-    //public override void initRoute(Route route)
-    //{
-    //    this.route = route;
-
-    //    if (!hasRoute)
-    //    {
-    //        hasRoute = true;
-    //        transform.position = route.GetDestination();
-
-    //        // initialize the direction bot is facing
-    //        Waypoint CurWP = route.GetCurWaypoint();
-    //        Waypoint NextWP = route.GetNextWaypoint();
-    //        //this.FaceMovementDirection(CurWP.position, NextWP.position);
-    //        Vector3 initDir = (NextWP.position - CurWP.position).normalized;
-    //        transform.rotation = Quaternion.LookRotation(initDir, Vector3.up);
-    //    }
-
-    //}
-
-    /// <summary>
-    /// Face the direction of travel
-    /// </summary>
-    void FaceMovementDirection(Vector3 start, Vector3 dest)
-    {
-        Vector3 moveDirection = (dest - start).normalized;
-
-        // Rotate the bot to face the direction it is moving in
-        if (moveDirection != Vector3.zero)
-        {
-            Quaternion rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
-            // Debug.Log("rotate bot " + transform.rotation);
-            ChangeRotation(rotation, Consts.botRotationSpeed);
-        }
-    }
-
-    //protected virtual void ReachWaypoint()
-    //{
-    //    route.AdvanceWaypoint();
-    //}
-
-    //protected virtual void FixedUpdate()
-    //{
-    //    Waypoint curWP = route.GetCurWaypoint();
-    //    Waypoint finalWP = route.GetLastWaypoint();
-
-    //    //// Debug.Log("Waypoint is " + curWP.position);
-
-    //    if (IsReachedFinalDestination(finalWP))
-    //    {
-    //        charAnimator.TriggerAnimation(isAttackingAnimName);
-    //        //// Debug.Log("Reached final waypoint");
-    //        ReachDestination();
-    //    }
-    //    else if (transform.position == curWP.position) // reached destination
-    //    {
-    //        if (curWP.segment != null)
-    //        {
-    //            UpdateSegment(curWP.segment);
-    //        }
-
-    //        //Vector3 rayDir = miniRoute.end - miniRoute.start;
-    //        //Debug.DrawRay(miniRoute.start, rayDir, Color.red);
-    //        ReachWaypoint();
-    //    }
-    //    else
-    //    {
-    //        Move(curWP);
-    //    }
-    //}
 
     public void Destroy()
     {

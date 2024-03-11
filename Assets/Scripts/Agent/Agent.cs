@@ -65,15 +65,16 @@ public class Agent : MonoBehaviour
 	{
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         // check if player's rotation changes based on direction within tunnel
-        if (curSegment != null && !DirectionUtils.isDirectionsAligned(transform.forward, curSegmentForward)) // for ex. if player has turned around in the current tunnel
-        {
-            // if traveling to the other end of the segment, update the segment forward vector
-            curSegmentForward = -curSegmentForward;
-            float xRot = DirectionUtils.GetUpDownRotation(transform.forward, curSegment.forward);
-            //Vector3 verticalRotate = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
-            // Rotations happen over several frames until playerr reaches target destination
-            ChangeVerticalRotation(xRot, Consts.defaultRotationSpeed);
-        }
+
+        //if (curSegment != null && !DirectionUtils.isDirectionsAligned(transform.forward, curSegmentForward)) // for ex. if player has turned around in the current tunnel
+        //{
+        //    // if traveling to the other end of the segment, update the segment forward vector
+        //    curSegmentForward = -curSegmentForward;
+        //    float xRot = DirectionUtils.GetUpDownRotation(transform.forward, curSegment.forward);
+        //    //Vector3 verticalRotate = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
+        //    // Rotations happen over several frames until playerr reaches target destination
+        //    ChangeVerticalRotation(xRot, Consts.defaultRotationSpeed);
+        //}
     }
 
     /// <summary>
@@ -143,25 +144,6 @@ public class Agent : MonoBehaviour
         attackedAgent.TakeDamage(damage);
     }
 
-    //IEnumerator MoveToDestination(Vector3 targetPosition, float speed)
-    //{
-    //    float startTime = Time.time;
-    //    Vector3 startPosition = transform.position;
-
-    //    charAnimator.SetAnimationMovement(speed);
-
-    //    while (Time.time - startTime < 1.0f / speed)
-    //    {
-    //        float t = (Time.time - startTime) * speed;
-    //        transform.position = Vector3.Lerp(startPosition, targetPosition, t);
-    //        yield return null;
-    //    }
-
-    //    isMoveInProgress = false;
-    //    // Ensure the object reaches the exact destination
-    //    transform.position = targetPosition;
-    //}
-
     public void AbortMovement()
     {
         isMoveInProgress = false;
@@ -216,31 +198,7 @@ public class Agent : MonoBehaviour
     {
         this.targetRotation = targetRotation;
         this.rotationSpeed = rotateSpeed.GetValueOrDefault(1 / Time.deltaTime);
-    }
-
-    ///// <summary>
-    ///// Move in a direction
-    ///// </summary>  
-    ///// <param name="destination">final destination</param>
-    ///// <param name="isContinuous">Will this movement happen over multiple frames</param>
-    //public void ChangeMovement(Vector3 destination, bool isContinuous, float speed)
-    //{
-    //    if (isMoveInProgress)
-    //    {
-    //        return;
-    //    }
-
-    //    charAnimator.SetAnimationMovement(speed);
-    //    if (isContinuous)
-    //    {
-    //        isMoveInProgress = true;
-    //        MoveRoutine = StartCoroutine(MoveToDestination(destination, speed));
-    //    }
-    //    else
-    //    {
-    //        transform.position = destination;
-    //    }
-    //}
+    }   
 
     protected void notifyDig(Vector3 digDirection)
     {
