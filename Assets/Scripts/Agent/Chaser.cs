@@ -15,6 +15,7 @@ public class Chaser : Bot
 
     protected override void Awake()
     {
+        addNoise = true;
         botType = BotManager.BotType.Chaser;
 
         damage = damageAmt; // amount of damage this type of Bot can inflict

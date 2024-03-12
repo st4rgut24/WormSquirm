@@ -69,6 +69,13 @@ public class BotManager : Singleton<BotManager>
         }
     }
 
+    public void SpawnChaser()
+    {
+        GameObject botGo = Spawn(BotType.Chaser);
+        Bot bot = botGo.GetComponent<Bot>();
+        InitBot(bot);
+    }
+
     public void OnTunnelDisabled(List<GameObject> disabledTunnels)
     {
         // remove bots that are within the disabled tunnels
@@ -182,7 +189,7 @@ public class BotManager : Singleton<BotManager>
             strat = RouteStrat.FollowSegment;
         }
 
-        Route route = RouteFactory.Get(strat, bot, bot.objective);
+        Route route = RouteFactory.Get(strat, bot, bot.objective, bot.addNoise); // want bots to follow slightly different routes, so add noise
 
         // TESTING WAYPOINTS
         WaypointDrawer wpDrawer = GameObject.Find(Consts.BotRouteDrawer).GetComponent<WaypointDrawer>();

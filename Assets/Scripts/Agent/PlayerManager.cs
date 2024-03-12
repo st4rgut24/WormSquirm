@@ -33,6 +33,7 @@ public class PlayerManager: Singleton<PlayerManager>
         mainPlayer = MainPlayerInst.GetComponent<MainPlayer>();
     }
 
+
 	public GameObject GetMainPlayer()
 	{
 		return MainPlayerInst;

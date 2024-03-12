@@ -40,6 +40,7 @@ public class Consts
     // bot movement
     public const float botRotationSpeed = 5;
     public const float rockRotationSpeed = 100;
+    public const float randomMoveRange = 2;
 
     // player animation
     public const string MoveAnim = "speed";

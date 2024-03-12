@@ -26,19 +26,29 @@ public class RouteFactory
     /// <param name="targetTransform">Destination of the route</param>
     /// <param name="agent">Agent that the route will be assigned to</param>
     /// <returns></returns>
-    public static Route Get(RouteStrat strat, Agent agent, Transform targetTransform)
+    public static Route Get(RouteStrat strat, Agent agent, Transform targetTransform, bool addNoise=false)
     {
+        Route route;
+
         switch (strat)
         {
             case RouteStrat.FollowSegment:
-                return FollowSegments(agent.curSegment, targetTransform, agent.transform);
+                route = FollowSegments(agent.curSegment, targetTransform, agent.transform);
+                break;
             case RouteStrat.StraightPath:
-                return CreateStraightPath(targetTransform);
+                route = CreateStraightPath(targetTransform);
+                break;
             case RouteStrat.Gravity:
-                return CreateDownhillRoute(agent.curSegment);
+                route = CreateDownhillRoute(agent.curSegment);
+                break;
             default:
-                return FollowSegments(agent.curSegment, targetTransform, agent.transform);
+                route = FollowSegments(agent.curSegment, targetTransform, agent.transform);
+                break;
         }
+
+        Route agentRoute = addNoise ? new NoisyRoute(route.waypoints, agent.transform) : route;
+
+        return agentRoute;
     }
 
     /// <summary>

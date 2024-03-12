@@ -39,7 +39,7 @@ public class ToolManager : Singleton<ToolManager>
 
     private void OnEnable()
     {
-        PlayerManager.SpawnMainPlayerEvent += OnSpawnMainPlayer;
+        //PlayerManager.SpawnMainPlayerEvent += OnSpawnMainPlayer;
         SimpleScrollSnap.SelctedItemEvent += OnSelectedItem;
     }
 
@@ -62,18 +62,18 @@ public class ToolManager : Singleton<ToolManager>
         //EquipTool(Consts.PickaxeTag); // depends on WeaponPrefabDict being initialized
     }
 
-    /// <summary>
-    /// Initialize whatever depends on main player
-    /// </summary>
-    /// <param name="mainPlayer"></param>
-    public void OnSpawnMainPlayer(GameObject mainPlayer)
-    {
-        InitWeaponUIPrefabDict();
+    ///// <summary>
+    ///// Initialize whatever depends on main player
+    ///// </summary>
+    ///// <param name="mainPlayer"></param>
+    //public void OnSpawnMainPlayer(GameObject mainPlayer)
+    //{
+    //    InitWeaponUIPrefabDict();
 
-        scrollSnap = mainPlayer.GetComponentInChildren<SimpleScrollSnap>();
-        toolSlider = new ToolSlider(scrollSnap, WeaponUIPrefabDict);
+    //    scrollSnap = mainPlayer.GetComponentInChildren<SimpleScrollSnap>();
+    //    toolSlider = new ToolSlider(scrollSnap, WeaponUIPrefabDict);
 
-    }
+    //}
 
     public ToolType GetToolTypeFromTag(string tag)
     {
@@ -90,11 +90,11 @@ public class ToolManager : Singleton<ToolManager>
         }
     }
 
-    public void InitWeaponUIPrefabDict()
-    {
-        WeaponUIPrefabDict[ToolType.Pickaxe] = Instantiate(PickaxeUIPrefab);
-        WeaponUIPrefabDict[ToolType.Crossbow] = Instantiate(CrossbowUIPrefab);
-    }
+    //public void InitWeaponUIPrefabDict()
+    //{
+    //    WeaponUIPrefabDict[ToolType.Pickaxe] = Instantiate(PickaxeUIPrefab);
+    //    WeaponUIPrefabDict[ToolType.Crossbow] = Instantiate(CrossbowUIPrefab);
+    //}
 
     public void InitWeaponPrefabDict()
     {
@@ -184,7 +184,7 @@ public class ToolManager : Singleton<ToolManager>
 
     private void OnDisable()
     {
-        PlayerManager.SpawnMainPlayerEvent -= OnSpawnMainPlayer;
+        //PlayerManager.SpawnMainPlayerEvent -= OnSpawnMainPlayer;
         SimpleScrollSnap.SelctedItemEvent -= OnSelectedItem;
     }
 }

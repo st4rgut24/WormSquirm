@@ -3,8 +3,10 @@ using UnityEngine;
 
 public class SimpleBot : Bot
 {
+
     protected override void Awake()
     {
+        addNoise = false;
         botType = BotManager.BotType.Simp;
         base.Awake();
     }

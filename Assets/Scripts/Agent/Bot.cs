@@ -8,6 +8,8 @@ using UnityEngine.UIElements;
 
 public abstract class Bot : Automaton
 {
+    public bool addNoise;
+
     public BotManager.BotType botType;
 
     public Transform objective;
