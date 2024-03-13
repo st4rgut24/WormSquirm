@@ -16,27 +16,20 @@ public abstract class Bot : Automaton
 
     protected float startTime;
 
-    //protected bool reachedDestination;
-
     protected abstract void SetObjective();
-
-    //protected abstract bool IsReachedFinalDestination(Waypoint finalWP);
-
-    //protected abstract void ReachDestination();
-
-    //protected bool hasRoute;
 
     protected const string isAttackingAnimName = "isAttacking";
 
     protected float damage = 0; // can be overriden in child classes
 
+    bool isEnemyColliderTriggered;
+
     protected virtual void Awake()
     {
-        //hasRoute = false;
-        //reachedDestination = true;
         SetObjective();
 
         health = new AgentHealth(BotManager.BotHealth);
+        isEnemyColliderTriggered = false;
     }
 
     protected override void Start()
@@ -51,6 +44,22 @@ public abstract class Bot : Automaton
         if (initSegment != null)
         {
             AgentManager.Instance.InitTransformSegmentDict(transform, initSegment);
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == Consts.MainPlayerTag)
+        {
+            isEnemyColliderTriggered = true;
+        }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.tag == Consts.MainPlayerTag)
+        {
+            isEnemyColliderTriggered = false;
         }
     }
 
@@ -108,8 +117,11 @@ public abstract class Bot : Automaton
     /// </summary>
     public void TriggerInflictDamage()
     {
-        Agent attackedAgent = objective.GetComponent<Agent>();
-        InflictDamage(damage, attackedAgent);
+        if (isEnemyColliderTriggered) // check if main player collider was triggered
+        {
+            Agent attackedAgent = objective.GetComponent<Agent>();
+            InflictDamage(damage, attackedAgent);
+        }
     }
 
     protected override IEnumerator DieCoroutine()

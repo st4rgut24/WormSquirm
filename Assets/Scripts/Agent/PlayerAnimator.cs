@@ -9,7 +9,7 @@ public class PlayerAnimator : CharacterAnimator
     static Dictionary<ToolType, Anim> WeaponAnimPairs = new Dictionary<ToolType, Anim>
     {
         { ToolType.Pickaxe, new Anim(Consts.SwingAnim, ActivateType.SetTrigger) },
-        { ToolType.Chain, new Anim(Consts.ChainAnim, ActivateType.SetTrigger) },
+        { ToolType.Mace, new Anim(Consts.ChainAnim, ActivateType.SetTrigger) },
         { ToolType.Crossbow, new Anim(Consts.ShootAnim, ActivateType.SetBool) }
     };
 

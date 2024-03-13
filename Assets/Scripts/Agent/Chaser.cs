@@ -13,6 +13,11 @@ public class Chaser : Bot
         Random
     }
 
+    private void OnEnable()
+    {
+        SegmentManager.OnEnterNewSegment += OnEnterNewSegment;
+    }
+
     protected override void Awake()
     {
         addNoise = true;
@@ -27,6 +32,19 @@ public class Chaser : Bot
         base.Start();
     }
 
+
+    /// <summary>
+    /// If the chased agent has moved to another segment, reroute
+    /// </summary>
+    /// <param name="transform">Agent entering new segment</param>
+    /// <param name="segment">entered segment</param>
+    public void OnEnterNewSegment(Transform transform, Segment segment)
+    {
+        if (transform.gameObject == objective.gameObject)
+        {
+            ReachDestination();
+        }
+    }
 
     public Transform ChooseTarget(ChooseStrategy strategy)
     {
@@ -66,6 +84,11 @@ public class Chaser : Bot
         AbortMovement();
         SetObjective();
         BotManager.SetBotRoute(this);
+    }
+
+    private void OnDisable()
+    {
+        SegmentManager.OnEnterNewSegment += OnEnterNewSegment;
     }
 }
 

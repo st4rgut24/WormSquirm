@@ -8,17 +8,31 @@ public class Pickaxe : Melee
     
     Vector2 digDirection = DefaultUtils.DefaultVector3;
 
+    private void OnEnable()
+    {
+        MainPlayer.MeleeAttackEvent += OnAttack;
+    }
+
     private void Awake()
     {
         toolType = ToolType.Pickaxe;
         damage = 100;
     }
 
-    public override void Use()
+    public void OnAttack()
     {
-        base.Use();
-        Vector3 direction = GetDirection();
-        Dig?.Invoke(direction);
+        // Dig, if the attack was not directed toward another agent
+        if (attackState != AttackState.Attack)
+        {
+            Vector3 direction = GetDirection();
+            Dig?.Invoke(direction);
+        }
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        MainPlayer.MeleeAttackEvent -= OnAttack;
     }
 }
 

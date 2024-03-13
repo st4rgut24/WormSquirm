@@ -11,8 +11,6 @@ public abstract class Automaton : Agent
 
     protected Route route;
 
-    protected bool hasRoute = false;
-
     /// <summary>
     /// Play this animation when final destination is reached
     /// </summary>
@@ -35,12 +33,11 @@ public abstract class Automaton : Agent
 
     public virtual bool initRoute(Route route)
     {
+        bool isAddFirstRoute = isFirstRoute();
         this.route = route;
-        bool isFirstRoute = hasRoute;
 
-        if (!hasRoute)
+        if (isAddFirstRoute)
         {
-            hasRoute = true;
             transform.position = GetSpawnLocation();
 
             // initialize the direction bot is facing
@@ -48,10 +45,16 @@ public abstract class Automaton : Agent
             Waypoint NextWP = route.GetNextWaypoint();
             //this.FaceMovementDirection(CurWP.position, NextWP.position);
             Vector3 initDir = (NextWP.position - CurWP.position).normalized;
-            transform.rotation = Quaternion.LookRotation(initDir, Vector3.up);
+            transform.rotation = Quaternion.LookRotation(initDir, Vector3.up);            
         }
 
-        return isFirstRoute;
+
+        return isAddFirstRoute;
+    }
+
+    public bool isFirstRoute()
+    {
+        return this.route == null;
     }
 
     protected Vector3 GetMoveDirection(Vector3 destination)

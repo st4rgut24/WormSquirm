@@ -11,7 +11,7 @@ public class ToolSlider
 	SimpleScrollSnap scrollSnap;
     Dictionary<ToolType, GameObject> WeaponUIPrefabDict;
 
-    public ToolType[] InitialWeapons = { ToolType.Pickaxe, ToolType.Crossbow };
+    public ToolType[] InitialWeapons = { ToolType.Pickaxe, ToolType.Crossbow, ToolType.Mace };
 
     public ToolSlider(SimpleScrollSnap scrollSnap, Dictionary<ToolType, GameObject> WeaponUIPrefabDict)
 	{

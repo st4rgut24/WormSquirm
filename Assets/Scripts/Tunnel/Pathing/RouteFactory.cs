@@ -8,7 +8,8 @@ public enum RouteStrat
 {
     FollowSegment,
     StraightPath,
-    Gravity
+    Gravity,
+    None
 }
 
 /// <summary>
@@ -26,29 +27,41 @@ public class RouteFactory
     /// <param name="targetTransform">Destination of the route</param>
     /// <param name="agent">Agent that the route will be assigned to</param>
     /// <returns></returns>
-    public static Route Get(RouteStrat strat, Agent agent, Transform targetTransform, bool addNoise=false)
+    public static Route Get(RouteStrat strat, Automaton agent, Transform targetTransform, bool addNoise = false)
     {
         Route route;
 
         switch (strat)
         {
             case RouteStrat.FollowSegment:
-                route = FollowSegments(agent.curSegment, targetTransform, agent.transform);
+                route = FollowSegments(agent.isFirstRoute(), agent.curSegment, targetTransform, agent.transform);
                 break;
             case RouteStrat.StraightPath:
                 route = CreateStraightPath(targetTransform);
                 break;
             case RouteStrat.Gravity:
-                route = CreateDownhillRoute(agent.curSegment);
+                route = CreateDownhillRoute(agent.isFirstRoute(), agent.curSegment);
                 break;
             default:
-                route = FollowSegments(agent.curSegment, targetTransform, agent.transform);
+                route = FollowSegments(agent.isFirstRoute(), agent.curSegment, targetTransform, agent.transform);
                 break;
         }
 
-        Route agentRoute = addNoise ? new NoisyRoute(route.waypoints, agent.transform) : route;
+        Route agentRoute = shouldAddNoise(route, addNoise) ? new NoisyRoute(route.waypoints, agent.transform) : route;
 
         return agentRoute;
+    }
+
+    /// <summary>
+    /// Criteria for adding noise
+    /// If there are only 2 waypoints (start and end), don't add noise to prevent weird routing behavior near objective colliders
+    /// </summary>
+    /// <param name="route">the candidate noisy route</param>
+    /// <param name="addNoise">if the type of route is noisy</param>
+    /// <returns></returns>
+    public static bool shouldAddNoise(Route route, bool addNoise)
+    {
+        return addNoise && route.waypoints.Count > 2;
     }
 
     /// <summary>
@@ -78,7 +91,7 @@ public class RouteFactory
         HashSet<GameObject> SeenTunnels = new HashSet<GameObject>();
 
         // while there is a segment that is active keep adding to the downhill path
-        while (IsNewActiveTunnel(segment?.tunnel, SeenTunnels) )
+        while (IsNewActiveTunnel(segment?.tunnel, SeenTunnels))
         {
             SeenTunnels.Add(segment.tunnel);
             downhillSegmentPath.Add(segment);
@@ -97,14 +110,15 @@ public class RouteFactory
     /// <summary>
     /// Get the route that traverses segments
     /// </summary>
+    /// <param name="spawnRoute">whether this is agent's first route, meaning agent will spawn at start of this route</param>
     /// <param name="segments">The segments that are part of the route</param>
     /// <param name="endWaypoint">The final waypoint</param>
     /// <returns>the route</returns>
-    public static Route GetFollowSegmentsRoute(List<Segment> segments, Waypoint endWaypoint)
+    public static Route GetFollowSegmentsRoute(bool spawnRoute, List<Segment> segments, Waypoint endWaypoint)
     {
         Route route = new Route();
 
-        for (int i=1;i<segments.Count; i++)             
+        for (int i = 1; i < segments.Count; i++)
         {
             Segment startSegment = segments[i - 1];
             Segment destSegment = segments[i];
@@ -113,9 +127,8 @@ public class RouteFactory
             route.AddWaypoints(path);
         }
 
-        // if there is only one segment, add a starting WP so we don't spawn on top of the player
-        // not really relevant because agent should never spawn in the same segment as player
-        if (segments.Count == 1)
+        // if this is the first route, choose a neutral spawning location (center of segment) instead of spawning directly at end waypoint
+        if (spawnRoute && segments.Count == 1)
         {
             Vector3 segmentCenter = segments[0].GetCenterLineCenter();
             Waypoint startWP = new Waypoint(segmentCenter);
@@ -141,7 +154,8 @@ public class RouteFactory
         List<Segment> segments = new List<Segment>();
 
         // farthest away the start segment can be from the goal segment is length of defaultSegmentDist
-        while (dist <= defaultSegmentDist) {
+        while (dist <= defaultSegmentDist)
+        {
             segments.Add(segment);
 
             List<GameObject> neighborTunnels = segment.getNextTunnels();
@@ -153,7 +167,7 @@ public class RouteFactory
 
             GameObject prevTunnel = null;
 
-            for (int i=0;i<neighborTunnels.Count;i++)
+            for (int i = 0; i < neighborTunnels.Count; i++)
             {
                 GameObject neighborTunnel = neighborTunnels[i];
 
@@ -180,13 +194,13 @@ public class RouteFactory
         return segments;
     }
 
-    public static Route CreateDownhillRoute(Segment startSegment)
+    public static Route CreateDownhillRoute(bool isSpawnRoute, Segment startSegment)
     {
         List<Segment> DownhillSegments = CreateDownhillPath(startSegment);
         Segment destSegment = DownhillSegments[DownhillSegments.Count - 1];
 
         Waypoint endWaypoint = new Waypoint(destSegment.GetCenterLineCenter(), destSegment);
-        Route route = GetFollowSegmentsRoute(DownhillSegments, endWaypoint);
+        Route route = GetFollowSegmentsRoute(isSpawnRoute, DownhillSegments, endWaypoint);
 
         return route;
     }
@@ -198,7 +212,7 @@ public class RouteFactory
     /// <param name="targetTransform">the transform of the target agent</param>
     /// <param name="transform">transform of the agent being assigned route</param>
     /// <returns>a route ending up in the segment that target gameobject is in</returns>
-    public static Route FollowSegments(Segment curSegment, Transform targetTransform, Transform transform)
+    public static Route FollowSegments(bool spawnRoute, Segment curSegment, Transform targetTransform, Transform transform)
     {
         Segment goalSegment = AgentManager.Instance.GetSegment(targetTransform);
         bool isInSegment = curSegment != null;
@@ -209,7 +223,7 @@ public class RouteFactory
 
         // convert a list of segments to a list of waypoints
         Waypoint endWP = new Waypoint(targetTransform.position);
-        Route route = GetFollowSegmentsRoute(segments, endWP);
+        Route route = GetFollowSegmentsRoute(spawnRoute, segments, endWP);
 
         return route;
     }

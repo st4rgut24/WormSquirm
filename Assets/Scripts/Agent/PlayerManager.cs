@@ -22,7 +22,6 @@ public class PlayerManager: Singleton<PlayerManager>
 
     protected void OnEnable()
     {
-		BotManager.Instance.DestroyBotEvent += OnRemoveBot;
     }
 
     protected void Awake()
@@ -39,10 +38,10 @@ public class PlayerManager: Singleton<PlayerManager>
 		return MainPlayerInst;
 	}
 
-	public void OnRemoveBot(GameObject HitObject)
-	{
-		mainPlayer.RemoveCollidedObject(HitObject);
-	}
+	//public void OnRemoveBot(GameObject HitObject)
+	//{
+	//	mainPlayer.RemoveCollidedObject(HitObject);
+	//}
 
     // Use this for initialization
     void Start()
@@ -74,7 +73,6 @@ public class PlayerManager: Singleton<PlayerManager>
 
     protected void OnDisable()
     {
-        BotManager.Instance.DestroyBotEvent += OnRemoveBot;
     }
 }
 

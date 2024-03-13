@@ -5,7 +5,7 @@ public class Consts
     // tags
     public const string PickaxeTag = "pickaxe";
     public const string CrossbowTag = "crossbow";
-    public const string ChainTag = "chain";
+    public const string MaceTag = "mace";
 
     public const string MainCameraTag = "MainCamera";
 
@@ -33,7 +33,7 @@ public class Consts
 
     // player movement
     public const float ReduceStaminaAmt = .05f;
-    public const float WalkingSpeed = 2f;
+    public const float WalkingSpeed = 3f;
     public const float RunningSpeed = 6f;
     public const float playerRotationSpeed = 15;
 
@@ -45,9 +45,9 @@ public class Consts
     // player animation
     public const string MoveAnim = "speed";
     public const string DieAnim = "isDying";
-    public const string SwingAnim = "isSwinging";
+    public const string SwingAnim = "overheadSwing";
     public const string ThrowAnim = "isThrowing";
-    public const string ChainAnim = "isChaining";
+    public const string ChainAnim = "rightHandSwing";
     public const string ShootAnim = "isShooting";
     public const string SnipeAnim = "isSniping";
 

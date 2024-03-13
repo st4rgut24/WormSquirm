@@ -3,7 +3,8 @@ public class Chain : Melee
 {
     private void Awake()
     {
-        toolType = ToolType.Chain;
+        damage = 50;
+        toolType = ToolType.Mace;
     }
 }
 

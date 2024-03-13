@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public enum PlayerState
 {
@@ -11,6 +12,8 @@ public enum PlayerState
 
 public class MainPlayer : Player
 {
+    public static event Action MeleeAttackEvent;
+
     //bool isBlocked;
     List<GameObject> CollidedObstacles;
 
@@ -35,33 +38,10 @@ public class MainPlayer : Player
         Pickaxe.Dig += HandleDig;
     }
 
-    private void OnTriggerEnter(Collider other)
+    // Roughly estimates the moment of impact when player is attacking
+    public void OnMeleeAttack()
     {
-        if (TransformUtils.IsTransformMatchTags(other.transform, Consts.ObstacleTags))
-        {
-            // want to add the root parent
-            CollidedObstacles.Add(other.gameObject);
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        // Debug.Log("Obstacle avoided");
-        RemoveCollidedObject(other.gameObject);
-    }
-
-    public void RemoveCollidedObject(GameObject hitObject)
-    {
-        if (CollidedObstacles.Contains(hitObject))
-        {
-            Debug.Log("Remove obstacle " + hitObject.name);
-            CollidedObstacles.Remove(hitObject);
-        }
-    }
-
-    public bool IsBlocked()
-    {
-        return CollidedObstacles.Count > 0;
+        MeleeAttackEvent?.Invoke();
     }
 
     /// <summary>
@@ -70,7 +50,6 @@ public class MainPlayer : Player
     public void OnAttackAnimationStopped() {
         ToolManager.Instance.DisengageTool();
     }
-
 
     protected override void Start()
     {        
@@ -115,10 +94,7 @@ public class MainPlayer : Player
     public void ChangePlayerMovement(Vector3 destination, bool isContinuous, float speed)
     {
         // adjust the speed based on stamina (get this from player health
-        if (!IsBlocked())
-        {
-            ChangeMovement(destination, isContinuous, speed);
-        }
+        ChangeMovement(destination, isContinuous, speed);
     }
 
     /// <summary>

@@ -127,7 +127,7 @@ public class BotManager : Singleton<BotManager>
     }
 
     /// <summary>
-    /// Set the bot's path and record it
+    /// Set the bot's path and record it    
     /// </summary>
     /// <param name="bot"></param>
     void InitBot(Bot bot)

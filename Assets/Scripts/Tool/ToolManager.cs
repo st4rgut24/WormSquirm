@@ -8,7 +8,7 @@ public enum ToolType
 {
     Pickaxe,
     Crossbow,
-    Chain
+    Mace
 }
 
 public class ToolManager : Singleton<ToolManager>
@@ -16,13 +16,8 @@ public class ToolManager : Singleton<ToolManager>
 
     public RectTransform WeaponCanvas;
 
-    SimpleScrollSnap scrollSnap;
-    ToolSlider toolSlider;
-    public GameObject PickaxeUIPrefab;
-    public GameObject CrossbowUIPrefab;
-
     public GameObject PickaxePrefab;
-    public GameObject ChainPrefab;
+    public GameObject MacePrefab;
     public GameObject CrossbowPrefab;
 
     static Dictionary<ToolType, GameObject> WeaponPrefabDict = new Dictionary<ToolType, GameObject>();
@@ -55,32 +50,12 @@ public class ToolManager : Singleton<ToolManager>
         InitWeaponPrefabDict(); // depends on player being initialized   
     }
 
-    // Use this for initialization
-    void Start()
-    {
-
-        //EquipTool(Consts.PickaxeTag); // depends on WeaponPrefabDict being initialized
-    }
-
-    ///// <summary>
-    ///// Initialize whatever depends on main player
-    ///// </summary>
-    ///// <param name="mainPlayer"></param>
-    //public void OnSpawnMainPlayer(GameObject mainPlayer)
-    //{
-    //    InitWeaponUIPrefabDict();
-
-    //    scrollSnap = mainPlayer.GetComponentInChildren<SimpleScrollSnap>();
-    //    toolSlider = new ToolSlider(scrollSnap, WeaponUIPrefabDict);
-
-    //}
-
     public ToolType GetToolTypeFromTag(string tag)
     {
         switch (tag)
         {
-            case Consts.ChainTag:
-                return ToolType.Chain;
+            case Consts.MaceTag:
+                return ToolType.Mace;
             case Consts.PickaxeTag:
                 return ToolType.Pickaxe;
             case Consts.CrossbowTag:
@@ -90,17 +65,11 @@ public class ToolManager : Singleton<ToolManager>
         }
     }
 
-    //public void InitWeaponUIPrefabDict()
-    //{
-    //    WeaponUIPrefabDict[ToolType.Pickaxe] = Instantiate(PickaxeUIPrefab);
-    //    WeaponUIPrefabDict[ToolType.Crossbow] = Instantiate(CrossbowUIPrefab);
-    //}
-
     public void InitWeaponPrefabDict()
     {
         WeaponPrefabDict[ToolType.Pickaxe] = InitWeaponPrefab(PickaxePrefab);
         WeaponPrefabDict[ToolType.Crossbow] = InitWeaponPrefab(CrossbowPrefab);
-        //WeaponPrefabDict[ToolType.Chain] = InitWeaponPrefab(ChainPrefab);
+        WeaponPrefabDict[ToolType.Mace] = InitWeaponPrefab(MacePrefab);
 
     }
 
@@ -157,6 +126,8 @@ public class ToolManager : Singleton<ToolManager>
 
         equippedTool.SetActive(true);
     }
+
+
 
     /// <summary>
     /// Disengage the tool so that it does not interact with its surroundings unless it's being used

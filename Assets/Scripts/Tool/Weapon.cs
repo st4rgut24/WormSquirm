@@ -3,6 +3,14 @@ using UnityEngine;
 
 public abstract class Weapon : MonoBehaviour
 {
+    // state of weapon use
+    public enum AttackState
+    {
+        Start,  // start attacking
+        Attack, // inflicting damage
+        Idle    // not in use
+    }
+
     public bool isEquipped = false;
     public ToolType toolType;
     public BoxCollider weaponCollider; // used to trigger attacks
@@ -11,6 +19,8 @@ public abstract class Weapon : MonoBehaviour
 
     protected Camera playerCamera;
     protected GameObject player;
+
+    protected AttackState attackState;
 
     protected virtual void Start()
     {
@@ -51,11 +61,12 @@ public abstract class Weapon : MonoBehaviour
     public abstract Vector3 GetDirection();
 
     /// <summary>
-    /// Apply effects of using the tool, if the weapon collider intersects with anything 
+    /// Start using a weapon
     /// </summary>
     /// <param name="direction">direction of tool</param>
     public virtual void Use()
     {
+        attackState = AttackState.Start;
         weaponCollider.enabled = true;
         // damage the gameobject that weapon collider intersects with her
     }
@@ -63,6 +74,7 @@ public abstract class Weapon : MonoBehaviour
     public void DisengageWeapon()
     {
         weaponCollider.enabled = false;
+        attackState = AttackState.Idle;
     }
 
     protected void DamageCollidedObject(Collider other)
@@ -74,6 +86,7 @@ public abstract class Weapon : MonoBehaviour
 
             Debug.Log("Deal damage to enemy " + other.gameObject.name);
             agent.TakeDamage(damage);
+            attackState = AttackState.Attack;
         }
     }
 
