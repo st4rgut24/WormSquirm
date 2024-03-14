@@ -15,7 +15,6 @@ public class Rock : Automaton
     bool IsWhole = true; // whether the rock is a whole piece or in the process of self destructing
 
     MeshRenderer WholeBoulderRenderer;
-    BoxCollider WholeBoulderCollider;
 
     // contains the split fragments of the boulder, displayed on destruction
     GameObject SplitBoulderParent;
@@ -27,7 +26,6 @@ public class Rock : Automaton
         SplitBoulderParent = transform.Find(Consts.SplitBoulder).gameObject;
 
         WholeBoulderRenderer = GetComponent<MeshRenderer>();
-        WholeBoulderCollider = GetComponent<BoxCollider>();
     }
 
     protected override void Update()
@@ -60,13 +58,13 @@ public class Rock : Automaton
     /// whole version and replacing it with a split version
     /// </summary>
     /// <returns></returns>
-    protected override IEnumerator DieCoroutine()
+    public override IEnumerator DieCoroutine()
     {
         if (IsWhole)
         {
             IsWhole = false;
 
-            WholeBoulderCollider.enabled = false;
+            DisableCollider();
             WholeBoulderRenderer.enabled = false;
 
             SplitBoulderParent.SetActive(true); // reveal the border fragments

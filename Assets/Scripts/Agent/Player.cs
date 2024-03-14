@@ -15,6 +15,7 @@ public class Player : Agent
         // Start the coroutine
         base.Start();
 
+        height = Consts.PlayerHeight;
         //string[] allAnimNames = animNames.Concat(agentAnimNames).ToArray();
         playerAnimator = new PlayerAnimator(animator);
         charAnimator = playerAnimator;
@@ -35,9 +36,10 @@ public class Player : Agent
         base.InflictDamage(damage, attackedAgent);
     }
 
-    protected override IEnumerator DieCoroutine()
+    public override IEnumerator DieCoroutine()
     {
         charAnimator.TriggerAnimation(Consts.DieAnim);
+        Fall();
         yield return null;
         // TODO: maybe emit an event to trigger some end screen
     }

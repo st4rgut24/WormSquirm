@@ -9,6 +9,8 @@ public abstract class Agent : MonoBehaviour
 {
     public Segment curSegment;
 
+    protected BoxCollider agentCollider;
+
     public Animator animator;
     public CharacterAnimator charAnimator;
 
@@ -17,18 +19,14 @@ public abstract class Agent : MonoBehaviour
     protected Coroutine MoveRoutine;
     protected bool isMoveInProgress; // a move is in progress that must complete before any other movements can be processed
 
-
-    //public Animator animator;
-    //public CharacterAnimator charAnimator;
-
-    //protected AgentHealth health;
+    protected bool hasDied = false; //if the agent has died it should not receive any further commands
 
     public const string moveAnimName = "speed";
     public const string dieAnimName = "isDying";
+        
+    protected float height;
 
     protected string[] agentAnimNames = { dieAnimName, moveAnimName };
-
-    //Coroutine MoveRoutine;
 
     public float rotationSpeed;
 
@@ -37,9 +35,7 @@ public abstract class Agent : MonoBehaviour
 
     protected Quaternion targetRotation;
 
-    protected abstract IEnumerator DieCoroutine();
-
-    //protected bool isMoveInProgress; // a move is in progress that must complete before any other movements can be processed
+    public abstract IEnumerator DieCoroutine();
 
     public static event Action<Transform, Vector3> OnDig;
 
@@ -60,6 +56,7 @@ public abstract class Agent : MonoBehaviour
         isMoveInProgress = false;
         curSegmentForward = DefaultUtils.DefaultVector3;
         animator = GetComponent<Animator>();
+        agentCollider = GetComponent<BoxCollider>();
     }
 
     // Update is called once per frame
@@ -78,6 +75,22 @@ public abstract class Agent : MonoBehaviour
             // Rotations happen over several frames until playerr reaches target destination
             ChangeVerticalRotation(xRot, Consts.defaultRotationSpeed);
         }
+    }
+
+    /// <summary>
+    /// Make an agent fall to the level of the ground of the tunnel segment
+    /// </summary>
+    protected void Fall()
+    {
+        Vector3 fallPos = transform.position - transform.up.normalized * height;
+        Debug.Log("fall pos is " + fallPos);
+        //transform.position = fallPos;
+        ChangeMovement(fallPos, true, Consts.FallSpeed);
+    }
+
+    protected void DisableCollider()
+    {
+        agentCollider.enabled = false;
     }
 
     /// <summary>
@@ -108,6 +121,24 @@ public abstract class Agent : MonoBehaviour
         }
     }
 
+    public Vector3 GetClosestCenterPoint()
+    {
+        return curSegment.GetClosestPointToCenterline(transform.position);
+    }
+
+    /// <summary>
+    /// Is the player traveling in a direction that is going out of the segment bounds
+    /// </summary>
+    /// <param name="position">Player transform</param>
+    /// <param name="originalPosition">player's original position</param>
+    /// <param name="projectedPosition">player's next position</param>
+    /// <returns>true if out of bounds</returns>
+    public bool isGoingOutOfBounds(Transform transform, Vector3 originalPosition, Vector3 projectedPosition)
+    {
+        bool outOfBounds = curSegment.IsOutOfBounds(transform, originalPosition, projectedPosition);
+        return outOfBounds;
+    }
+
     protected IEnumerator MoveToDestination(Vector3 targetPosition, float speed)
     {
         float startTime = Time.time;
@@ -132,14 +163,16 @@ public abstract class Agent : MonoBehaviour
 
     public virtual bool TakeDamage(float damage)
     {
-        bool isDead = health.ReduceHealth(damage);
+        if (!hasDied) {
+            hasDied = health.ReduceHealth(damage);
 
-        if (isDead)
-        {
-            StartCoroutine(DieCoroutine());
+            if (hasDied)
+            {
+                StartCoroutine(DieCoroutine());
+            }
         }
 
-        return isDead;
+        return hasDied;
     }
 
     protected virtual void InflictDamage(float damage, Agent attackedAgent)

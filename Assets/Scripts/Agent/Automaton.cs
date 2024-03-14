@@ -65,6 +65,11 @@ public abstract class Automaton : Agent
 
     protected virtual void FixedUpdate()
     {
+        if (route == null || hasDied)
+        {
+            return;
+        }
+
         Waypoint curWP = route.GetCurWaypoint();
         Waypoint finalWP = route.GetLastWaypoint();
 

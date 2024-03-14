@@ -41,15 +41,14 @@ public class Controller
     /// <param name="rawInput">unnormalized input</param>
     public void HandleInput(Vector2 rawInput)
     {
-
         Rotate(rawInput);
-        Move(rawInput);
+        Move();
     }
 
-    public void Move(Vector2 rawInput)
+    public void Move()
     {
         Vector3 forwardMovement = GetForwardMovement();
-            
+
         if (forwardMovement == DefaultUtils.DefaultVector3)
         {
             return;

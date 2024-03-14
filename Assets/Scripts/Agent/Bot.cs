@@ -28,6 +28,7 @@ public abstract class Bot : Automaton
     {
         SetObjective();
 
+        height = Consts.BotHeight;
         health = new AgentHealth(BotManager.BotHealth);
         isEnemyColliderTriggered = false;
     }
@@ -124,9 +125,12 @@ public abstract class Bot : Automaton
         }
     }
 
-    protected override IEnumerator DieCoroutine()
+    public override IEnumerator DieCoroutine()
     {
+        AbortMovement(); // stop any ongoing movmement
         charAnimator.TriggerAnimation(Consts.DieAnim);
+        Fall();
+        DisableCollider();
 
         yield return new WaitForSeconds(Consts.SecondsToDisappear);
         BotManager.Instance.RemoveBot(this);

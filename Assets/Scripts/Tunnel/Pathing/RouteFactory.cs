@@ -118,6 +118,14 @@ public class RouteFactory
     {
         Route route = new Route();
 
+        // if this is the first route, choose a neutral spawning location (center of segment) instead of spawning directly at end waypoint
+        if (spawnRoute)
+        {
+            Vector3 segmentCenter = segments[0].GetCenterLineCenter();
+            Waypoint startWP = new Waypoint(segmentCenter);
+            route.AddWaypoint(startWP);
+        }
+
         for (int i = 1; i < segments.Count; i++)
         {
             Segment startSegment = segments[i - 1];
@@ -125,14 +133,6 @@ public class RouteFactory
 
             List<Waypoint> path = SegmentManager.Instance.GetConnectedSegmentPath(startSegment, destSegment);
             route.AddWaypoints(path);
-        }
-
-        // if this is the first route, choose a neutral spawning location (center of segment) instead of spawning directly at end waypoint
-        if (spawnRoute && segments.Count == 1)
-        {
-            Vector3 segmentCenter = segments[0].GetCenterLineCenter();
-            Waypoint startWP = new Waypoint(segmentCenter);
-            route.AddWaypoint(startWP);
         }
 
         route.AddWaypoint(endWaypoint);

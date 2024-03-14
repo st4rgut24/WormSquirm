@@ -88,7 +88,7 @@ public class Chaser : Bot
 
     private void OnDisable()
     {
-        SegmentManager.OnEnterNewSegment += OnEnterNewSegment;
+        SegmentManager.OnEnterNewSegment -= OnEnterNewSegment;
     }
 }
 

@@ -98,19 +98,6 @@ public class MainPlayer : Player
     }
 
     /// <summary>
-    /// Is the player traveling in a direction that is going out of the segment bounds
-    /// </summary>
-    /// <param name="position">Player transform</param>
-    /// <param name="originalPosition">player's original position</param>
-    /// <param name="projectedPosition">player's next position</param>
-    /// <returns>true if out of bounds</returns>
-    public bool isGoingOutOfBounds(Transform transform, Vector3 originalPosition, Vector3 projectedPosition)
-    {
-        bool outOfBounds = curSegment.IsOutOfBounds(transform, originalPosition, projectedPosition);
-        return outOfBounds;
-    }
-
-    /// <summary>
     /// Handle digging action
     /// </summary>
     /// <param name="direction">Direction to dig in</param>

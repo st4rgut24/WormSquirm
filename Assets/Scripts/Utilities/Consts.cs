@@ -16,9 +16,10 @@ public class Consts
     public const string TunnelTag = "tunnel";
 
     public static readonly string[] PlayerTags = { PlayerTag, MainPlayerTag };
-    public static readonly string[] ObstacleTags = { EnemyTag };
+    public static readonly string[] EnemyTags = { EnemyTag };
     public static readonly string[] PlayerDamageableTags = { EnemyTag, RockTag, PlayerTag }; // main player tag is ommitted because cannot damage self
     public static readonly string[] AllDamageableTags = { EnemyTag, RockTag, PlayerTag, MainPlayerTag };
+    public static readonly string[] LivingAgentTags = { EnemyTag, PlayerTag, MainPlayerTag };
 
     // names
     public const string HealthSlider = "HealthBar";
@@ -31,16 +32,20 @@ public class Consts
 
     public const float defaultRotationSpeed = 5f;
 
+    public const float FallSpeed = 3;
+
     // player movement
     public const float ReduceStaminaAmt = .05f;
     public const float WalkingSpeed = 3f;
     public const float RunningSpeed = 6f;
     public const float playerRotationSpeed = 15;
+    public const float PlayerHeight = 2.4f;
 
     // bot movement
     public const float botRotationSpeed = 5;
     public const float rockRotationSpeed = 100;
     public const float randomMoveRange = 2;
+    public const float BotHeight = 2.4f;
 
     // player animation
     public const string MoveAnim = "speed";

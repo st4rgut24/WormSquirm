@@ -203,7 +203,7 @@ public class Segment
             }
         }
         float dist = GetClosestDistance(position, segmentLines);
-        float curDist = GetClosestDistance(originalPos, segmentLines);
+        //float curDist = GetClosestDistance(originalPos, segmentLines);
         // Debug.Log("In Tunnel " + tunnel.name + ". Projected Distance to center line is " + dist + ". Should be less than " + SegmentManager.Instance.MinDistFromCenterLine + " Current dist is " + curDist);
         return dist >= SegmentManager.Instance.MinDistFromCenterLine; // divide by 2 because the moveable area is smaller on bottom plane of the tunnel
     }
