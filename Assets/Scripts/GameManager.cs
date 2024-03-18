@@ -44,15 +44,15 @@ public class GameManager : Singleton<GameManager>
     {
         if (gameState == GameState.Start && waypoints.Count >= Consts.MinSetupWPs)
         {
-            Waypoint spawnWaypoint = waypoints[waypoints.Count - 2]; // spawn at the second to last waypoint, last waypoint is tunnel end, first waypoint is start
+            int spawnIdx = waypoints.Count - 2;
+            Waypoint spawnWaypoint = waypoints[spawnIdx]; // spawn at the second to last waypoint, last waypoint is tunnel end, first waypoint is start
 
             Vector3 playerLocation = spawnWaypoint.position + spawnWaypoint.segment.forward * initAgentOffset;
             PlayerManager.Instance.InitPlayer(playerLocation, spawnWaypoint.segment);
 
             // initialize the gate
-            // the gate is in the closed state
-            // the gate has a gatekeeper
-            // the gate requires a key to open
+            Waypoint gateWaypoint = waypoints[spawnIdx];
+            GateManager.Instance.Create(gateWaypoint.segment, GateType.Key);
         }
         else
         {

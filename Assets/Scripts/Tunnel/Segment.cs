@@ -49,6 +49,14 @@ public class Segment
         return center.y;
     }
 
+    /// <summary>
+    /// Get rotation of tunnel
+    /// </summary>
+    public Quaternion GetRotation()
+    {
+        return segmentGo.GetRotation();
+    }
+
     public void AddGuideline(Guideline line)
     {
         segmentLines.Add(line);

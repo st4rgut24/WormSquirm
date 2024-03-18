@@ -32,6 +32,13 @@ public class SegmentGo
 		return corridor.tunnel;
 	}
 
+    public Quaternion GetRotation()
+    {
+        GameObject tunnel = getTunnel();
+
+        return tunnel.transform.rotation;
+    }
+
 	public float GetCorridorLength()
 	{
 		return corridor.GetLength();
