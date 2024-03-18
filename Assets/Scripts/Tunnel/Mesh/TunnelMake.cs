@@ -29,10 +29,6 @@ public class TunnelMake: MonoBehaviour
 
     private void Awake()
     {
-    }
-
-    private void Start()
-    {
         _props = TunnelManager.Instance.defaultProps;
     }
 
@@ -47,7 +43,8 @@ public class TunnelMake: MonoBehaviour
         Vector3 direction = heading.forward;
         Vector3 position = heading.position;
 
-        return CreateSegment(direction, position, playerTransform, prevRing);
+        OptionalMeshProps meshProps = new OptionalMeshProps(playerTransform, prevRing, _props);
+        return CreateSegment(direction, position, meshProps, prevRing);
     }
 
     /// <summary>
@@ -65,15 +62,17 @@ public class TunnelMake: MonoBehaviour
 
         Vector3 position = heading.position + tunnelDir * offset;
 
-        return CreateSegment(tunnelDir, position, playerTransform, offsetPrevRing); // TODO: not working properly on game start intersection
+        OptionalMeshProps meshProps = new OptionalMeshProps(playerTransform, offsetPrevRing, _props);
+        // the un-offset ring is used to create the segment, to create the true center line which begins where the previous tunnel ends,
+        // otherwise the start of this tunnel would overlap with the previous tunnel, leading to ambiguity when determining which tunnel
+        // a player belonged to
+        return CreateSegment(tunnelDir, position, meshProps, prevRing);
     }
 
-    private SegmentGo CreateSegment(Vector3 direction, Vector3 position, Transform playerTransform, Ring prevRing)
+    private SegmentGo CreateSegment(Vector3 direction, Vector3 position, OptionalMeshProps meshProps, Ring prevRing)
     {
         Ring endRing = RingFactory.Create(direction, position);
-        //Ring prevRing = RingManager.Instance.Get(playerTransform);
 
-        OptionalMeshProps meshProps = new OptionalMeshProps(playerTransform, prevRing, _props);
 
         GameObject tunnelObject = MeshObjectFactory.Get(MeshType.Tunnel, TunnelSegment, endRing, meshProps);
         tunnelObject.transform.parent = TunnelContainer;
@@ -82,7 +81,7 @@ public class TunnelMake: MonoBehaviour
         tunnelObject.name = "Tunnel " + tunnelCounter;
         tunnelCounter++;
 
-        return new SegmentGo(tunnelObject, Cap, endRing, prevRing);
+        return new SegmentGo(tunnelObject, Cap, endRing, prevRing, meshProps.prevRing);
     }
 
     /// <summary>

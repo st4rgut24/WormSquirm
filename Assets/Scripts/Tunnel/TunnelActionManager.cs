@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using UnityEngine;
+using UnityEngine.UIElements;
 using UnityEngine.UIElements.Experimental;
+using static UnityEditor.Rendering.CameraUI;
 
 /// <summary>
 /// Notifies other GameObjects of Tunnel Actions
@@ -13,7 +15,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     Grid tunnelGrid;
 
     public static event Action<Transform, GameObject, Heading, bool, Ring, HitInfo> OnIntersectTunnel; // intersect an existing tunnel
-    public static event Action<Transform, bool, Heading, Ring> OnCreateTunnel; // create a new unobstructed tunnel
+    public static event Action<Transform, Heading, Ring> OnCreateTunnel; // create a new unobstructed tunnel
     public static event Action<Transform> OnFollowTunnel; // follow path of existing tunnel
 
     public enum Action {
@@ -26,7 +28,7 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     private void OnEnable()
     {
         Agent.OnDig += TunnelAction;
-        AgentManager.OnSpawn += OnSpawn;
+        //PlayerManager.SpawnMainPlayerEvent += OnInitTunnelForAgent;
     }
 
     private void Awake()
@@ -34,19 +36,13 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
         tunnelGrid = GameManager.Instance.GetGrid(GridType.Tunnel);
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
     /// <summary>
-    /// Set a reference point for the creation of the first tunnel when an agent is spawned
+    /// When an agent is first spawned (typically the main player), place that agent in a tunnel
     /// </summary>
-    /// <param name="transform">agent transform</param>
-    public void OnSpawn(Transform transform)
+    /// <param name="agent">The spawned agent</param>
+    public void OnInitTunnelForAgent(GameObject agent)
     {
-        Heading initHeading = DirectionUtils.GetHeading(transform.position, transform.forward, 0);
-        //PrevHeadingDict[transform] = initHeading;
+        TunnelAction(agent.transform, agent.transform.forward);
     }
 
     /// <summary>
@@ -60,11 +56,8 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
 
         if (!IsTunnelCreated)
         {
-            // TODO: this case should not exist
-            // Debug.Log("Tunnel Action Follow");
             OnFollowTunnel?.Invoke(playerTransform);
         }
-
     }
 
     /// <summary>
@@ -75,12 +68,40 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     public bool CreateTunnel(Transform playerTransform, Heading TunnelHeading)
     {
         bool extendsTunnel = SegmentManager.Instance.IsExtendingTunnel(playerTransform);
-        // Debug.Log("is extending tunnel");
-        List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(TunnelHeading.position, 1);
-
-        // todo: intersection depends on direction of player instead of direction of swing?
-
+        
         Ring prevRing = GetPrevRing(extendsTunnel, playerTransform);
+
+        try
+        {
+            if (CanDig(prevRing, playerTransform))
+            {
+                return DigNewTunnel(playerTransform, TunnelHeading, prevRing, extendsTunnel);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch(Exception e)
+        {
+            Debug.LogWarning("Unable to create new tunnel due to error: " + e.Message);
+
+            return false;
+        }
+    }
+
+
+    /// <summary>
+    /// Dig a new tunnel
+    /// </summary>
+    /// <param name="playerTransform">Transform of digger</param>
+    /// <param name="TunnelHeading">direction of new tunnel</param>
+    /// <param name="prevRing">start of the new tunnel</param>
+    /// <param name="extendsTunnel">whether this tunnel is extending an existing tunnel</param>
+    /// <returns></returns>
+    private bool DigNewTunnel(Transform playerTransform, Heading TunnelHeading, Ring prevRing, bool extendsTunnel)
+    {
+        List<GameObject> otherTunnels = tunnelGrid.GetGameObjects(TunnelHeading.position, 1, playerTransform);
 
         RayRing hitTestRayRing = new RayRing(prevRing, playerTransform.forward); // get rays for the vertices of a tunnel ring
         HitInfo hitInfo = TunnelUtils.GetHitInfoFromRays(hitTestRayRing.rays, otherTunnels, GameManager.Instance.agentOffset);
@@ -108,13 +129,17 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
             else
             {
                 // Debug.Log("Tunnel Action Create");
-                OnCreateTunnel?.Invoke(playerTransform, extendsTunnel, TunnelHeading, prevRing);
+                OnCreateTunnel?.Invoke(playerTransform, TunnelHeading, prevRing);
             }
             return true;
         }
     }
 
-    
+    private bool CanDig(Ring startRing, Transform diggerTransform)
+    {
+        Debug.Log("Distance to digging location " + Vector3.Distance(startRing.center, diggerTransform.position));
+        return Vector3.Distance(startRing.center, diggerTransform.position) < Consts.MaxDistToDig;
+    }
 
     public bool IsCreationValid(Heading TunnelHeading, Ring prevRing)
     {
@@ -177,6 +202,6 @@ public class TunnelActionManager: Singleton<TunnelActionManager>
     private void OnDisable()
     {
         Agent.OnDig -= TunnelAction;
-        AgentManager.OnSpawn -= OnSpawn;
+        //PlayerManager.SpawnMainPlayerEvent -= OnInitTunnelForAgent;
     }
 }

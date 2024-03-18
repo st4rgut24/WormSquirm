@@ -2,10 +2,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UIElements.Experimental;
 
 public class TunnelManager : Singleton<TunnelManager>
 {
+    [SerializeField]
+    public LayerMask TunnelLayerMask;
+
     // The intersection relationship is not bidirectional.
     // The key should be the tunnel that initiates the intersection.
     // For ex. Tunnel A intersects Tunnel B when Tunnel A is created.
@@ -40,8 +42,6 @@ public class TunnelManager : Singleton<TunnelManager>
     {
         TunnelCreatorManager.OnAddCreatedTunnel += OnAddCreatedTunnel;
         TunnelIntersectorManager.OnAddIntersectedTunnelSuccess += OnAddIntersectedTunnel;
-
-		Agent.OnDig += tunnelDisabler.Disable;
     }
 
     private void Awake()
@@ -51,24 +51,17 @@ public class TunnelManager : Singleton<TunnelManager>
 		//EndCapDict = new Dictionary<Transform, GameObject>();
         IntersectedTunnelDict = new Dictionary<GameObject, List<GameObject>>();
         tunnelDisabler = new Disabler(5);
+
+        tunnelGrid = GameManager.Instance.GetGrid(GridType.Tunnel);
     }
 
-    /// <summary>
-    /// Get tunnels near to player
-    /// </summary>
-    /// <param name="playerTransform">the player</param>
-    /// <returns></returns>
-    /// <exception cref="Exception">if no tunnels found near player</exception>
-    public List<GameObject> GetProximalTunnels(Transform playerTransform)
+    // Use this for initialization
+    void Start()
     {
-        if (tunnelDisabler.ProximalObjectDict.ContainsKey(playerTransform))
-        {
-            return tunnelDisabler.ProximalObjectDict[playerTransform];
-        }
-        else
-        {
-            throw new Exception("No tunnels corresponding to player transform " + playerTransform);
-        }
+        tunnelInsiderManager = TunnelInsiderManager.Instance;
+        tunnelCreatorManager = TunnelCreatorManager.Instance;
+        tunnelActionManager = TunnelActionManager.Instance;
+        tunnelIntersectorManager = TunnelIntersectorManager.Instance;
     }
 
 	public GameObject GetGameObjectTunnel(Transform playerTransform)
@@ -96,8 +89,9 @@ public class TunnelManager : Singleton<TunnelManager>
         GameObject endCap = segment.GetEndCap();
         List<GameObject> neighborTunnels = InitTunnelList(prevTunnel);
 		AddTunnel(playerTransform, segment, neighborTunnels, prevTunnel);
-		//ReplaceEndCap(playerTransform, endCap);        
-	}
+
+        tunnelDisabler.Disable(playerTransform);
+    }
 
     /// <summary>
     /// Add intersecting tunnels info
@@ -105,10 +99,12 @@ public class TunnelManager : Singleton<TunnelManager>
     /// <param name="playerTransform">player pos</param>
     /// <param name="segment">new tunnel segment that intersects others</param>
     /// <param name="prevTunnel">tunnel from which the player dug the intersected segment</param>
-    /// <param name="intersectedTunnels">a list of intersected tunnel segments</param>
-	void OnAddIntersectedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel, List<GameObject> intersectedTunnels)
+    /// <param name="endIntersectedTunnels">the intersected tunnels connected to the end of a segment</param>
+    /// <param name="startIntersectedTunnels">the intersected tunnels connected to the beginning of a segment</param>
+	void OnAddIntersectedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel, List<GameObject> startIntersectedTunnels, List<GameObject> endIntersectedTunnels)
 	{
-        GameObject endCap = segment.GetEndCap();
+        List<GameObject> intersectedTunnels = startIntersectedTunnels;
+        intersectedTunnels.AddRange(endIntersectedTunnels);
 
         MapIntersectingTunnels(segment.getTunnel(), intersectedTunnels);
 
@@ -126,10 +122,12 @@ public class TunnelManager : Singleton<TunnelManager>
 
         // Debug.Log("There are " + connectingTunnels.Count + " intersecting tunnels");
 
-        if (connectingTunnels.Count > 1 || prevTunnel == null) // the new segment intersects the previous and another tunnel in front, creating a corridor (no need for cap)
+        if (endIntersectedTunnels.Count > 0) // the new segment connects to a segment at its opposite end, creating a corridor
         {
             segment.IntersectEndCap();
         }
+
+        tunnelDisabler.Disable(playerTransform);
     }
 
     public List<GameObject> InitTunnelList(GameObject InitTunnel)
@@ -183,32 +181,19 @@ public class TunnelManager : Singleton<TunnelManager>
 
     void AddTunnel(Transform playerTransform, SegmentGo segmentGo, List<GameObject> nextTunnels, GameObject prevTunnel)
 	{
-
         Cap startCap = segmentGo.StartCap;
         Cap endCap = segmentGo.EndCap;
         GameObject tunnel = segmentGo.getTunnel();
 
         Segment segment = SegmentManager.Instance.AddTunnelSegment(segmentGo, nextTunnels, endCap.ring, startCap.ring);
-        AgentManager.Instance.InitTransformSegmentDict(playerTransform, segment);
+        // not necessary because segment is assigned to agent on startup
+
+
+        // how to assign segment to bot that creates tunnels?
+        AgentManager.Instance.InitSegment(playerTransform, segment);
 
         // Debug.Log("Add segment to grid at position " + segment.getCenter());
         tunnelGrid.AddGameObject(segment.getCenter(), segmentGo.getTunnel());
-
-        if (prevTunnel != null)
-        {
-            RemovePrevTunnelCap(prevTunnel);
-        }
-    }
-
-    void RemovePrevTunnelCap(GameObject prevTunnel)
-    {
-        Segment prevSegment = SegmentManager.Instance.GetSegmentFromObject(prevTunnel);
-
-        if (prevSegment.HasDeadEndCap())
-        {
-            SegmentGo segmentGo = prevSegment.segmentGo;
-            segmentGo.DestroyEndCap();
-        }
     }
 
     /// <summary>
@@ -225,50 +210,12 @@ public class TunnelManager : Singleton<TunnelManager>
 		{
             // Debug.Log("Player has moved to a new segment " + UpdatedSegment.tunnel.name);
         }
-        //else
-        //{
-        //    // Debug.Log("Player has not moved to a new segment. Stuck in " + TransformCreatedTunnelDict[playerTransform]?.name);
-        //}
     }
-
-	//void ReplaceEndCap(Transform transform, GameObject endCap)
-	//{
-	//	if (EndCapDict.ContainsKey(transform))
-	//	{
-	//		GameObject prevCap = EndCapDict[transform];
-
-	//		if(prevCap != null)
-	//		{
- //               Destroy(prevCap);
- //           }
- //       }
-
-	//	EndCapDict[transform] = endCap;
-	//}
-
-    // Use this for initialization
-    void Start()
-	{
-		tunnelInsiderManager = TunnelInsiderManager.Instance;
-		tunnelCreatorManager = TunnelCreatorManager.Instance;
-		tunnelActionManager = TunnelActionManager.Instance;
-		tunnelIntersectorManager = TunnelIntersectorManager.Instance;
-
-        tunnelGrid = GameManager.Instance.GetGrid(GridType.Tunnel);
-    }
-
-    // Update is called once per frame
-    void Update()
-	{
-			
-	}
 
     private void OnDisable()
     {
         TunnelCreatorManager.OnAddCreatedTunnel -= OnAddCreatedTunnel;
         TunnelIntersectorManager.OnAddIntersectedTunnelSuccess -= OnAddIntersectedTunnel;
-
-        Agent.OnDig -= tunnelDisabler.Disable;
     }
 }
 

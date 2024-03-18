@@ -13,7 +13,7 @@ public class SegmentManager : Singleton<SegmentManager>
 
     public const float SameDirAngleMargin = 30; // the margin of error for two gameobjects to be considered facing the same direction
 
-    public static event Action<Transform, Segment> OnEnterNewSegment;
+    public static event Action<Transform, Segment> EnterNewSegmentEvent;
     public Dictionary<string, Segment> SegmentGoDict; // <tunnel name, Segment>
 
     private void Awake()
@@ -24,10 +24,10 @@ public class SegmentManager : Singleton<SegmentManager>
 
     private void Start()
     {
-        float edgeDist = 3; // the distance from the edge of tunnel serves as a stopping point
+        //float edgeDist = 3; // the distance from the edge of tunnel serves as a stopping point
 
         MinDistFromCenterLine = TunnelManager.tunnelRadius / 2; // todo: tinker with this to find what number works with creating newly intersected tunnels
-        MinDistFromCap = edgeDist;
+        MinDistFromCap = Consts.MinDistToEndCap;
     }
 
     /// <summary>
@@ -47,13 +47,14 @@ public class SegmentManager : Singleton<SegmentManager>
         Segment curSegment = AgentManager.Instance.GetSegment(transform);        
         Segment UpdatedSegment = null;
 
-        if (!curSegment.ContainsTransform(transform)) // another tunnel that is closer than the current tunnel
+        // another tunnel that is closer than the current tunnel
+        if (!curSegment.ContainsTransform(transform)) 
         {
             UpdatedSegment = GetEnclosingSegment(curSegment, transform);
             if (UpdatedSegment != null)
             {
-                // Debug.Log("Player has moved to the new segment " + UpdatedSegment.tunnel.name);
-                OnEnterNewSegment?.Invoke(transform, UpdatedSegment);
+                 Debug.Log("Player has moved to the new segment " + UpdatedSegment.tunnel.name);
+                EnterNewSegmentEvent?.Invoke(transform, UpdatedSegment);
             }
             else
             {
@@ -108,7 +109,13 @@ public class SegmentManager : Singleton<SegmentManager>
                 }
                 else
                 {
-                    throw new Exception("Multiple enclosing segments found that contain transform at position " + transform.position);
+                    // At points of intersection there can be a region of ambiguity most likely due to overlap.
+                    // Because determining the true enclosing segment would likely require lots of complex math,
+                    // we just accept the ambiguity and default to the last known current segment if it occurs
+                    // Eventually the player will move to a new segment (hopefully)
+                    Debug.LogWarning("Multiple enclosing segments found that contain transform at position " + transform.position);
+                    enclosingSegment = curSegment;
+                    return;
                 }
             }
         });
@@ -179,6 +186,20 @@ public class SegmentManager : Singleton<SegmentManager>
         intersectedSegment.AddGuideline(intersectingGuideline); // the intersecting guideline connectst he intersected point with the other tunnel
 
         return intersectingGuideline;
+    }
+
+    public void RemovePrevTunnelCap(GameObject prevTunnel)
+    {
+        if (prevTunnel != null) {
+
+            Segment prevSegment = SegmentManager.Instance.GetSegmentFromObject(prevTunnel);
+
+            if (prevSegment.HasDeadEndCap())
+            {
+                SegmentGo segmentGo = prevSegment.segmentGo;
+                segmentGo.DestroyEndCap();
+            }
+        }
     }
 
     /// <summary>

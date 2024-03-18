@@ -16,7 +16,7 @@ public class AgentManager : Singleton<AgentManager>
 
     private void OnEnable()
     {
-        SegmentManager.OnEnterNewSegment += OnEnterNewSegment;
+        SegmentManager.EnterNewSegmentEvent += UpdateSegment;
 
         TunnelCreatorManager.OnAddCreatedTunnel += OnAddCreatedTunnel;
         TunnelIntersectorManager.OnAddIntersectedTunnelSuccess += OnAddIntersectedTunnel;
@@ -48,7 +48,7 @@ public class AgentManager : Singleton<AgentManager>
         }
     }
 
-    void OnAddIntersectedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel, List<GameObject> intersectedTunnels)
+    void OnAddIntersectedTunnel(Transform playerTransform, SegmentGo segment, GameObject prevTunnel, List<GameObject> startIntersectedTunnels, List<GameObject> endIntersectedTunnels)
     {
         Spawn(playerTransform, segment, prevTunnel);
     }
@@ -63,15 +63,15 @@ public class AgentManager : Singleton<AgentManager>
     /// </summary>
     /// <param name="transform">player transform</param>
     /// <param name="segment">segment tunnel</param>
-    public void InitTransformSegmentDict(Transform transform, Segment segment)
+    public void InitSegment(Transform transform, Segment segment)
     {
-        if (!TransformSegmentDict.ContainsKey(transform))
-        {
-            Agent agent = transform.gameObject.GetComponent<Agent>();
+        Agent agent = transform.gameObject.GetComponent<Agent>();
+        agent.InitSegment(segment);
+    }
 
-            agent.curSegment = segment; 
-            TransformSegmentDict[transform] = segment;
-        }
+    public void SetTransformSegmentDict(Transform transform, Segment segment)
+    {
+        TransformSegmentDict[transform] = segment;
     }
 
     public Segment GetSegment(Transform transform)
@@ -91,7 +91,7 @@ public class AgentManager : Singleton<AgentManager>
     /// </summary>
     /// <param name="transform">player transform</param>
     /// <param name="segment">segment of tunnel player is in</param>
-    public void OnEnterNewSegment(Transform transform, Segment segment)
+    public void UpdateSegment(Transform transform, Segment segment)
     {
         Agent movedAgent = transform.gameObject.GetComponent<Agent>();
         movedAgent.UpdateSegment(segment);
@@ -112,7 +112,7 @@ public class AgentManager : Singleton<AgentManager>
 
     private void OnDisable()
     {
-        SegmentManager.OnEnterNewSegment -= OnEnterNewSegment;
+        SegmentManager.EnterNewSegmentEvent -= UpdateSegment;
 
         TunnelCreatorManager.OnAddCreatedTunnel -= OnAddCreatedTunnel;
         TunnelIntersectorManager.OnAddIntersectedTunnelSuccess -= OnAddIntersectedTunnel;

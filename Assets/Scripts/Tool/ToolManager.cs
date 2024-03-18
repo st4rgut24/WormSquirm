@@ -34,13 +34,12 @@ public class ToolManager : Singleton<ToolManager>
 
     private void OnEnable()
     {
-        //PlayerManager.SpawnMainPlayerEvent += OnSpawnMainPlayer;
+        PlayerManager.SpawnMainPlayerEvent += OnSpawnMainPlayer;
         SimpleScrollSnap.SelctedItemEvent += OnSelectedItem;
     }
 
-    private void Awake()
+    public void OnSpawnMainPlayer(GameObject mainPlayerGo)
     {
-        GameObject mainPlayerGo = PlayerManager.Instance.GetMainPlayer();
         player = mainPlayerGo.GetComponent<MainPlayer>();
 
         playerTransform = mainPlayerGo.transform;
@@ -48,6 +47,7 @@ public class ToolManager : Singleton<ToolManager>
         playerCamera = cameras[0];
 
         InitWeaponPrefabDict(); // depends on player being initialized   
+
     }
 
     public ToolType GetToolTypeFromTag(string tag)
@@ -155,7 +155,7 @@ public class ToolManager : Singleton<ToolManager>
 
     private void OnDisable()
     {
-        //PlayerManager.SpawnMainPlayerEvent -= OnSpawnMainPlayer;
+        PlayerManager.SpawnMainPlayerEvent -= OnSpawnMainPlayer;
         SimpleScrollSnap.SelctedItemEvent -= OnSelectedItem;
     }
 }

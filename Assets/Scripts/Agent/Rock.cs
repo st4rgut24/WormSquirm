@@ -19,8 +19,9 @@ public class Rock : Automaton
     // contains the split fragments of the boulder, displayed on destruction
     GameObject SplitBoulderParent;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         health = new AgentHealth(RockManager.RockHealth);
 
         SplitBoulderParent = transform.Find(Consts.SplitBoulder).gameObject;
@@ -64,7 +65,7 @@ public class Rock : Automaton
         {
             IsWhole = false;
 
-            DisableCollider();
+            DisableCollider(); // to prevent collision with other agents
             WholeBoulderRenderer.enabled = false;
 
             SplitBoulderParent.SetActive(true); // reveal the border fragments

@@ -48,7 +48,9 @@ public class Grid
     {
         if (!GameManager.Instance.isValidPos(pos))
         {
-            throw new System.Exception("GameObject is out of bounds");
+            Debug.LogWarning("GameObject is out of bounds");
+
+            return;
         }
             
         Vector3Int cellPos = ConvertWorldPosToGridPos(pos);
@@ -75,11 +77,13 @@ public class Grid
     /// </summary>
     /// <param name="worldPos">position</param>
     /// <param name="searchMultiplier">factor to expand the search radius</param>
+    /// <param name="transform">Transform of the digging agent</param>
     /// <returns>gameobjects within the search area</returns>
     /// <exception cref="System.Exception">invalid position exception</exception>
-    public List<GameObject> GetGameObjects(Vector3 worldPos, int searchMultiplier)
+    public List<GameObject> GetGameObjects(Vector3 worldPos, int searchMultiplier, Transform transform)
     {
-        if (!GameManager.Instance.isValidPos(worldPos))
+        // disqualify out-of-bounds digs by any agent other than the digger bot
+        if (!GameManager.Instance.isValidPos(worldPos) && !transform.CompareTag(Consts.DiggerBotTag))
         {
             throw new System.Exception("GameObject is out of bounds " + worldPos);
         }

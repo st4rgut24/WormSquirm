@@ -191,14 +191,12 @@ public class Segment
     {
         if (HasDeadEndCap()) // check if player is close enough to the end of a tunnel
         {
-            //float distToEndCap = Vector3.Distance(position, endRingCenter);
-            float curDistToEndCap = GetClosestDistance(originalPos, endRing.GetRingLines());
-
             float DistToEndCap = GetClosestDistance(position, endRing.GetRingLines());
             // Debug.Log("In Tunnel " + tunnel.name + ". Projected Distance to end cap " + DistToEndCap + ". Should be less than " + SegmentManager.Instance.MinDistFromCap + " Current dist is " + curDistToEndCap);
 
             if (DistToEndCap <= SegmentManager.Instance.MinDistFromCap)
             {
+                Debug.Log("Distance to end cap is " + DistToEndCap + ". Player is out of bounds");
                 return true;
             }
         }
@@ -214,16 +212,15 @@ public class Segment
     /// <param name="transform">the moving thing</param>
     /// <returns>true if contains it</returns>
     public bool ContainsTransform(Transform transform)
-    {
+    {   
         bool behindStart = Vector3.Dot(forward, transform.position - startRingCenter) < 0;
         bool aheadOfEnd = Vector3.Dot(forward, transform.position - endRingCenter) > 0;
         // TODO: inbounds is not a good indicator because guidelines may not be centered in the tunnel
         bool isInbounds = GetDistanceToCenterLine(transform.position) < TunnelManager.tunnelRadius;
 
-        // Debug.Log("Check if segment " + tunnel.name + " contains player. BehindStart is " + behindStart + " aheadOfEnd is " + aheadOfEnd + " isInbounds is " + isInbounds);
+         //Debug.Log("Check if segment " + tunnel.name + " contains player. BehindStart is " + behindStart + " aheadOfEnd is " + aheadOfEnd + " isInbounds is " + isInbounds);
 
         return !behindStart && !aheadOfEnd && isInbounds;
-
     }
 }
 

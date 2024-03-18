@@ -25,9 +25,10 @@ public class MainPlayer : Player
 
     protected PlayerHealth playerStamina;
 
-    private void Awake()
+    protected override void Awake()
     {
-        //isBlocked = false;
+        base.Awake();
+
         CollidedObstacles = new List<GameObject>();
         health = new PlayerHealth(Consts.HealthSlider, PlayerManager.PlayerHealth);
         playerStamina = new PlayerHealth(Consts.StaminaSlider, PlayerManager.PlayerHealth);

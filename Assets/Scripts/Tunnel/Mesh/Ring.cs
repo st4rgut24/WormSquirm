@@ -23,7 +23,7 @@ public class Ring
         vertexLineList = new List<Guideline>();
         // Debug.Log("Center is " + center);
         float angularOffset = GetAngularOffset(vertexCount);
-        Vector3[] vertices = SetVertices(vertexCount, normal, angularOffset, noiseScale);
+        SetVertices(vertexCount, normal, angularOffset, noiseScale);
         SetRingGuidelines(vertices, center);
     }
 

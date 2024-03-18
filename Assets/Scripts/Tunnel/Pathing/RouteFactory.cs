@@ -72,7 +72,7 @@ public class RouteFactory
     public static Route CreateStraightPath(Transform targetTransform)
     {
         Route route = new Route();
-        Transform[] simpWPs = BotManager.Instance.SimpWPs;
+        Transform[] simpWPs = BotManager.Instance.TunnelMakerWPs;
 
         for (int i = 0; i < simpWPs.Length; i++)
         {

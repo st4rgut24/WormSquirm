@@ -5,17 +5,6 @@ using UnityEngine;
 
 public class TunnelUtils
 {
-    /// <summary>
-    /// Offset the point of intersection in provided direction
-    /// </summary>
-    /// <param name="intersectionPoint">location of interesction between two tunnels</param>
-    /// <param name="offsetDir">point will be offset in this direction</param>
-    /// <returns>offset point</returns>
-    public static Vector3 OffsetIntersectionPoint(Vector3 intersectionPoint, Vector3 offsetDir)
-    {
-        return intersectionPoint + offsetDir.normalized * Consts.IntersectionOffset;
-    }
-
     private static Bounds GetAdjustedBounds(GameObject tunnelGo, float buffer)
     {
         Bounds originalBounds = tunnelGo.GetComponent<Renderer>().bounds;
@@ -116,13 +105,11 @@ public class TunnelUtils
 
         HitInfo hitInfo = null;
 
-        //Ray ray = new Ray(transform.position, transform.forward);
-
         for (int i = 0; i < rays.Count; i++)
         {
             Ray ray = rays[i];
 
-            bool didHit = Physics.Raycast(ray.origin, ray.direction, out hit, rayDistance);
+            bool didHit = Physics.Raycast(ray.origin, ray.direction, out hit, rayDistance, TunnelManager.Instance.TunnelLayerMask);
 
             Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.cyan, 200.0f);
             if (didHit)

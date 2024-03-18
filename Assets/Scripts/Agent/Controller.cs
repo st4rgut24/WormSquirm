@@ -33,6 +33,8 @@ public class Controller
         this.player = playerGo.GetComponent<MainPlayer>();
         this.changeRotation = changeRotation;
         this.changeMovement = changeMovement;
+
+        lastInBoundsPosition = this.transform.position;
     }
 
     /// <summary>

@@ -9,12 +9,12 @@ using System;
 public class BotManager : Singleton<BotManager>
 {
     // Testing
-    public Transform SimpStartBlock;
-    public Transform SimpWP1;
-    public Transform[] SimpWPs;
+    public Transform TunnelMakerStartBlock;
+    public Transform TunnelMakerWP1;
+    public Transform[] TunnelMakerWPs;
 
     public GameObject Chaser;
-    public GameObject SimpBot;
+    public GameObject TunnelMaker;
 
     public const float BotHealth = 10;
 
@@ -32,7 +32,7 @@ public class BotManager : Singleton<BotManager>
 
     public enum BotType {
         Chaser,
-        Simp
+        InitTunnelMaker
     }
 
     public int spawnDistance = 13; // number of segments away from the player the bot should spawns
@@ -47,14 +47,17 @@ public class BotManager : Singleton<BotManager>
         bots = new List<Bot>();
         ObjectiveDict = new Dictionary<Transform, List<Bot>>();
 
-        // Testing
-        SimpWPs = new Transform[] { SimpStartBlock, SimpWP1 };
+        // Testing intersection with an existing tunnel
+        TunnelMakerWPs = new Transform[] { TunnelMakerStartBlock, TunnelMakerWP1 };
     }
 
-    // Use this for initialization
+    // Use this for initializing tunnel
     void Start()
-	{
-        StartCoroutine(SpawnAtInterval());
+    {
+        GameObject botGo = Spawn(BotType.InitTunnelMaker);
+        Bot bot = botGo.GetComponent<Bot>();
+
+        InitBot(bot);
     }
 
     public void AddBotToSegment(Transform playerTransform, Segment segment)
@@ -69,12 +72,12 @@ public class BotManager : Singleton<BotManager>
         }
     }
 
-    public void SpawnChaser()
-    {
-        GameObject botGo = Spawn(BotType.Chaser);
-        Bot bot = botGo.GetComponent<Bot>();
-        InitBot(bot);
-    }
+    //public void SpawnChaser()
+    //{
+    //    GameObject botGo = Spawn(BotType.Chaser);
+    //    Bot bot = botGo.GetComponent<Bot>();
+    //    InitBot(bot);
+    //}
 
     public void OnTunnelDisabled(List<GameObject> disabledTunnels)
     {
@@ -116,11 +119,11 @@ public class BotManager : Singleton<BotManager>
 
         if (type == BotType.Chaser)
         {
-            BotGo = AgentManager.Instance.CreateAgent(Chaser); 
+            BotGo = AgentManager.Instance.CreateAgent(Chaser);
         }
-        else if (type == BotType.Simp)
+        else if (type == BotType.InitTunnelMaker)
         {
-            BotGo = AgentManager.Instance.CreateAgent(SimpBot);
+            BotGo = AgentManager.Instance.CreateAgent(TunnelMaker);
         }
 
         return BotGo;
@@ -144,33 +147,36 @@ public class BotManager : Singleton<BotManager>
         }
     }
 
-    IEnumerator SpawnAtInterval()
-    {
-        while (true)
-        {
-            if (bots.Count <  maxBots)
-            {
-                // temporary (Simp bot is just for testing)
+    //IEnumerator SpawnAtInterval()
+    //{
+    //    while (true)
+    //    {
+    //        if (bots.Count <  maxBots)
+    //        {
+    //            // temporary (Simp bot is just for testing)
+    //            //GameObject botGo = bots.Count == 0 ? Spawn(BotType.Simp) : Spawn(BotType.Chaser);
 
-                GameObject botGo = bots.Count == 0 ? Spawn(BotType.Simp) : Spawn(BotType.Chaser);
-                Bot bot = botGo.GetComponent<Bot>();
-                try
-                {
-                    InitBot(bot);
-                }
-                catch (System.Exception error)
-                {
-                    bots.Remove(bot);
-                    Destroy(botGo);
-                    // Debug.Log("Error creating bot: " + error.Message);
-                    // Debug.Log(error.StackTrace);
-                }
-            }
+    //            // TODO: Add logic to add different kinds of bots
+    //            GameObject botGo = Spawn(BotType.Chaser);
 
-            yield return new WaitForSeconds(spawnFrequency);
-        }
+    //            Bot bot = botGo.GetComponent<Bot>();
+    //            try
+    //            {
+    //                InitBot(bot);
+    //            }
+    //            catch (System.Exception error)
+    //            {
+    //                bots.Remove(bot);
+    //                Destroy(botGo);
+    //                // Debug.Log("Error creating bot: " + error.Message);
+    //                // Debug.Log(error.StackTrace);
+    //            }
+    //        }
 
-    }
+    //        yield return new WaitForSeconds(spawnFrequency);
+    //    }
+
+    //}
 
     /// <summary>
     /// Give the Bot an initial destination 
@@ -180,7 +186,7 @@ public class BotManager : Singleton<BotManager>
     {
         RouteStrat strat;
 
-        if (bot.botType == BotType.Simp)
+        if (bot.botType == BotType.InitTunnelMaker)
         {
             strat = RouteStrat.StraightPath;
         }
@@ -198,12 +204,6 @@ public class BotManager : Singleton<BotManager>
 
         bot.initRoute(route);
     }
-
-    // Update is called once per frame
-    void Update()
-	{
-			
-	}
 
     protected void OnDisable()
     {

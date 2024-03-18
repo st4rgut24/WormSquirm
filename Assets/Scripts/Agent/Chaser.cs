@@ -15,7 +15,7 @@ public class Chaser : Bot
 
     private void OnEnable()
     {
-        SegmentManager.OnEnterNewSegment += OnEnterNewSegment;
+        SegmentManager.EnterNewSegmentEvent += OnEnterNewSegment;
     }
 
     protected override void Awake()
@@ -88,7 +88,7 @@ public class Chaser : Bot
 
     private void OnDisable()
     {
-        SegmentManager.OnEnterNewSegment -= OnEnterNewSegment;
+        SegmentManager.EnterNewSegmentEvent -= OnEnterNewSegment;
     }
 }
 

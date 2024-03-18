@@ -2,16 +2,13 @@ using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UIElements.Experimental;
-using static UnityEngine.Rendering.HableCurve;
-using Unity.VisualScripting;
 
 /// <summary>
 /// Manages the intersection of tunnels
 /// </summary>
 public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
 {
-    public static event Action<Transform, SegmentGo, GameObject, List<GameObject>> OnAddIntersectedTunnelSuccess;
+    public static event Action<Transform, SegmentGo, GameObject, List<GameObject>, List<GameObject>> OnAddIntersectedTunnelSuccess;
     public static event Action<Transform> OnAddIntersectedTunnelFailure;
 
     public int rayRings = 3; // The bigger this number is, the smaller the interval
@@ -59,44 +56,55 @@ public class TunnelIntersectorManager : Singleton<TunnelIntersectorManager>
     /// <param name="hitInfo">info about the hit object</param>
     void IntersectAction(Transform playerTransform, GameObject prevTunnel, Heading heading, bool extendsTunnel, Ring prevRing, HitInfo hitInfo)
     {
-        Heading intersectHeading = hitInfo != null ? GetHitHeading(hitInfo, playerTransform) : heading;
-
-        Vector3 center = TunnelUtils.GetCenterPoint(prevRing.GetCenter(), intersectHeading.position);
-        List<GameObject> nearbyTunnels = tunnelGrid.GetGameObjects(center, 1);
-        // Debug.Log("There are " + nearbyTunnels.Count + " tunnels with the viciting of position " + center);
-
-        RayRing endRayRing = new RayRing(_ringVertices, -intersectHeading.forward, intersectHeading.position, offsetMultiple, _rayInterval, _holeRadius);
-        List<Ray> intersectingRays = new List<Ray>(endRayRing.rays);
-
-        if (!extendsTunnel) // tunnel faces may be deleted from the start of a segment if the intersecting segment bisects the current segment
-        {
-            RayRing startRayRing = new RayRing(_ringVertices, intersectHeading.forward, prevRing.GetCenter(), offsetMultiple, _rayInterval, _holeRadius);
-            intersectingRays.AddRange(startRayRing.rays);
-        }
-
-
-        Intersect(playerTransform, prevTunnel, nearbyTunnels, intersectingRays, intersectHeading, prevRing);
-    }
-
-    void Intersect(Transform playerTransform, GameObject prevTunnel, List<GameObject> otherTunnels, List<Ray> rays, Heading heading, Ring prevRing)
-    {
-        SegmentGo projectedSegment = null;
-
-        // offset in the direction opposite to which player creates intesecting tunnel, so the intersecting tunnel
-        // juts into the exist tunnel, creating an overlap
-        //Vector3 offsetIntersectionPoint = TunnelUtils.OffsetIntersectionPoint(intersectionPoint, -playerTransform.forward);
-
         try
         {
+            Heading intersectHeading = hitInfo != null ? GetHitHeading(hitInfo, playerTransform) : heading;
+
+            Vector3 center = TunnelUtils.GetCenterPoint(prevRing.GetCenter(), intersectHeading.position);
+            List<GameObject> nearbyTunnels = tunnelGrid.GetGameObjects(center, 1, playerTransform);
+            // Debug.Log("There are " + nearbyTunnels.Count + " tunnels with the viciting of position " + center);
+
+            RayRing endRayRing = new RayRing(_ringVertices, -intersectHeading.forward, intersectHeading.position, offsetMultiple, _rayInterval, _holeRadius);
+
+            List<Ray> endIntersectingRays = new List<Ray>(endRayRing.rays);
+            List<Ray> startIntersectingRays = new List<Ray>();
+
+            if (!extendsTunnel) // tunnel faces may be deleted from the start of a segment if the intersecting segment bisects the current segment
+            {
+                RayRing startRayRing = new RayRing(_ringVertices, intersectHeading.forward, prevRing.GetCenter(), offsetMultiple, _rayInterval, _holeRadius);
+                startIntersectingRays.AddRange(startRayRing.rays);
+            }
+
+
+            Intersect(playerTransform, prevTunnel, nearbyTunnels, startIntersectingRays, endIntersectingRays, intersectHeading, prevRing, extendsTunnel);
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning("Invalid intersection. This can be caused by angle of intersection being too high");
+        }
+    }
+
+    void Intersect(Transform playerTransform, GameObject prevTunnel, List<GameObject> otherTunnels, List<Ray> startRingIntersectRays, List<Ray> endRingIntersectRays, Heading heading, Ring prevRing, bool extendsTunnel)
+    {
+        SegmentGo projectedSegment = null;
+        
+        try
+        {
+            if (extendsTunnel)
+            {
+                SegmentManager.Instance.RemovePrevTunnelCap(prevTunnel);
+            }
+
             projectedSegment = tunnelMaker.GrowExtendedTunnel(playerTransform, heading, prevRing, Consts.IntersectionOffset);
             projectedSegment.IntersectStartCap(); // start of intersected tunnel segment will have a hole in it
 
             List<GameObject> intersectedTunnels = TunnelUtils.GetIntersectedObjects(projectedSegment.getTunnel(), otherTunnels, intersectBuffer);
 
             ValidateIntersection(intersectedTunnels, heading);
-            List<GameObject> deletedTunnels = DeleteTunnels(intersectedTunnels, rays);
+            List<GameObject> startDeletedTunnels = DeleteTunnels(intersectedTunnels, startRingIntersectRays);
+            List<GameObject> endDeletedTunnels = DeleteTunnels(intersectedTunnels, endRingIntersectRays);
 
-            OnAddIntersectedTunnelSuccess?.Invoke(playerTransform, projectedSegment, prevTunnel, deletedTunnels);
+            OnAddIntersectedTunnelSuccess?.Invoke(playerTransform, projectedSegment, prevTunnel, startDeletedTunnels, endDeletedTunnels);
         } catch (Exception e) {
             // Debug.LogError(e.Message);
 

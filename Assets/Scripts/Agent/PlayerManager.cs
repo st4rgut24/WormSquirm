@@ -18,43 +18,30 @@ public class PlayerManager: Singleton<PlayerManager>
 
 	public const float PlayerHealth = 100;
 
-	Vector3 defaultSpawnLoc = new Vector3(26, 10, 7);
-
-    protected void OnEnable()
-    {
-    }
-
     protected void Awake()
 	{
 		Players = new List<GameObject>();
-
-        MainPlayerInst = Spawn(MainPlayerGo);
-        mainPlayer = MainPlayerInst.GetComponent<MainPlayer>();
     }
 
+	public void InitPlayer(Vector3 location, Segment initSegment)
+	{
+        MainPlayerInst = Spawn(MainPlayerGo, location);
+        mainPlayer = MainPlayerInst.GetComponent<MainPlayer>();
+		mainPlayer.curSegment = initSegment;
+		AgentManager.Instance.SetTransformSegmentDict(mainPlayer.transform, initSegment);
+
+		SpawnMainPlayerEvent?.Invoke(MainPlayerInst);
+    }
 
 	public GameObject GetMainPlayer()
 	{
 		return MainPlayerInst;
 	}
 
-	//public void OnRemoveBot(GameObject HitObject)
-	//{
-	//	mainPlayer.RemoveCollidedObject(HitObject);
-	//}
-
-    // Use this for initialization
-    void Start()
-	{
-		SpawnMainPlayerEvent?.Invoke(mainPlayer.gameObject);
-
-        Ray ray = new Ray(MainPlayerInst.transform.position, MainPlayerInst.transform.forward);
-    }
-
-    GameObject Spawn(GameObject Player)
+    GameObject Spawn(GameObject Player, Vector3 location)
 	{
 		GameObject player = AgentManager.Instance.CreateAgent(Player);
-		player.transform.position = defaultSpawnLoc;
+		player.transform.position = location;
 		Players.Add(player);
 
 		return player;
@@ -65,14 +52,9 @@ public class PlayerManager: Singleton<PlayerManager>
 		return this.Players.Count > 0;
 	}
 
-	// Update is called once per frame
-	void Update()
-	{
-			
-	}
-
-    protected void OnDisable()
+    private void OnDisable()
     {
+        
     }
 }
 

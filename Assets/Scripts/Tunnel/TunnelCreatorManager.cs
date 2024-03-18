@@ -11,7 +11,6 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
     public static event Action<Transform, SegmentGo, GameObject> OnAddCreatedTunnel; // <Prev GameObject, Cur GameObject>
 
     TunnelMake tunnelMaker;
-    //Grid tunnelGrid;
 
     int cubeCount = 0;
 
@@ -43,12 +42,12 @@ public class TunnelCreatorManager : Singleton<TunnelCreatorManager>
     /// Create a Tunnel segment
     /// </summary>
     /// <param name="playerTransform">The transform of the player</param>
-    /// <param name="extendsTunnel">The player is extending a tunnel, always true for Create Action</param>
     /// <param name="heading">The directional info of the tunnel</param>
-	void CreateAction(Transform playerTransform, bool extendsTunnel, Heading heading, Ring prevRing)
+	void CreateAction(Transform playerTransform, Heading heading, Ring prevRing)
     {
         GameObject prevSegment = TunnelManager.Instance.GetGameObjectTunnel(playerTransform);
-        
+        SegmentManager.Instance.RemovePrevTunnelCap(prevSegment);
+
         SegmentGo segmentGo = tunnelMaker.GrowTunnel(playerTransform, heading, prevRing);
 
         OnAddCreatedTunnel?.Invoke(playerTransform, segmentGo, prevSegment);

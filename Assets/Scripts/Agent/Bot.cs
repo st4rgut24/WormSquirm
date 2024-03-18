@@ -26,6 +26,7 @@ public abstract class Bot : Automaton
 
     protected virtual void Awake()
     {
+        base.Awake();
         SetObjective();
 
         height = Consts.BotHeight;
@@ -44,7 +45,7 @@ public abstract class Bot : Automaton
 
         if (initSegment != null)
         {
-            AgentManager.Instance.InitTransformSegmentDict(transform, initSegment);
+            AgentManager.Instance.InitSegment(transform, initSegment);
         }
     }
 

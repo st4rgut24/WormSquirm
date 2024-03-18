@@ -68,7 +68,6 @@ public abstract class Weapon : MonoBehaviour
     {
         attackState = AttackState.Start;
         weaponCollider.enabled = true;
-        // damage the gameobject that weapon collider intersects with her
     }
 
     public void DisengageWeapon()

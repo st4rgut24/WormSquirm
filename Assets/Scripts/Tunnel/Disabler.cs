@@ -21,7 +21,8 @@ public class Disabler
 	/// <summary>
 	/// Trigger the disable of surrounding gameobject
 	/// </summary>
-	public void Disable(Transform transform, Vector3 direction)
+    /// . does not include the connection that is made as a result of Dig, called right before the Dig happens
+	public void Disable(Transform transform)
 	{
         Segment segment = AgentManager.Instance.GetSegment(transform);
 

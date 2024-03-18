@@ -39,7 +39,7 @@ public abstract class Agent : MonoBehaviour
 
     public static event Action<Transform, Vector3> OnDig;
 
-    Vector3 prevPosition = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+    //Vector3 prevPosition = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
 
     public bool isDigging;
 
@@ -49,6 +49,11 @@ public abstract class Agent : MonoBehaviour
 
     public Vector3 curSegmentForward; // the direction of the tunnel the player is facing
 
+    protected virtual void Awake()
+    {
+        agentCollider = GetComponent<BoxCollider>();
+    }
+
     // Use this for initialization
     protected virtual void Start()
 	{
@@ -56,7 +61,6 @@ public abstract class Agent : MonoBehaviour
         isMoveInProgress = false;
         curSegmentForward = DefaultUtils.DefaultVector3;
         animator = GetComponent<Animator>();
-        agentCollider = GetComponent<BoxCollider>();
     }
 
     // Update is called once per frame
@@ -75,6 +79,14 @@ public abstract class Agent : MonoBehaviour
             // Rotations happen over several frames until playerr reaches target destination
             ChangeVerticalRotation(xRot, Consts.defaultRotationSpeed);
         }
+    }
+
+    /// <summary>
+    /// Define some behavior when an agent creates a new segment
+    /// </summary>
+    public virtual void InitSegment(Segment segment)
+    {
+
     }
 
     /// <summary>
@@ -238,12 +250,12 @@ public abstract class Agent : MonoBehaviour
 
     protected void notifyDig(Vector3 digDirection)
     {
-        if (transform.position != prevPosition)
-        {
-            // Debug.Log("Notify dig. Current position " + transform.position + " Previous position " + prevPosition);
-            prevPosition = transform.position;
-            OnDig?.Invoke(transform, digDirection);
-        }
+        //if (transform.position != prevPosition)
+        //{
+        // Debug.Log("Notify dig. Current position " + transform.position + " Previous position " + prevPosition);
+        //prevPosition = transform.position;
+        OnDig?.Invoke(transform, digDirection);
+        //}
     }
 }
 

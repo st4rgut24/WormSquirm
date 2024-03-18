@@ -16,18 +16,18 @@ public class RockManager : Singleton<RockManager>
     // TODO: Rock Manager determines the HP of the rocks. 'Tougher' rocks can crush a player
     private void OnEnable()
     {
-        Agent.OnDig += CreateDebris;
+        TunnelActionManager.OnIntersectTunnel += OnCreateRockAtTunnelIntersection;
+        TunnelActionManager.OnCreateTunnel += OnCreateRockAtTunnelCreation;
     }
 
     /// <summary>
     /// Create a debris field at the site of impact
     /// </summary>
     /// <param name="transform">Agent who initiated the dig</param>
-    /// <param name="digDirection">Where the debris should be created</param>
-    private void CreateDebris(Transform transform, Vector3 digDirection)
+    /// <param name="spawnPos">Where the debris should be created</param>
+    private void CreateDebris(Transform transform, Vector3 spawnPos)
     {
         GameObject Debris = AgentManager.Instance.CreateAgent(DebrisPrefab);
-        Vector3 spawnPos = digDirection.normalized + transform.position;
         Debris.transform.position = spawnPos;
 
         Rock debrisAgent = Debris.GetComponent<Rock>();
@@ -53,9 +53,20 @@ public class RockManager : Singleton<RockManager>
         return RockGo;
     }
 
+    void OnCreateRockAtTunnelIntersection(Transform playerTransform, GameObject prevTunnel, Heading heading, bool extendsTunnel, Ring prevRing, HitInfo hitInfo)
+    {
+        CreateDebris(playerTransform, prevRing.center);
+    }
+
+    void OnCreateRockAtTunnelCreation(Transform playerTransform, Heading heading, Ring prevRing)
+    {
+        CreateDebris(playerTransform, prevRing.center);
+    }
+
     private void OnDisable()
     {
-        Agent.OnDig -= CreateDebris;
+        TunnelActionManager.OnIntersectTunnel -= OnCreateRockAtTunnelIntersection;
+        TunnelActionManager.OnCreateTunnel -= OnCreateRockAtTunnelCreation;
     }
 }
 

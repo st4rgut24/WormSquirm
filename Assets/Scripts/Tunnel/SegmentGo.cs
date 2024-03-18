@@ -37,7 +37,7 @@ public class SegmentGo
 		return corridor.GetLength();
 	}
 
-    public SegmentGo(GameObject tunnelObject, GameObject CapPrefab, Ring endRing, Ring prevRing)
+    public SegmentGo(GameObject tunnelObject, GameObject CapPrefab, Ring endRing, Ring prevRing, Ring prevCapRing)
     {
 		this.CapPrefab = CapPrefab;
 		this.corridor = new Corridor(tunnelObject, CapPrefab, endRing, prevRing);
@@ -45,7 +45,7 @@ public class SegmentGo
         GameObject EndCapObject = MeshObjectFactory.Get(MeshType.EndCap, CapPrefab, endRing, new OptionalMeshProps());
         EndCap = new Cap(EndCapObject, endRing, MeshType.EndCap);
 
-        StartCap = new Cap(prevRing); // stsart of a segment is not capped
+        StartCap = new Cap(prevCapRing); // stsart of a segment is not capped
     }
 
     /// <summary>

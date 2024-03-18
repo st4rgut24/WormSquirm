@@ -2,6 +2,9 @@
 
 public class Consts
 {
+    // Game Manager
+    public const int MinSetupWPs = 3;
+
     // tags
     public const string PickaxeTag = "pickaxe";
     public const string CrossbowTag = "crossbow";
@@ -14,6 +17,7 @@ public class Consts
     public const string PlayerTag = "Player";
     public const string MainPlayerTag = "MainPlayer";
     public const string TunnelTag = "tunnel";
+    public const string DiggerBotTag = "Digibot";
 
     public static readonly string[] PlayerTags = { PlayerTag, MainPlayerTag };
     public static readonly string[] EnemyTags = { EnemyTag };
@@ -73,5 +77,7 @@ public class Consts
 
     // tunnels
     public const float IntersectionOffset = 1; // intended to create an overlap between interecting segments to hide void in between
+    public const float MaxDistToDig = 3; // the maximum distance player can be from tunnel walls to dig
+    public const float MinDistToEndCap = 2.5f; // the closest a player can get to the end of a tunnel
 }
 
