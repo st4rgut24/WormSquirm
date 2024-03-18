@@ -32,6 +32,9 @@ public class GateManager : Singleton<GateManager>
 				throw new System.Exception("Not a valid gate type: " + type);
 		}
 
+		Gate gate = GateGo.GetComponent<Gate>();
+		gate.SetCurSegment(segment);
+
 		return GateGo;
 	}
 

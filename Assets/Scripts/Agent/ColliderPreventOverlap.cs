@@ -20,18 +20,18 @@ public class ColliderPreventOverlap : MonoBehaviour
     void OnTriggerStay(Collider other)
     {
         // Check if the overlapping collider is the one we want to prevent overlapping with
-        if (TransformUtils.IsTransformMatchTags(other.transform, Consts.LivingAgentTags))
+        if (TransformUtils.IsTransformMatchTags(other.transform, Consts.ObstacleTags))
         {
 
             // Calculate the direction to move this collider to prevent overlap
-            Agent enemy = other.transform.gameObject.GetComponent<Agent>();
+            Matter tunnelObject = other.transform.gameObject.GetComponent<Matter>();
 
             // because the pivot of the gameobject is not the center of the tunnel,
             // subtracting the agents positions will misalign the player wrt to tunnel
 
             // use tunnel centers to align direction with slope of tunnel
             Vector3 agentCenterPoint = agent.GetClosestCenterPoint();
-            Vector3 enemyCenterPoint = enemy.GetClosestCenterPoint();
+            Vector3 enemyCenterPoint = tunnelObject.GetClosestCenterPoint();
 
             Vector3 direction = (agentCenterPoint - enemyCenterPoint).normalized;
             Vector3 translation = direction * separateDistance;

@@ -15,7 +15,7 @@ public class DigiSetupBot : DigiBot
         if (!isSetupCompleted)
         {
             base.ReachDestination();
-
+                
             GameManager.Instance.InitGame(route.waypoints);
 
             isSetupCompleted = true;

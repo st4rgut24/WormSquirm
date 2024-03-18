@@ -18,12 +18,15 @@ public class Consts
     public const string MainPlayerTag = "MainPlayer";
     public const string TunnelTag = "tunnel";
     public const string DiggerBotTag = "Digibot";
+    public const string GateTag = "Gate";
+    public const string TollBoothTag = "Toll";
 
     public static readonly string[] PlayerTags = { PlayerTag, MainPlayerTag };
     public static readonly string[] EnemyTags = { EnemyTag };
     public static readonly string[] PlayerDamageableTags = { EnemyTag, RockTag, PlayerTag }; // main player tag is ommitted because cannot damage self
     public static readonly string[] AllDamageableTags = { EnemyTag, RockTag, PlayerTag, MainPlayerTag };
     public static readonly string[] LivingAgentTags = { EnemyTag, PlayerTag, MainPlayerTag };
+    public static readonly string[] ObstacleTags = { EnemyTag, PlayerTag, MainPlayerTag, GateTag, TollBoothTag };
 
     // names
     public const string HealthSlider = "HealthBar";

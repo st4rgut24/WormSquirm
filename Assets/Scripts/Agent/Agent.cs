@@ -5,11 +5,11 @@ using System;
 /// <summary>
 /// Live agents have controlled movements, hence the functions for controlling rotation, etc.
 /// </summary>
-public abstract class Agent : MonoBehaviour
+public abstract class Agent : Matter
 {
-    public Segment curSegment;
+    //public Segment curSegment;
 
-    protected BoxCollider agentCollider;
+    //protected BoxCollider agentCollider;
 
     public Animator animator;
     public CharacterAnimator charAnimator;
@@ -49,10 +49,10 @@ public abstract class Agent : MonoBehaviour
 
     public Vector3 curSegmentForward; // the direction of the tunnel the player is facing
 
-    protected virtual void Awake()
-    {
-        agentCollider = GetComponent<BoxCollider>();
-    }
+    //protected virtual void Awake()
+    //{
+    //    agentCollider = GetComponent<BoxCollider>();
+    //}
 
     // Use this for initialization
     protected virtual void Start()
@@ -131,11 +131,6 @@ public abstract class Agent : MonoBehaviour
         {
             transform.position = destination;
         }
-    }
-
-    public Vector3 GetClosestCenterPoint()
-    {
-        return curSegment.GetClosestPointToCenterline(transform.position);
     }
 
     /// <summary>
