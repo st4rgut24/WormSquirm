@@ -13,6 +13,11 @@ public class DigiBot : Bot
         base.Awake();
     }
 
+    protected override void PlayFinalDestinationAnim()
+    {
+        charAnimator.Idle();
+    }
+
     /// <summary>
     /// Get the segment of the newly reached waypoint if it is not yet set.
     /// </summary>

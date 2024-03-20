@@ -42,7 +42,7 @@ public class RockManager : Singleton<RockManager>
 
         Rock rockAgent = RockGo.GetComponent<Rock>();
         rockAgent.curSegment = segment;
-        Route route = RouteFactory.Get(RouteStrat.Gravity, rockAgent, null);
+        Route route = RouteFactory.Get(RouteStrat.Gravity, rockAgent, null, DefaultUtils.DefaultVector3);
 
         WaypointDrawer wpDrawer = GameObject.Find(Consts.RockRouteDrawer).GetComponent<WaypointDrawer>();
         wpDrawer.SetWaypoints(route.waypoints, Color.blue);

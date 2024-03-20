@@ -7,7 +7,8 @@ using UnityEngine.UIElements;
 public enum RouteStrat
 {
     FollowSegment,
-    StraightPath,
+    InitPath,
+    Stationary,
     Gravity,
     None
 }
@@ -24,10 +25,10 @@ public class RouteFactory
     /// Get a Route for a agent to follow
     /// </summary>
     /// <param name="strat">Strategy used for constructing a route</param>
-    /// <param name="targetTransform">Destination of the route</param>
+    /// <param name="targetPosition">Destination of the route</param>
     /// <param name="agent">Agent that the route will be assigned to</param>
     /// <returns></returns>
-    public static Route Get(RouteStrat strat, Automaton agent, Transform targetTransform, bool addNoise = false)
+    public static Route Get(RouteStrat strat, Automaton agent, Transform targetTransform, Vector3 targetPosition, bool addNoise = false)
     {
         Route route;
 
@@ -36,8 +37,11 @@ public class RouteFactory
             case RouteStrat.FollowSegment:
                 route = FollowSegments(agent.isFirstRoute(), agent.curSegment, targetTransform, agent.transform);
                 break;
-            case RouteStrat.StraightPath:
-                route = CreateStraightPath(targetTransform);
+            case RouteStrat.InitPath:
+                route = CreateInitPath(targetPosition);
+                break;
+            case RouteStrat.Stationary:
+                route = CreateStationaryPosition(targetPosition);
                 break;
             case RouteStrat.Gravity:
                 route = CreateDownhillRoute(agent.isFirstRoute(), agent.curSegment);
@@ -65,11 +69,24 @@ public class RouteFactory
     }
 
     /// <summary>
-    /// Creates a route consisting of a straight path between two points
+    /// Make a route consisting of one waypoint
     /// </summary>
-    /// <param name="targetTransform">destination</param>
-    /// <returns>a simple route</returns>
-    public static Route CreateStraightPath(Transform targetTransform)
+    /// <param name="targetPosition">The target to go to</param>
+    /// <returns></returns>
+    public static Route CreateStationaryPosition(Vector3 targetPosition)
+    {
+        Route route = new Route();
+        route.AddWaypoint(new Waypoint(targetPosition));
+
+        return route;
+    }
+
+    /// <summary>
+    /// Creates a route used to setup a tunnel for the player to start in at the beginning of the game
+    /// </summary>
+    /// <param name="targetPosition">end of the setup tunnel</param>
+    /// <returns>a simple tunnel network for now</returns>
+    public static Route CreateInitPath(Vector3 targetPosition)
     {
         Route route = new Route();
         Transform[] simpWPs = BotManager.Instance.TunnelMakerWPs;
@@ -79,7 +96,7 @@ public class RouteFactory
             route.AddWaypoint(new Waypoint(simpWPs[i].position));
         }
 
-        route.AddWaypoint(new Waypoint(targetTransform.position));
+        route.AddWaypoint(new Waypoint(targetPosition));
 
         return route;
     }

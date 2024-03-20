@@ -14,6 +14,7 @@ public class BotManager : Singleton<BotManager>
     public Transform[] TunnelMakerWPs;
 
     public GameObject Chaser;
+    public GameObject GateKeeper;
     public GameObject TunnelMaker;
 
     public const float BotHealth = 10;
@@ -32,7 +33,8 @@ public class BotManager : Singleton<BotManager>
 
     public enum BotType {
         Chaser,
-        InitTunnelMaker
+        InitTunnelMaker,
+        GateKeeper
     }
 
     public int spawnDistance = 13; // number of segments away from the player the bot should spawns
@@ -40,6 +42,7 @@ public class BotManager : Singleton<BotManager>
     protected void OnEnable()
     {
         Disabler.OnDisableTunnels += OnTunnelDisabled;
+        GateManager.CreateGateEvent += OnAddGate;
     }
 
     protected void Awake()
@@ -72,22 +75,27 @@ public class BotManager : Singleton<BotManager>
         }
     }
 
-    //public void SpawnChaser()
-    //{
-    //    GameObject botGo = Spawn(BotType.Chaser);
-    //    Bot bot = botGo.GetComponent<Bot>();
-    //    InitBot(bot);
-    //}
+    /// <summary>
+    /// Adds a bot to control the gate
+    /// </summary>
+    /// <param name="gate">The gate to control</param>
+    public void OnAddGate()
+    {
+        GameObject GateKeeperGo = Spawn(BotType.GateKeeper);
+        GateKeeper GateKeeperBot = GateKeeperGo.GetComponent<GateKeeper>();
+
+        InitBot(GateKeeperBot);
+    }
 
     public void OnTunnelDisabled(List<GameObject> disabledTunnels)
     {
         // remove bots that are within the disabled tunnels
         bots.ForEach((bot) =>
         {
-            GameObject botTunnel = bot.curSegment.tunnel;
+            GameObject botTunnel = bot.curSegment?.tunnel;
             disabledTunnels.ForEach((tunnel) => // check if bot's tunnel is one of the disabled tunnels
             {
-                if (botTunnel == tunnel)
+                if (botTunnel != null && botTunnel == tunnel)
                 {
                     RemoveBot(bot);
                 }
@@ -121,6 +129,10 @@ public class BotManager : Singleton<BotManager>
         {
             BotGo = AgentManager.Instance.CreateAgent(Chaser);
         }
+        else if (type == BotType.GateKeeper)
+        {
+            BotGo = AgentManager.Instance.CreateAgent(GateKeeper);
+        }
         else if (type == BotType.InitTunnelMaker)
         {
             BotGo = AgentManager.Instance.CreateAgent(TunnelMaker);
@@ -147,37 +159,6 @@ public class BotManager : Singleton<BotManager>
         }
     }
 
-    //IEnumerator SpawnAtInterval()
-    //{
-    //    while (true)
-    //    {
-    //        if (bots.Count <  maxBots)
-    //        {
-    //            // temporary (Simp bot is just for testing)
-    //            //GameObject botGo = bots.Count == 0 ? Spawn(BotType.Simp) : Spawn(BotType.Chaser);
-
-    //            // TODO: Add logic to add different kinds of bots
-    //            GameObject botGo = Spawn(BotType.Chaser);
-
-    //            Bot bot = botGo.GetComponent<Bot>();
-    //            try
-    //            {
-    //                InitBot(bot);
-    //            }
-    //            catch (System.Exception error)
-    //            {
-    //                bots.Remove(bot);
-    //                Destroy(botGo);
-    //                // Debug.Log("Error creating bot: " + error.Message);
-    //                // Debug.Log(error.StackTrace);
-    //            }
-    //        }
-
-    //        yield return new WaitForSeconds(spawnFrequency);
-    //    }
-
-    //}
-
     /// <summary>
     /// Give the Bot an initial destination 
     /// </summary>
@@ -188,14 +169,19 @@ public class BotManager : Singleton<BotManager>
 
         if (bot.botType == BotType.InitTunnelMaker)
         {
-            strat = RouteStrat.StraightPath;
+            strat = RouteStrat.InitPath;
+        }
+        else if (bot.botType == BotType.GateKeeper)
+        {
+            strat = RouteStrat.Stationary;
         }
         else
         {
             strat = RouteStrat.FollowSegment;
         }
 
-        Route route = RouteFactory.Get(strat, bot, bot.objective, bot.addNoise); // want bots to follow slightly different routes, so add noise
+        Vector3 destination = bot.GetDestination();
+        Route route = RouteFactory.Get(strat, bot, bot.objective, destination, bot.addNoise); // want bots to follow slightly different routes, so add noise
 
         // TESTING WAYPOINTS
         WaypointDrawer wpDrawer = GameObject.Find(Consts.BotRouteDrawer).GetComponent<WaypointDrawer>();
@@ -208,6 +194,7 @@ public class BotManager : Singleton<BotManager>
     protected void OnDisable()
     {
         Disabler.OnDisableTunnels -= OnTunnelDisabled;
+        GateManager.CreateGateEvent -= OnAddGate;
     }
 }
 

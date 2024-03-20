@@ -35,7 +35,7 @@ public class ToolManager : Singleton<ToolManager>
     private void OnEnable()
     {
         PlayerManager.SpawnMainPlayerEvent += OnSpawnMainPlayer;
-        SimpleScrollSnap.SelctedItemEvent += OnSelectedItem;
+        SimpleScrollSnap.SelectedItemEvent += OnSelectedItem;
     }
 
     public void OnSpawnMainPlayer(GameObject mainPlayerGo)
@@ -156,7 +156,7 @@ public class ToolManager : Singleton<ToolManager>
     private void OnDisable()
     {
         PlayerManager.SpawnMainPlayerEvent -= OnSpawnMainPlayer;
-        SimpleScrollSnap.SelctedItemEvent -= OnSelectedItem;
+        SimpleScrollSnap.SelectedItemEvent -= OnSelectedItem;
     }
 }
 

@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
+using System.Collections.Generic;
 
 public abstract class Bot : Automaton
 {
@@ -32,6 +33,11 @@ public abstract class Bot : Automaton
         height = Consts.BotHeight;
         health = new AgentHealth(BotManager.BotHealth);
         isEnemyColliderTriggered = false;
+    }
+
+    public virtual Vector3 GetDestination()
+    {
+        return objective.position;
     }
 
     protected override void Start()
@@ -65,10 +71,10 @@ public abstract class Bot : Automaton
         }
     }
 
-    protected override void PlayFinalDestinationAnim()
-    {
-        charAnimator.TriggerAnimation(isAttackingAnimName);
-    }
+    //protected override void PlayFinalDestinationAnim()
+    //{
+    //    charAnimator.TriggerAnimation(isAttackingAnimName);
+    //}
 
     protected override Vector3 GetSpawnLocation()
     {
@@ -90,11 +96,11 @@ public abstract class Bot : Automaton
         bool isFirstRoute = base.initRoute(route);
         this.route = route;
 
-        if (isFirstRoute)
-        {
-            Waypoint CurWP = route.GetCurWaypoint();
-            Waypoint NextWP = route.GetNextWaypoint();
+        Waypoint CurWP = route.GetCurWaypoint();
+        Waypoint NextWP = route.GetNextWaypoint();
 
+        if (isFirstRoute && CurWP != null && NextWP != null)
+        {
             Vector3 initDir = (NextWP.position - CurWP.position).normalized;
             transform.rotation = Quaternion.LookRotation(initDir, Vector3.up);
         }

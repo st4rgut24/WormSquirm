@@ -51,7 +51,14 @@ public class Route
 
     public Waypoint GetNextWaypoint()
     {
-        return waypoints[waypointIdx + 1];
+		if (waypoints.Count > waypointIdx + 1)
+		{
+            return waypoints[waypointIdx + 1];
+        }
+		else
+		{
+			return null;
+		}
     }
 
     public Waypoint GetCurWaypoint()

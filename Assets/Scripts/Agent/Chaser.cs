@@ -32,6 +32,10 @@ public class Chaser : Bot
         base.Start();
     }
 
+    protected override void PlayFinalDestinationAnim()
+    {
+        charAnimator.TriggerAnimation(isAttackingAnimName);
+    }
 
     /// <summary>
     /// If the chased agent has moved to another segment, reroute

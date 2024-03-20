@@ -8,20 +8,17 @@ using System;
 /// </summary>
 public class DigiSetupBot : DigiBot
 {
-    private bool isSetupCompleted = false; // this flag ensures game is setup once
+    protected override void Awake()
+    {
+        base.Awake();
+
+    }
 
     protected override void ReachDestination()
     {
-        if (!isSetupCompleted)
-        {
-            base.ReachDestination();
-                
-            GameManager.Instance.InitGame(route.waypoints);
-
-            isSetupCompleted = true;
-            // Debug.Log("Reached destination");
-            //notifyDig(transform.forward);
-        }
+        base.ReachDestination();
+        GameManager.Instance.InitGame(route.waypoints);
+        BotManager.Instance.RemoveBot(this);
     }
 }
 

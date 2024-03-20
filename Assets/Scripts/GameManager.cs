@@ -11,8 +11,8 @@ public class GameManager : Singleton<GameManager>
     }
 
     GridManager gridManager;
-
     TunnelManager tunnelManager;
+    LevelSystem levelSystem;
 
     public int agentOffset = 12; // how many units away from end of a newly created tunnel a player is
     public int initAgentOffset = 4; // how many units away fro the beginning of a newly created tunnel a player is spawned at start of game
@@ -26,6 +26,7 @@ public class GameManager : Singleton<GameManager>
     // World will be a cube starting from the origin and corners along the positive axes
 
     GameState gameState;
+    Level level;
 
     private void OnEnable()
     {
@@ -38,6 +39,13 @@ public class GameManager : Singleton<GameManager>
         gridManager = new GridManager();
 
         gameState = GameState.Start;
+        levelSystem = new LevelSystem();
+    }
+
+    public void TearDownGame()
+    {
+        // TODO: After a level is completed, tear down the level
+        // in preparatino for a new one
     }
 
     public void InitGame(List<Waypoint> waypoints)
@@ -53,6 +61,9 @@ public class GameManager : Singleton<GameManager>
             // initialize the gate
             Waypoint gateWaypoint = waypoints[spawnIdx];
             GateManager.Instance.Create(gateWaypoint.segment, GateType.Key);
+
+            level = levelSystem.GetNextLevel();
+            gameState = GameState.ToTreasure;
         }
         else
         {

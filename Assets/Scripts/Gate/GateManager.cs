@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System;
 
 public enum GateType
 {
@@ -9,12 +11,33 @@ public enum GateType
 
 public class GateManager : Singleton<GateManager>
 {
-	public Transform GateParent;
+    public static event Action CreateGateEvent;
+
+    public Transform GateParent;
 
     public GameObject TollPrefab;
     public GameObject GatePrefab;
 
-	public GameObject Create(Segment segment, GateType type) {
+	public List<Gate> GateList;
+
+    private void Awake()
+    {
+		GateList = new List<Gate>();
+    }
+
+	public Gate GetNewestGate()
+	{
+		if (GateList.Count == 0)
+		{
+			return null;
+		}
+		else
+		{
+			return GateList[GateList.Count - 1];
+		}
+	}
+
+    public GameObject Create(Segment segment, GateType type) {
 		GameObject GateGo;
 
 		Vector3 GatePos = segment.endRingCenter;
@@ -35,7 +58,11 @@ public class GateManager : Singleton<GateManager>
 		Gate gate = GateGo.GetComponent<Gate>();
 		gate.SetCurSegment(segment);
 
-		return GateGo;
+		GateList.Add(gate);
+
+        CreateGateEvent?.Invoke();
+
+        return GateGo;
 	}
 
 

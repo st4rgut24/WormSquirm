@@ -43,13 +43,27 @@ public abstract class Automaton : Agent
             // initialize the direction bot is facing
             Waypoint CurWP = route.GetCurWaypoint();
             Waypoint NextWP = route.GetNextWaypoint();
+
+            SetDirection(CurWP, NextWP);
             //this.FaceMovementDirection(CurWP.position, NextWP.position);
-            Vector3 initDir = (NextWP.position - CurWP.position).normalized;
-            transform.rotation = Quaternion.LookRotation(initDir, Vector3.up);            
+        
         }
 
 
         return isAddFirstRoute;
+    }
+
+    private void SetDirection(Waypoint CurWP, Waypoint NextWP)
+    {
+        if (CurWP != null && NextWP != null)
+        {
+            Vector3 initDir = (NextWP.position - CurWP.position).normalized;
+            transform.rotation = Quaternion.LookRotation(initDir, Vector3.up);
+        }
+        else
+        {
+            Debug.LogWarning("Cannot set direction, missing waypoints");
+        }
     }
 
     public bool isFirstRoute()

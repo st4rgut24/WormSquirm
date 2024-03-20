@@ -67,6 +67,11 @@ protected string[] agentAnimNames = { Consts.DieAnim, Consts.MoveAnim };
         }
     }
 
+    public void Idle()
+    {
+        SetAnimationMovement(Consts.IdleSpeed);
+    }
+
     /// <summary>
     /// Play an animation by setting a trigger
     /// </summary>
