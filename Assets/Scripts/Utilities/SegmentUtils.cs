@@ -5,6 +5,39 @@ using System.Collections.Generic;
 public class SegmentUtils
 {
     /// <summary>
+    /// Gets a point perpendicular to the segment at a certain distance in a random direction
+    /// </summary>
+    /// <param name="segment">segment to find distance from</param>
+    /// <param name="distance">distance</param>
+    /// <returns>a random point in space</returns>
+    public static Vector3 GetPerpendicularPoint(Segment segment, int distance, float angle)
+    {
+        Ring endRing = segment.GetEndRing();
+
+        Vector3 point1 = endRing.center;
+
+        Vector3 levelPoint = endRing.vertices[0]; // point should be on same plane as the segment, 0 degrees
+        Quaternion rotationAboutAxis = Quaternion.AngleAxis(angle, segment.forward);
+
+        Vector3 dirVector = levelPoint - endRing.center;
+
+        Vector3 point = endRing.center + (rotationAboutAxis * dirVector) * distance;
+
+        return point;
+    }
+
+    /// <summary>
+    /// Gets a point collinear to the segment provided a direction from the segment's center
+    /// </summary>
+    /// <param name="segment">segment to find distance from</param>
+    /// <param name="distance">distance</param>
+    /// <returns>a point along the same line the segment is going in</returns>
+    public static Vector3 GetCollinearPoint(Segment segment, int distance, Vector3 direction)
+    {
+        return segment.GetCenterLineCenter() + direction * distance;
+    }
+
+    /// <summary>
     /// Get the end of the guideline that connects to a segment
     /// </summary>
     /// <param name="guideline">A line</param>
@@ -67,6 +100,27 @@ public class SegmentUtils
         else
         {
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Gets the first consecutive segment
+    /// </summary>
+    /// <param name="segment"></param>
+    /// <returns></returns>
+    public static Segment GetNextSegment(Segment segment)
+    {
+        List<GameObject> nextSegments = segment.getNextTunnels();
+
+        if (nextSegments.Count == 0)
+        {
+            return null;
+        }
+        else
+        {
+            GameObject nextSegmentGo = nextSegments[0];
+            Segment nextSegment = SegmentManager.Instance.GetSegmentFromObject(nextSegmentGo);
+            return nextSegment;
         }
     }
 }

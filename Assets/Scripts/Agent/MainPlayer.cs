@@ -12,6 +12,7 @@ public enum PlayerState
 
 public class MainPlayer : Player
 {
+    public static event Action<Jewel, Segment> CollectJewelEvent;
     public static event Action MeleeAttackEvent;
 
     //bool isBlocked;
@@ -79,6 +80,26 @@ public class MainPlayer : Player
         {
             ChangeMovement(transform.position, false, 0);
             playerStamina.IncreaseHealth(Consts.ReduceStaminaAmt);
+        }
+    }
+
+    /// <summary>
+    /// Logic for collecting items goes here
+    /// </summary>
+    /// <param name="other">collided with object</param>
+    private void OnTriggerEnter(Collider other)
+    {
+        if (TransformUtils.IsCollectible(other.transform))
+        {
+            if (other.CompareTag(Consts.JewelTag))
+            {
+                Jewel jewel = other.GetComponent<Jewel>();
+                CollectJewelEvent?.Invoke(jewel, curSegment);
+            }
+
+            // TODO: Add the item to the inventory and UI
+
+            GameObject.Destroy(other.gameObject);
         }
     }
 

@@ -8,6 +8,11 @@ public class TransformUtils
         return IsTransformMatchTags(transform, Consts.AllDamageableTags);
     }
 
+    public static bool IsCollectible(Transform transform)
+    {
+        return IsTransformMatchTags(transform, Consts.ItemTags);
+    }
+
     public static bool IsPlayerDamageableObject(Transform transform)
     {
         return IsTransformMatchTags(transform, Consts.PlayerDamageableTags);

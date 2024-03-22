@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class RockManager : Singleton<RockManager>
 {
+    RockManagerDifficulty difficulty;
 
     [SerializeField]
     private GameObject RockPrefab;
@@ -35,6 +36,10 @@ public class RockManager : Singleton<RockManager>
         StartCoroutine(debrisAgent.DieCoroutine());
     }
 
+    public void setDifficulty(RockManagerDifficulty difficulty)
+    {
+        this.difficulty = difficulty;
+    }
 
     public GameObject Spawn(Segment segment)
     {        

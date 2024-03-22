@@ -14,7 +14,7 @@ public class GameManager : Singleton<GameManager>
     TunnelManager tunnelManager;
     LevelSystem levelSystem;
 
-    public int agentOffset = 12; // how many units away from end of a newly created tunnel a player is
+    public int agentOffset = Consts.DistFromNewTunnelEnd; // how many units away from end of a newly created tunnel a player is
     public int initAgentOffset = 4; // how many units away fro the beginning of a newly created tunnel a player is spawned at start of game
 
     public Vector3Int origin = new Vector3Int(0, 0, 0);
@@ -26,7 +26,7 @@ public class GameManager : Singleton<GameManager>
     // World will be a cube starting from the origin and corners along the positive axes
 
     GameState gameState;
-    Level level;
+    GameLevel level;
 
     private void OnEnable()
     {
@@ -52,6 +52,9 @@ public class GameManager : Singleton<GameManager>
     {
         if (gameState == GameState.Start && waypoints.Count >= Consts.MinSetupWPs)
         {
+            level = levelSystem.GetNextLevel();
+            InitManagers(level);
+
             int spawnIdx = waypoints.Count - 2;
             Waypoint spawnWaypoint = waypoints[spawnIdx]; // spawn at the second to last waypoint, last waypoint is tunnel end, first waypoint is start
 
@@ -62,13 +65,24 @@ public class GameManager : Singleton<GameManager>
             Waypoint gateWaypoint = waypoints[spawnIdx];
             GateManager.Instance.Create(gateWaypoint.segment, GateType.Key);
 
-            level = levelSystem.GetNextLevel();
             gameState = GameState.ToTreasure;
         }
         else
         {
             throw new System.Exception("Not the correct state for game initialization");
         }
+    }
+
+    /// <summary>
+    /// Initialize the managers with data to programatically setup the level
+    /// </summary>
+    /// <param name="level">The level of the game</param>
+    public void InitManagers(GameLevel level)
+    {
+        BotManager.Instance.SetDifficulty(level.botManagerDifficulty);
+        GateManager.Instance.SetParams(level.gateManagerDifficulty);
+        RockManager.Instance.setDifficulty(level.rockManagerDifficulty);
+        // TODO: RewardManager set difficulty
     }
 
     public bool isValidPos(Vector3 pos)

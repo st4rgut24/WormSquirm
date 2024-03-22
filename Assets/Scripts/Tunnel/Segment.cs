@@ -13,6 +13,7 @@ public class Segment
 	public Vector3 endRingCenter;
 	public Vector3 startRingCenter;
     public Vector3 forward;
+    public float length;
 
     Vector3 center = DefaultUtils.DefaultVector3;
 
@@ -26,6 +27,7 @@ public class Segment
 		this.endRingCenter = ring.GetCenter();
         this.endRing = ring;
         this.forward = (this.endRingCenter - this.startRingCenter).normalized;
+        this.length = Vector3.Distance(this.endRingCenter, this.startRingCenter);
 
         this.segmentGo = segmentGo;
         this.tunnel = this.segmentGo.getTunnel();

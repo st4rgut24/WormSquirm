@@ -8,6 +8,8 @@ using System;
 /// </summary>
 public class BotManager : Singleton<BotManager>
 {
+    BotManagerDifficulty difficulty;
+
     // Testing
     public Transform TunnelMakerStartBlock;
     public Transform TunnelMakerWP1;
@@ -43,6 +45,7 @@ public class BotManager : Singleton<BotManager>
     {
         Disabler.OnDisableTunnels += OnTunnelDisabled;
         GateManager.CreateGateEvent += OnAddGate;
+        SegmentManager.EnterNewSegmentEvent += OnEnterNewSegment;
     }
 
     protected void Awake()
@@ -52,6 +55,11 @@ public class BotManager : Singleton<BotManager>
 
         // Testing intersection with an existing tunnel
         TunnelMakerWPs = new Transform[] { TunnelMakerStartBlock, TunnelMakerWP1 };
+    }
+
+    public void SetDifficulty(BotManagerDifficulty difficulty)
+    {
+        this.difficulty = difficulty;
     }
 
     // Use this for initializing tunnel
@@ -72,6 +80,14 @@ public class BotManager : Singleton<BotManager>
 
             bot.curSegment = segment;
             InitBot(bot);
+        }
+    }
+
+    public void OnEnterNewSegment(Transform transform, Segment segment)
+    {
+        if (transform.CompareTag(Consts.MainPlayerTag))
+        {
+            // determine spawning logic based off difficulty
         }
     }
 
@@ -195,6 +211,7 @@ public class BotManager : Singleton<BotManager>
     {
         Disabler.OnDisableTunnels -= OnTunnelDisabled;
         GateManager.CreateGateEvent -= OnAddGate;
+        SegmentManager.EnterNewSegmentEvent -= OnEnterNewSegment;
     }
 }
 

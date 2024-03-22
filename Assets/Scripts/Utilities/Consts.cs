@@ -6,6 +6,8 @@ public class Consts
     public const int MinSetupWPs = 3;
 
     // tags
+    public const string JewelTag = "Jewel";
+
     public const string PickaxeTag = "pickaxe";
     public const string CrossbowTag = "crossbow";
     public const string MaceTag = "mace";
@@ -27,6 +29,7 @@ public class Consts
     public static readonly string[] AllDamageableTags = { EnemyTag, RockTag, PlayerTag, MainPlayerTag };
     public static readonly string[] LivingAgentTags = { EnemyTag, PlayerTag, MainPlayerTag };
     public static readonly string[] ObstacleTags = { EnemyTag, PlayerTag, MainPlayerTag, GateTag, TollBoothTag };
+    public static readonly string[] ItemTags = { JewelTag };
 
     // names
     public const string HealthSlider = "HealthBar";
@@ -40,6 +43,8 @@ public class Consts
     public const float defaultRotationSpeed = 5f;
 
     public const float FallSpeed = 3;
+
+    public const float MagnetizeSpeed = 5;
 
     // player movement
     public const float ReduceStaminaAmt = .05f;
@@ -83,5 +88,6 @@ public class Consts
     public const float IntersectionOffset = 1; // intended to create an overlap between interecting segments to hide void in between
     public const float MaxDistToDig = 3; // the maximum distance player can be from tunnel walls to dig
     public const float MinDistToEndCap = 2.5f; // the closest a player can get to the end of a tunnel
+    public const int DistFromNewTunnelEnd = 12; // how many units away from end of a newly created tunnel a player is
 }
 

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Gate : Matter
 {
@@ -18,6 +19,26 @@ public class Gate : Matter
         state = State.Closed;
 
         // TODO: Create a Gatekeeper
+    }
+
+    public Jewel.Type GetKeyType()
+    {
+        return key.type;
+    }
+
+    public Jewel GetKey()
+    {
+        return key;
+    }
+
+    /// <summary>
+    /// Create a key that unlocks this gate
+    /// </summary>
+    /// <param name="direction">direction in which key can be found</param>
+    /// <param name="distance">distance along the direction to find the key</param>
+    public void CreateKey(Vector3 direction, Vector3 distance)
+    {
+
     }
 
     public virtual void SetKey(Jewel key)
