@@ -89,6 +89,11 @@ public abstract class Agent : Matter
 
     }
 
+    public Vector3 GetClosestPointOnSegmentCenterLine()
+    {
+        return curSegment.GetClosestPointToCenterline(transform.position);
+    }
+
     /// <summary>
     /// Make an agent fall to the level of the ground of the tunnel segment
     /// </summary>

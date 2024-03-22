@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
+/// <summary>
+/// Accounting system
+/// </summary>
 public class Inventory
 {
 	int fiat;

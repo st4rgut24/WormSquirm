@@ -63,7 +63,8 @@ public class GameManager : Singleton<GameManager>
 
             // initialize the gate
             Waypoint gateWaypoint = waypoints[spawnIdx];
-            GateManager.Instance.Create(gateWaypoint.segment, GateType.Key);
+            Segment segment = gateWaypoint.segment;
+            GateManager.Instance.Create(segment, segment, GateType.Key);
 
             gameState = GameState.ToTreasure;
         }

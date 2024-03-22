@@ -26,7 +26,7 @@ public class Key
     /// </summary>
     public Key(Segment segment, int distance, Vector3 direction)
     {
-        position = SegmentUtils.GetCollinearPoint(segment,distance, direction);
+        position = SegmentUtils.GetCollinearPoint(segment, distance, direction);
     }
 }
 

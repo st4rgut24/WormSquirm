@@ -30,8 +30,6 @@ public class TunnelManager : Singleton<TunnelManager>
     //todo: use separation value to calculate the tunnel segment's transform
     float separation = 1f; // separation between the player and the end of the active tunnel
 
-    public const float tunnelRadius = 5.13f;
-
     const int tunnelSides = 16; // 8;
     const float segmentSpacing = 1.33f;
     // issue with noiseScale != 0: dist from center line to ring edge should be constant to
@@ -46,7 +44,7 @@ public class TunnelManager : Singleton<TunnelManager>
 
     private void Awake()
     {
-        defaultProps = new TunnelProps(tunnelSides, segmentSpacing, tunnelRadius, noiseScale);
+        defaultProps = new TunnelProps(tunnelSides, segmentSpacing, Consts.tunnelRadius, noiseScale);
 
 		//EndCapDict = new Dictionary<Transform, GameObject>();
         IntersectedTunnelDict = new Dictionary<GameObject, List<GameObject>>();

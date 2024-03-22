@@ -15,6 +15,7 @@ public class GateManager : Singleton<GateManager>
 	GateManagerDifficulty difficulty;
 
     public static event Action CreateGateEvent;
+    public static event Action<GameObject> CreateKeyEvent;
 
     public Transform GateParent;
     public Transform KeyParent;
@@ -68,7 +69,6 @@ public class GateManager : Singleton<GateManager>
 			// 1. find the route back to the start
 			Segment finalGateSegment = SegmentUtils.GetNextSegment(StartGate.curSegment);
 			List<Segment> returnSegments = SearchUtils.dfsConnectSegments(finalGateSegment, segment);
-			returnSegments.RemoveAt(0); // remove the segment with key, because we don't want the gate to be added at the end of that segment
 			//because it would be in the wrong direction
 			initIntermediaryGates(returnSegments);
         }
@@ -89,14 +89,16 @@ public class GateManager : Singleton<GateManager>
 			return;
 		}
 
-		for (int i=0;i< returnSegments.Count; i++)
+		// start at the first gate following the gate with the gate the key was found in
+		// aka the first tunnel behind the player
+		for (int i=1; i< returnSegments.Count; i++)
 		{
 			if (i % gateSpacing == 0)
 			{
                 TypeProbability pickedTypeProbability = RandomUtils.PickTypeProbability(difficulty.GateTypeProbabilities);
                 GateType randomGateType = (GateType)pickedTypeProbability.enumType;
-
-				Create(returnSegments[i], randomGateType);
+				Segment prevSegment = returnSegments[i - 1];
+				Create(returnSegments[i],prevSegment, randomGateType);
             }
 		}
     }
@@ -123,9 +125,9 @@ public class GateManager : Singleton<GateManager>
 	/// </summary>
 	/// <param name="gate">gate</param>
 	/// <param name="segment">segment the gate is in</param>
-	private void InitGate(Gate gate, Segment segment)
+	private void InitGate(Gate gate, Segment gateSegment, Segment keySegment)
 	{
-        gate.SetCurSegment(segment);
+        gate.SetCurSegment(gateSegment);
 
 		Jewel gateKey;
 		Key key;
@@ -134,15 +136,17 @@ public class GateManager : Singleton<GateManager>
         {
             StartGate = gate;
 			gateKey = KeyJewelPairs[difficulty.FinalJewelType];
-			key = new Key(segment, difficulty.FinalKeyDist, difficulty.FinalKeyDirection);
+			key = new Key(keySegment, difficulty.FinalKeyDist, difficulty.FinalKeyDirection);
         }
 		else
 		{
 			gateKey = GetRandomKey();
-			key = new Key(segment, difficulty.AvgKeyDist, difficulty.KeyMinAngle, difficulty.KeyMaxAngle);
+			key = new Key(keySegment, difficulty.AvgKeyDist, difficulty.KeyMinAngle, difficulty.KeyMaxAngle);
         }
 
-        Instantiate(gateKey.gameObject, key.position, Quaternion.identity, KeyParent);
+        GameObject keyGo = Instantiate(gateKey.gameObject, key.position, Quaternion.identity, KeyParent);
+        CreateKeyEvent?.Invoke(keyGo);
+
 		gate.SetKey(gateKey);
     }
 
@@ -156,7 +160,7 @@ public class GateManager : Singleton<GateManager>
         return KeyJewelPairs[randomJewelType];
     }
 
-    public GameObject Create(Segment segment, GateType type) {
+    public GameObject Create(Segment segment, Segment prevSegment, GateType type) {
 		GameObject GateGo;
 
 		Vector3 GatePos = segment.endRingCenter;
@@ -174,7 +178,7 @@ public class GateManager : Singleton<GateManager>
 
 		Gate gate = GateGo.GetComponent<Gate>();
         GateList.Add(gate);
-        InitGate(gate, segment);
+        InitGate(gate, segment, prevSegment);
 
         CreateGateEvent?.Invoke();
 

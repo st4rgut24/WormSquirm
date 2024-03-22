@@ -174,7 +174,7 @@ public class Segment
     {
         // TODO: add mesh collider here, find where the mesh is intersected using Physics.Raycast
         Vector3 centerPoint = GetClosestPointToCenterline(heading.position);
-        Vector3 edgePoint = centerPoint + heading.forward.normalized * TunnelManager.tunnelRadius;
+        Vector3 edgePoint = centerPoint + heading.forward.normalized * Consts.tunnelRadius;
 
         return edgePoint;
     }
@@ -249,7 +249,7 @@ public class Segment
         bool behindStart = Vector3.Dot(forward, transform.position - startRingCenter) < 0;
         bool aheadOfEnd = Vector3.Dot(forward, transform.position - endRingCenter) > 0;
         // TODO: inbounds is not a good indicator because guidelines may not be centered in the tunnel
-        bool isInbounds = GetDistanceToCenterLine(transform.position) < TunnelManager.tunnelRadius;
+        bool isInbounds = GetDistanceToCenterLine(transform.position) < Consts.tunnelRadius;
 
          //Debug.Log("Check if segment " + tunnel.name + " contains player. BehindStart is " + behindStart + " aheadOfEnd is " + aheadOfEnd + " isInbounds is " + isInbounds);
 

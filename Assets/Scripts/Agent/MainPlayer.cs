@@ -12,6 +12,8 @@ public enum PlayerState
 
 public class MainPlayer : Player
 {
+    Detector detector;
+
     public static event Action<Jewel, Segment> CollectJewelEvent;
     public static event Action MeleeAttackEvent;
 
@@ -33,6 +35,9 @@ public class MainPlayer : Player
         CollidedObstacles = new List<GameObject>();
         health = new PlayerHealth(Consts.HealthSlider, PlayerManager.PlayerHealth);
         playerStamina = new PlayerHealth(Consts.StaminaSlider, PlayerManager.PlayerHealth);
+        detector = GameObject.Find(Consts.Detector).GetComponent<Detector>();
+
+        detector.Init(this);
     }
 
     private void OnEnable()

@@ -36,6 +36,7 @@ public class Consts
     public const string StaminaSlider = "StaminaBar";
     public const string Arrow = "arrow";
     public const string SplitBoulder = "split_parent";
+    public const string Detector = "Detector";
 
     // transforms
     public const float FullRevolution = 360;
@@ -89,6 +90,7 @@ public class Consts
     public const float MaxDistToDig = 3; // the maximum distance player can be from tunnel walls to dig
     public const float MinDistToEndCap = 2.5f; // the closest a player can get to the end of a tunnel
     public const int DistFromNewTunnelEnd = 12; // how many units away from end of a newly created tunnel a player is
+    public const float tunnelRadius = 5.13f;
 
     // Gate
     public const float SpawnKeyAngleMax = 60; // maximum angle perpendicular to the segment a key can be spawned

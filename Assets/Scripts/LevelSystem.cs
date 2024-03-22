@@ -76,7 +76,7 @@ public class LevelSystem
         GameLevel level1 = new GameLevel(
             new GateManagerDifficulty
             {
-                AvgKeyDist = 20,
+                AvgKeyDist = 10,
                 GateTypeProbabilities = new TypeProbability[]
                 {
                     new TypeProbability((int) GateType.Key, .5f),
@@ -89,7 +89,7 @@ public class LevelSystem
                 FinalKeyDist = 30,
                 FinalJewelType = Jewel.Type.Emerald,
                 KeyMaxAngle = 0,
-                KeyMinAngle = -30
+                KeyMinAngle = 0
             },
             new BotManagerDifficulty
             {
