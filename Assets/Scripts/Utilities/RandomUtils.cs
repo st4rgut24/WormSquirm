@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 /// <summary>
 /// Assigns a probability to a type
@@ -17,6 +18,15 @@ public class TypeProbability
 
 public class RandomUtils
 {
+    public static bool CoinToss()
+    {
+        return UnityEngine.Random.Range(0, 2) == 0;
+    }
+
+    public static float GetRandomNumber(float min, float max)
+    {
+        return UnityEngine.Random.Range(min, max);
+    }
 
     /// <summary>
     /// Confirms a list of floats adds to 1
@@ -48,7 +58,7 @@ public class RandomUtils
     {
         ValidateSumOfProbabilities(probabilities);
 
-        Random random = new Random();
+        System.Random random = new System.Random();
 
         // Generate a random number between 0 and 1
         double randomNumber = random.NextDouble();

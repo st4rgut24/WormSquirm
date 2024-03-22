@@ -18,7 +18,7 @@ public class Valuable : MonoBehaviour
 
     Transform unearther; // transform of the rightful owner of valuable
 
-    private void OnEnable()
+    protected virtual void OnEnable()
     {
         SegmentManager.EnterNewSegmentEvent += OnEnterNewSegment;
     }
@@ -73,7 +73,7 @@ public class Valuable : MonoBehaviour
         }
     }
 
-    private void OnDisable()
+    protected virtual void OnDisable()
     {
         SegmentManager.EnterNewSegmentEvent -= OnEnterNewSegment;
     }

@@ -185,7 +185,7 @@ public class TunnelManager : Singleton<TunnelManager>
         Cap endCap = segmentGo.EndCap;
         GameObject tunnel = segmentGo.getTunnel();
 
-        Segment segment = SegmentManager.Instance.AddTunnelSegment(segmentGo, nextTunnels, endCap.ring, startCap.ring);
+        Segment segment = SegmentManager.Instance.AddTunnelSegment(playerTransform.up, segmentGo, nextTunnels, endCap.ring, startCap.ring);
         // not necessary because segment is assigned to agent on startup
 
 

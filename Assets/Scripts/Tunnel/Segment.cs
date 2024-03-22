@@ -10,10 +10,16 @@ public class Segment
 
     public Guideline centerLine;
     public Ring endRing;
-	public Vector3 endRingCenter;
-	public Vector3 startRingCenter;
-    public Vector3 forward;
+    public Vector3 endRingCenter;
+    public Vector3 startRingCenter;
     public float length;
+
+    public Quaternion rotation {get; private set;}
+
+    // directions are relative to tunnel's end ring
+    public Vector3 forward;
+    public Vector3 up;
+    public Vector3 right;
 
     Vector3 center = DefaultUtils.DefaultVector3;
 
@@ -21,12 +27,24 @@ public class Segment
 
     List<Guideline> segmentLines;
 
-	public Segment(SegmentGo segmentGo, Ring ring, Ring prevRing)
+    /// <summary>
+    /// A wrapper for a Tunnel that contains positional information
+    /// </summary>
+    /// <param name="up">local up of the tunnel</param>
+    /// <param name="segmentGo">segment gameobject wrapper</param>
+    /// <param name="ring">a list of vertices defining end of segment</param>
+    /// <param name="prevRing">a list of vertices defining beginning of segment</param>
+	public Segment(Vector3 up, SegmentGo segmentGo, Ring ring, Ring prevRing)
 	{
 		this.startRingCenter = prevRing.GetCenter();
 		this.endRingCenter = ring.GetCenter();
         this.endRing = ring;
         this.forward = (this.endRingCenter - this.startRingCenter).normalized;
+        this.up = up;
+
+        this.rotation = Quaternion.LookRotation(this.forward, this.up);
+        this.right = Vector3.Cross(this.forward, this.up);
+
         this.length = Vector3.Distance(this.endRingCenter, this.startRingCenter);
 
         this.segmentGo = segmentGo;
@@ -39,6 +57,11 @@ public class Segment
         Debug.DrawRay(centerLine.start, centerLine.end - centerLine.start, Color.green, 300);
 
         this.segmentLines.Add(centerLine);
+    }
+
+    public Vector3 GetUpDir()
+    {
+        return tunnel.transform.up;
     }
 
     /// <summary>
@@ -206,7 +229,7 @@ public class Segment
 
             if (DistToEndCap <= SegmentManager.Instance.MinDistFromCap)
             {
-                Debug.Log("Distance to end cap is " + DistToEndCap + ". Player is out of bounds");
+                //Debug.Log("Distance to end cap is " + DistToEndCap + ". Player is out of bounds");
                 return true;
             }
         }

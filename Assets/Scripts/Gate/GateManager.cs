@@ -128,21 +128,21 @@ public class GateManager : Singleton<GateManager>
         gate.SetCurSegment(segment);
 
 		Jewel gateKey;
-		Vector3 keyPos;
+		Key key;
 
         if (GateList.Count == 1)
         {
             StartGate = gate;
 			gateKey = KeyJewelPairs[difficulty.FinalJewelType];
-			keyPos = SegmentUtils.GetCollinearPoint(segment, difficulty.FinalKeyDist, difficulty.FinalKeyDirection);
+			key = new Key(segment, difficulty.FinalKeyDist, difficulty.FinalKeyDirection);
         }
 		else
 		{
 			gateKey = GetRandomKey();
-			keyPos = SegmentUtils.GetPerpendicularPoint(segment, difficulty.AvgKeyDist, difficulty.KeyAngle);
+			key = new Key(segment, difficulty.AvgKeyDist, difficulty.KeyMinAngle, difficulty.KeyMaxAngle);
         }
 
-        Instantiate(gateKey.gameObject, keyPos, Quaternion.identity, KeyParent);
+        Instantiate(gateKey.gameObject, key.position, Quaternion.identity, KeyParent);
 		gate.SetKey(gateKey);
     }
 
@@ -160,15 +160,13 @@ public class GateManager : Singleton<GateManager>
 		GameObject GateGo;
 
 		Vector3 GatePos = segment.endRingCenter;
-		Quaternion GateRot = segment.GetRotation();
-
 
         switch (type) {
 			case GateType.Toll:
-				GateGo = Instantiate(TollPrefab, GatePos, GateRot, GateParent);
+				GateGo = Instantiate(TollPrefab, GatePos, segment.rotation, GateParent);
 				break;
 			case GateType.Key:
-                GateGo = Instantiate(GatePrefab, GatePos, GateRot, GateParent);
+                GateGo = Instantiate(GatePrefab, GatePos, segment.rotation, GateParent);
                 break;
 			default:
 				throw new System.Exception("Not a valid gate type: " + type);

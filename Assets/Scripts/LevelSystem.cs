@@ -15,8 +15,10 @@ public struct GateManagerDifficulty
     // Intermediary Gates
     public int GateCount;      // total number of gates (does not include the starting gate)
     public int AvgKeyDist;     // average distance between key location and the gate
-    public int KeyAngle;       // angle between segment with gate and the key, a bigger angle means a steeper path, a negative angle means descent (easier), and positive (harder due to avalanche risk)
     public int TollMultiplier; // average premium for paying a toll (multiplies the value of the key)
+    // angles define direction perpendicular to the segment to spawn the key. Angle range reflects along segment's local up vector: eg (0, 30) implies (150, 180) as well
+    public int KeyMaxAngle;       // Upper bound of angle between segment with gate and the key, a bigger angle means a steeper path, a negative angle means descent (easier), and positive (harder due to avalanche risk)
+    public int KeyMinAngle;       // Lower bound of angle between segment with gate and the key, a bigger angle means a steeper path, a negative angle means descent (easier), and positive (harder due to avalanche risk)
 
     // Note that the below probabilities must add up to 1.0f
     public TypeProbability[] GateTypeProbabilities;
@@ -72,8 +74,9 @@ public class LevelSystem
 	{
         // TODO: Initialize the levels
         GameLevel level1 = new GameLevel(
-            new GateManagerDifficulty {
-                AvgKeyDist = 2,
+            new GateManagerDifficulty
+            {
+                AvgKeyDist = 20,
                 GateTypeProbabilities = new TypeProbability[]
                 {
                     new TypeProbability((int) GateType.Key, .5f),
@@ -85,19 +88,23 @@ public class LevelSystem
                 FinalKeyDirection = Vector3.forward,
                 FinalKeyDist = 30,
                 FinalJewelType = Jewel.Type.Emerald,
-                KeyAngle = 30
+                KeyMaxAngle = 0,
+                KeyMinAngle = -30
             },
-            new BotManagerDifficulty {
+            new BotManagerDifficulty
+            {
                 StartCount = 0,
                 EndCount = 1,
                 Health = 100
             },
-            new RockManagerDifficulty {
+            new RockManagerDifficulty
+            {
                 DigChance = .5f,
                 Health = 100,
                 SpeedMultiplier = 1
             },
-            new RewardDifficulty {
+            new RewardDifficulty
+            {
                 AdGoldAmount = 5,
                 AdHealthAmount = .1f,
                 RewardTypeProbabilities = new TypeProbability[]
@@ -111,7 +118,7 @@ public class LevelSystem
                 KillEnemyGold = 5,
                 TreasureAmount = 10
             }
-        ); ;
+        ) ; ;
 
         SetLevel(1, level1);
 	}

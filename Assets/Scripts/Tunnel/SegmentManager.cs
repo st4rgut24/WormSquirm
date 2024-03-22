@@ -235,9 +235,9 @@ public class SegmentManager : Singleton<SegmentManager>
         });
     }
 
-    public Segment AddTunnelSegment(SegmentGo segmentGo, List<GameObject> nextTunnels, Ring ring, Ring prevRing)
+    public Segment AddTunnelSegment(Vector3 up, SegmentGo segmentGo, List<GameObject> nextTunnels, Ring ring, Ring prevRing)
     {
-        Segment segment = new Segment(segmentGo, ring, prevRing);
+        Segment segment = new Segment(up, segmentGo, ring, prevRing);
         GameObject tunnel = segment.tunnel;
 
         if (nextTunnels.Count > 0)
