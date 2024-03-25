@@ -4,11 +4,11 @@ using UnityEngine.UI;
 
 public class PlayerHealth : AgentHealth
 {
-    public Slider healthSlider;  // Reference to the UI Slider for the health bar
+    public UnityEngine.UI.Slider healthSlider;  // Reference to the UI Slider for the health bar
 
     public PlayerHealth(string sliderGoName, float maxHealth) : base(maxHealth)
     {
-        healthSlider = GameObject.Find(sliderGoName).GetComponent<Slider>();
+        healthSlider = GameObject.Find(sliderGoName).GetComponent<UnityEngine.UI.Slider>();
     }
 
     // Method to update the health bar with the current health value

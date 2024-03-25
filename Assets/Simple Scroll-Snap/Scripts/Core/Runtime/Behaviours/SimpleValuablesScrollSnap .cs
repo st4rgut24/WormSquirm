@@ -13,9 +13,9 @@ namespace DanielLochner.Assets.SimpleScrollSnap
     [RequireComponent(typeof(ScrollRect))]
     public class SimpleScrollSnap : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler, IPointerUpHandler
     {
-        public const int NoMatchIdx = -1;
+        public static event Action<GameObject> SelectedItemEvent;
 
-        public int activeDistFromCenter = 10;
+        public const int NoMatchIdx = -1;
 
         #region Fields
         // Movement and Layout Settings
@@ -419,7 +419,9 @@ namespace DanielLochner.Assets.SimpleScrollSnap
             Vector2 offset = new Vector2(xOffset, yOffset);
             prevAnchoredPosition = Content.anchoredPosition = -Panels[startingPanel].anchoredPosition + offset;
             SelectedPanel = CenteredPanel = startingPanel;
-            
+
+            SelectedItemEvent?.Invoke(Panels[SelectedPanel].gameObject);
+
             // Buttons
             if (previousButton != null)
             {
@@ -607,9 +609,8 @@ namespace DanielLochner.Assets.SimpleScrollSnap
                 {
                     onPanelCentered.Invoke(CenteredPanel, SelectedPanel);
                     SelectedPanel = CenteredPanel;
-                    RectTransform SnappedPanel = Panels[SelectedPanel];
 
-
+                    SelectedItemEvent?.Invoke(Panels[SelectedPanel].gameObject);
                 }
             }
             else
@@ -716,6 +717,7 @@ namespace DanielLochner.Assets.SimpleScrollSnap
 
             panel = Instantiate(panel, Content, false);
             panel.transform.SetSiblingIndex(index);
+            Content.GetChild(index).tag = panel.tag;
 
             if (ValidConfig)
             {

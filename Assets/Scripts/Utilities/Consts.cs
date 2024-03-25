@@ -6,7 +6,15 @@ public class Consts
     public const int MinSetupWPs = 3;
 
     // tags
-    public const string JewelTag = "Jewel";
+    //public const string JewelTag = "Jewel";
+    public const string AquamarineTag = "Aquamarine";
+    public const string EmeraldTag = "Emerald";
+    public const string GoldenStarTag = "GoldenStar";
+    public const string MoonStoneTag = "MoonStone";
+    public const string ObsidianTag = "Obsidian";
+    public const string PinkSaphireTag = "PinkSaphire";
+    public const string RubyTag = "Ruby";
+
 
     public const string PickaxeTag = "pickaxe";
     public const string CrossbowTag = "crossbow";
@@ -23,13 +31,20 @@ public class Consts
     public const string GateTag = "Gate";
     public const string TollBoothTag = "Toll";
 
+    public static readonly string[] ToolTags = { PickaxeTag, CrossbowTag, MaceTag };
     public static readonly string[] PlayerTags = { PlayerTag, MainPlayerTag };
     public static readonly string[] EnemyTags = { EnemyTag };
     public static readonly string[] PlayerDamageableTags = { EnemyTag, RockTag, PlayerTag }; // main player tag is ommitted because cannot damage self
     public static readonly string[] AllDamageableTags = { EnemyTag, RockTag, PlayerTag, MainPlayerTag };
     public static readonly string[] LivingAgentTags = { EnemyTag, PlayerTag, MainPlayerTag };
     public static readonly string[] ObstacleTags = { EnemyTag, PlayerTag, MainPlayerTag, GateTag, TollBoothTag };
-    public static readonly string[] ItemTags = { JewelTag };
+
+    // keys
+    public static readonly string[] KeyTags = { AquamarineTag, EmeraldTag, GoldenStarTag, MoonStoneTag, ObsidianTag, PinkSaphireTag, RubyTag };
+    // items that can be stored for later use
+    public static readonly string[] EquipmentTags = { AquamarineTag, EmeraldTag, GoldenStarTag, MoonStoneTag, ObsidianTag, PinkSaphireTag, RubyTag };
+    // all items that are collectible including ones used immediately
+    public static readonly string[] CollectibleTags = { AquamarineTag, EmeraldTag, GoldenStarTag, MoonStoneTag, ObsidianTag, PinkSaphireTag, RubyTag };
 
     // names
     public const string HealthSlider = "HealthBar";
@@ -37,6 +52,7 @@ public class Consts
     public const string Arrow = "arrow";
     public const string SplitBoulder = "split_parent";
     public const string Detector = "Detector";
+    public const string ValuablesSnapGo = "ValuablesSnap";
 
     // transforms
     public const float FullRevolution = 360;
@@ -47,12 +63,16 @@ public class Consts
 
     public const float MagnetizeSpeed = 5;
 
+    public const float DistFromHeadToChest = 2;
+
     // player movement
+    public const float LerpThreshhold = .01f;
     public const float ReduceStaminaAmt = .05f;
     public const float WalkingSpeed = 3f;
     public const float RunningSpeed = 6f;
     public const float playerRotationSpeed = 15;
     public const float PlayerHeight = 2.4f;
+    public const float ElevateSpeed = 6;
 
     // bot movement
     public const float botRotationSpeed = 5;
@@ -95,5 +115,9 @@ public class Consts
     // Gate
     public const float SpawnKeyAngleMax = 60; // maximum angle perpendicular to the segment a key can be spawned
     public const float SpawnKeyAngleMin = -60;// minimum angle perpendicular to the segment a key can be spawned
+    public const float OpenDist = 8;
+    public const float OpenSpeed = 3;
+
+    public const string Meters = "meters";
 }
 

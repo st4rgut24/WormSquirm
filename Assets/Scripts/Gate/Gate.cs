@@ -7,6 +7,7 @@ public class Gate : Matter
     public enum State
     {
         Closed,
+        Opening,
         Open
     }
 
@@ -14,11 +15,34 @@ public class Gate : Matter
     int priceToUnlock;
     State state;
 
+    private Vector3 openPosition;
+    private Vector3 closedPosition;
+
     private void Awake()
     {
         state = State.Closed;
 
-        // TODO: Create a Gatekeeper
+        closedPosition = transform.position;
+        openPosition = transform.position + transform.up * Consts.OpenDist;
+    }
+
+    private void Update()
+    {
+        if (IsOpening())
+        {
+            transform.position = Vector3.Lerp(transform.position, openPosition, Consts.OpenSpeed * Time.deltaTime);
+        }
+        else if (state == State.Opening)
+        {
+            // finished opening
+            state = State.Open;
+            GateManager.Instance.Destroy(this);
+        }
+    }
+
+    private bool IsOpening()
+    {
+        return state == State.Opening && !TransformUtils.ReachedDestination(transform.position, openPosition);
     }
 
     public Jewel.Type GetKeyType()
@@ -58,14 +82,27 @@ public class Gate : Matter
         }
     }
 
-    protected virtual bool IsKeyValid(Valuable valuable)
+    /// <summary>
+    /// player will need to equip jewel in hand and touch the gate to open it
+    /// </summary>
+    /// <param name="other"></param>
+    private void OnTriggerEnter(Collider other)
     {
-        return key.GetType() == valuable.GetType();
+        if (TransformUtils.IsTransformMatchTags(other.transform, Consts.KeyTags))
+        {
+            Jewel key = other.GetComponent<Jewel>();
+            Unlock(key);
+        }
+    }
+
+    protected virtual bool IsKeyValid(Jewel foundKey)
+    {
+        return key.type == foundKey.type;
     }
 
 	protected void Open()
 	{
-        state = State.Open;
+        state = State.Opening;
 	}
 
     protected void Close()

@@ -5,6 +5,11 @@ public class GateKeeper : Bot
 {
     Gate gate;
 
+    private void OnEnable()
+    {
+        GateManager.DestroyGateEvent += OnGateDestroyed;
+    }
+
     protected override bool IsReachedFinalDestination(Waypoint finalWP)
     {
         return finalWP.position.Equals(route.GetCurrentPosition());
@@ -32,10 +37,26 @@ public class GateKeeper : Bot
         return keeperPos;
     }
 
+    /// <summary>
+    /// Destroy the gatekeeper if its gate has been destroyed
+    /// </summary>
+    private void OnGateDestroyed(GameObject destroyedGateGo)
+    {
+        if (gate == destroyedGateGo)
+        {
+            StartCoroutine(DieCoroutine());
+        }
+    }
+
     protected override void SetObjective()
     {
         gate = GateManager.Instance.GetNewestGate();
         objective = gate.transform;
+    }
+
+    private void OnDisable()
+    {
+        GateManager.DestroyGateEvent -= OnGateDestroyed;
     }
 }
 

@@ -139,6 +139,16 @@ public abstract class Agent : Matter
     }
 
     /// <summary>
+    /// Get the end of the segment closes to player
+    /// </summary>
+    /// <param name="segment"></param>
+    /// <returns></returns>
+    public Vector3 GetClosestCenterPoint(Segment segment)
+    {
+        return segment.GetClosestPointToCenterline(transform.position);
+    }
+
+    /// <summary>
     /// Is the player traveling in a direction that is going out of the segment bounds
     /// </summary>
     /// <param name="position">Player transform</param>

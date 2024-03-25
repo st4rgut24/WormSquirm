@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class TransformUtils
 {
+    public static bool ReachedDestination(Vector3 from, Vector3 to)
+    {
+        return Vector3.Distance(from, to) < Consts.LerpThreshhold;
+    }
+
     public static bool IsAnyDamageableObject(Transform transform)
     {
         return IsTransformMatchTags(transform, Consts.AllDamageableTags);
@@ -10,7 +15,7 @@ public class TransformUtils
 
     public static bool IsCollectible(Transform transform)
     {
-        return IsTransformMatchTags(transform, Consts.ItemTags);
+        return IsTransformMatchTags(transform, Consts.CollectibleTags);
     }
 
     public static bool IsPlayerDamageableObject(Transform transform)

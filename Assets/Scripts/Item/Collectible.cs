@@ -2,21 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ValueType
+public enum CollectibleType
 {
     Jewel
 }
 
-public class Valuable : MonoBehaviour
+public abstract class Collectible : MonoBehaviour
 {
-	ValueType type;
+	CollectibleType type;
 
 	public int value;
+
+    protected bool IsCollected = false;
 
     private float MagnetizeDist = 3;
     private bool isUnearthed = false; // whether the valuable has been unearthed
 
     Transform unearther; // transform of the rightful owner of valuable
+
+    /// <summary>
+    /// Defines behavior of of item when it is first obtained
+    /// </summary>
+    /// <param name="segment">Segment in which valuable was discovered</param>
+    public virtual void Collect(Segment segment) 
+    {
+        IsCollected = true;
+    } 
 
     protected virtual void OnEnable()
     {
@@ -25,7 +36,8 @@ public class Valuable : MonoBehaviour
 
     private void Update()
     {
-        if (isUnearthed && IsMagnetized())
+        // Move an item that has not been collected yet and is unearthed to nearby player
+        if (isUnearthed && !IsCollected && IsMagnetized())
         {
             MoveToRightfulOwner();
         }

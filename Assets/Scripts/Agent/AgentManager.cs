@@ -99,7 +99,7 @@ public class AgentManager : Singleton<AgentManager>
         //Vector3 rotation = new Vector3(xRot, transform.eulerAngles.y, transform.eulerAngles.z);
         movedAgent.ChangeVerticalRotation(xRot, Consts.defaultRotationSpeed); // instantaneous update
         //// Debug.Log("Enter new segment " + segment.tunnel.name + ". Target rotation is " + rotation);
-        TransformSegmentDict[transform] = segment;
+        TransformSegmentDict[transform] = segment;  
     }
 
     public GameObject CreateAgent(GameObject agentGo)

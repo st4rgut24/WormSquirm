@@ -4,8 +4,11 @@ using System;
 using System.Collections.Generic;
 using static UnityEngine.Rendering.HableCurve;
 
-public class Jewel : Valuable
+public class Jewel : Equipment
 {
+    public static event Action<Jewel, Segment> CollectJewelEvent;
+    public static event Action<Jewel> RepositionJewelEvent;
+
     public enum Type
     {
         Aquamarine,
@@ -27,8 +30,15 @@ public class Jewel : Valuable
         TunnelIntersectorManager.OnAddIntersectedTunnelSuccess += OnAddIntersectedTunnel;
     }
 
+    public override void Collect(Segment segment)
+    {
+        base.Collect(segment);
+        CollectJewelEvent?.Invoke(this, segment);
+    }
+
     private bool isCollectible(SegmentGo segmentGo, Transform collectorTransform)
     {
+        // check if the jewel's segment matches the collector's segment as well
         if (collectorTransform.CompareTag(Consts.MainPlayerTag))
         {
             GameObject tunnel = segmentGo.getTunnel();
@@ -41,14 +51,19 @@ public class Jewel : Valuable
         }
     }
 
+    // TODO: There is a problem, this can return true for multiple jewels when a single segment is created, causing
+    // both jewels to be positioned in the center of the segment, instead of the closest one only. This can be solved
+    // by making sure gates (and as an effect, keys) are spaced more than one segment apart, which shouldn't be a problem
+    // asides from testing
     private void CenterJewelInRange(Transform playerTransform, SegmentGo segmentGo)
     {
-        if (isCollectible(segmentGo, playerTransform))
+        if (!IsCollected && isCollectible(segmentGo, playerTransform))
         {
             Segment segment = SegmentManager.Instance.GetSegmentFromObject(segmentGo.getTunnel());
             Vector3 segmentCenter = segment.GetCenterLineCenter();
 
             transform.position = segmentCenter;
+            RepositionJewelEvent?.Invoke(this);
         }
     }
 

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using DanielLochner.Assets.SimpleScrollSnap;
 
 public enum PlayerState
 {
@@ -12,15 +13,17 @@ public enum PlayerState
 
 public class MainPlayer : Player
 {
+    Inventory inventory;
     Detector detector;
 
-    public static event Action<Jewel, Segment> CollectJewelEvent;
     public static event Action MeleeAttackEvent;
 
     //bool isBlocked;
     List<GameObject> CollidedObstacles;
 
     public Transform handTransform;
+    public Transform leftHandTransform;
+
     PlayerState state;
 
     Controller controller;
@@ -36,13 +39,21 @@ public class MainPlayer : Player
         health = new PlayerHealth(Consts.HealthSlider, PlayerManager.PlayerHealth);
         playerStamina = new PlayerHealth(Consts.StaminaSlider, PlayerManager.PlayerHealth);
         detector = GameObject.Find(Consts.Detector).GetComponent<Detector>();
+        inventory = GetComponentInChildren<Inventory>();
 
+        inventory.SetMainPlayer(this);
         detector.Init(this);
     }
 
-    private void OnEnable()
+    protected override void OnEnable()
     {
+        base.OnEnable();
         Pickaxe.Dig += HandleDig;
+        Jewel.CollectJewelEvent += inventory.OnKeyFound;
+        GateManager.CreateKeyEvent += inventory.OnKeyCreated;
+        GateManager.DestroyKeyEvent += inventory.OnKeyDestroyed;
+        Detector.DetectDistanceEvent += inventory.OnDistanceToItemReceived;
+        SimpleScrollSnap.SelectedItemEvent += inventory.OnSelectedItem;
     }
 
     // Roughly estimates the moment of impact when player is attacking
@@ -96,21 +107,19 @@ public class MainPlayer : Player
     {
         if (TransformUtils.IsCollectible(other.transform))
         {
-            if (other.CompareTag(Consts.JewelTag))
-            {
-                Jewel jewel = other.GetComponent<Jewel>();
-                CollectJewelEvent?.Invoke(jewel, curSegment);
-            }
-
-            // TODO: Add the item to the inventory and UI
-
-            GameObject.Destroy(other.gameObject);
+            Equipment valuable = other.GetComponent<Equipment>();
+            valuable.Collect(curSegment);
         }
     }
 
-    public void EquipTool(GameObject tool)
+    public void EquipValuable(GameObject obj)
     {
-        tool.transform.parent = handTransform;
+        obj.transform.parent = leftHandTransform;
+    }
+
+    public void EquipTool(GameObject obj)
+    {
+        obj.transform.parent = handTransform;
     }
 
     public bool HasStamina()
@@ -151,9 +160,15 @@ public class MainPlayer : Player
         charAnimator.TriggerAnimation(animName);
     }
 
-    private void OnDisable()
+    protected override void OnDisable()
     {
+        base.OnDisable();
         Pickaxe.Dig -= HandleDig;
+        Jewel.CollectJewelEvent -= inventory.OnKeyFound;
+        GateManager.CreateKeyEvent -= inventory.OnKeyCreated;
+        GateManager.DestroyKeyEvent -= inventory.OnKeyDestroyed;
+        Detector.DetectDistanceEvent -= inventory.OnDistanceToItemReceived;
+        SimpleScrollSnap.SelectedItemEvent -= inventory.OnSelectedItem;
     }
 }
 

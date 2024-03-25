@@ -21,7 +21,6 @@ public class ToolManager : Singleton<ToolManager>
     public GameObject CrossbowPrefab;
 
     static Dictionary<ToolType, GameObject> WeaponPrefabDict = new Dictionary<ToolType, GameObject>();
-    static Dictionary<ToolType, GameObject> WeaponUIPrefabDict = new Dictionary<ToolType, GameObject>();
 
     public GameObject toolboxGo;
 
@@ -77,7 +76,6 @@ public class ToolManager : Singleton<ToolManager>
     {
         GameObject WeaponGo = Instantiate(WeaponPrefab, player.handTransform, false);
         WeaponGo.SetActive(false);
-        Weapon weapon = WeaponGo.GetComponent<Weapon>();
         return WeaponGo;
     }
 
@@ -88,7 +86,10 @@ public class ToolManager : Singleton<ToolManager>
 
     public void StopWeaponAnim(ToolType type, bool isPaused)
     {
-        player.StopWeaponAnimation(type, isPaused);
+        if (player != null)
+        {
+            player.StopWeaponAnimation(type, isPaused);
+        }
     }
 
     public GameObject GetWeaponPrefab(ToolType type)
@@ -97,7 +98,7 @@ public class ToolManager : Singleton<ToolManager>
     }
 
     /// <summary>
-    /// A certain event in the animation is required to trigger the effects of the weapon (eg attack, dig)
+    /// Time the weapon's effects (eg dealing damage, digging) with this animation event callback
     /// </summary>
     public void UseOnTrigger()
     {
@@ -106,7 +107,10 @@ public class ToolManager : Singleton<ToolManager>
 
     public void OnSelectedItem(GameObject item)
     {
-        EquipTool(item.tag);
+        if (TransformUtils.IsTransformMatchTags(item.transform, Consts.ToolTags))
+        {
+            EquipTool(item.tag);
+        }
     }
 
     /// <summary>

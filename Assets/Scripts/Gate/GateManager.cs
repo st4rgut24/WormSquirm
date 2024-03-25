@@ -14,8 +14,13 @@ public class GateManager : Singleton<GateManager>
 {
 	GateManagerDifficulty difficulty;
 
+	HashSet<Jewel.Type> KeySet; // Set of keys used to open gates, used to ensure uniqueness of generated keys
+
     public static event Action CreateGateEvent;
+    public static event Action<GameObject> DestroyGateEvent;
+
     public static event Action<GameObject> CreateKeyEvent;
+    public static event Action<GameObject> DestroyKeyEvent;
 
     public Transform GateParent;
     public Transform KeyParent;
@@ -34,18 +39,20 @@ public class GateManager : Singleton<GateManager>
 	public Jewel PinkSaphireKey;
 	public Jewel RubyKey;
 
+    //public Dictionary<string, GameObject> KeyDict; // <enum of the Jewel/key, Key GameObject>. Assuming the keys that are created are unique
     Dictionary<Jewel.Type, Jewel> KeyJewelPairs;
 
     private void OnEnable()
     {
-		MainPlayer.CollectJewelEvent += OnKeyFound;
+		Jewel.CollectJewelEvent += OnKeyFound;
     }
 
     private void Awake()
     {
 		GateList = new List<Gate>();
+		KeySet = new HashSet<Jewel.Type>();
 
-		KeyJewelPairs = new Dictionary<Jewel.Type, Jewel>
+        KeyJewelPairs = new Dictionary<Jewel.Type, Jewel>
 		{
 			{ Jewel.Type.Aquamarine, AquamarineKey },
             { Jewel.Type.Emerald, EmeraldKey },
@@ -55,14 +62,16 @@ public class GateManager : Singleton<GateManager>
             { Jewel.Type.PinkSaphire, PinkSaphireKey },
             { Jewel.Type.Ruby, RubyKey }
         };
+
+        //KeyDict = new Dictionary<string, GameObject>();
     }
 
-	/// <summary>
-	/// If the start gate jewel is found, initialize the rest of the gates
-	/// </summary>
-	/// <param name="jewel">a found jewel</param>
-	/// <param name="segment">segment containing the jewel</param>
-	public void OnKeyFound(Jewel jewel, Segment segment)
+    /// <summary>
+    /// If the start gate jewel is found, initialize the rest of the gates
+    /// </summary>
+    /// <param name="jewel">a found jewel</param>
+    /// <param name="segment">segment containing the jewel</param>
+    public void OnKeyFound(Jewel jewel, Segment segment)
 	{
 		if (GateList.Count == 1 && StartGate.GetKeyType() == jewel.type) // check if this is the starting gate's jewel
 		{
@@ -129,35 +138,84 @@ public class GateManager : Singleton<GateManager>
 	{
         gate.SetCurSegment(gateSegment);
 
-		Jewel gateKey;
+		Jewel gateKeyPrefab;
 		Key key;
 
         if (GateList.Count == 1)
         {
             StartGate = gate;
-			gateKey = KeyJewelPairs[difficulty.FinalJewelType];
+			gateKeyPrefab = KeyJewelPairs[difficulty.FinalJewelType];
 			key = new Key(keySegment, difficulty.FinalKeyDist, difficulty.FinalKeyDirection);
         }
 		else
 		{
-			gateKey = GetRandomKey();
+			gateKeyPrefab = GetRandomUniqueKey();
 			key = new Key(keySegment, difficulty.AvgKeyDist, difficulty.KeyMinAngle, difficulty.KeyMaxAngle);
         }
 
-        GameObject keyGo = Instantiate(gateKey.gameObject, key.position, Quaternion.identity, KeyParent);
-        CreateKeyEvent?.Invoke(keyGo);
-
-		gate.SetKey(gateKey);
+		InitKey(gateKeyPrefab, key, gate);
     }
 
-    private Jewel GetRandomKey()
+	/// <summary>
+	/// Create a key and initialize everything that depends on it
+	/// </summary>
+	/// <param name="gateKeyPrefab">the prefab of the key</param>
+	/// <param name="key">contains key metadata like position</param>
+	/// <param name="gate">Gate the key belongs to</param>
+	private void InitKey(Jewel gateKeyPrefab, Key key, Gate gate)
+	{
+        GameObject keyGo = Instantiate(gateKeyPrefab.gameObject, key.position, Quaternion.identity, KeyParent);
+
+        GameObject KeyGoInScene = SceneItemManager.Instance.AddSceneObject(keyGo);
+        Jewel KeyInScene = KeyGoInScene.GetComponent<Jewel>();
+        KeySet.Add(KeyInScene.type);
+
+        CreateKeyEvent?.Invoke(keyGo);
+
+        gate.SetKey(gateKeyPrefab);
+    }
+
+	/// <summary>
+	/// Pick a key for a gate randomly. Ensure there are no duplicate keys created
+	/// </summary>
+	/// <returns>A key that unlocks a gate</returns>
+    private Jewel GetRandomUniqueKey()
     {
-        // Get a random index
         Array jewelTypes = Enum.GetValues(typeof(Jewel.Type));
-        int jewelIndex = UnityEngine.Random.Range(0, jewelTypes.Length);
-        Jewel.Type randomJewelType = (Jewel.Type)jewelTypes.GetValue(jewelIndex);
+
+		if (KeySet.Count == jewelTypes.Length)
+		{
+			throw new Exception("There are no more keys left to choose from");
+		}
+
+		Jewel.Type randomJewelType;
+        do
+        {
+            int jewelIndex = UnityEngine.Random.Range(0, jewelTypes.Length);
+            randomJewelType = (Jewel.Type)jewelTypes.GetValue(jewelIndex);
+        } while (KeySet.Contains(randomJewelType));
+
 
         return KeyJewelPairs[randomJewelType];
+    }
+
+	/// <summary>
+	/// Destroy a gate after it has been opened
+	/// </summary>
+	/// <param name="gate">the gate to remove</param>
+	public void Destroy(Gate gate)
+	{
+		Jewel keyPrefab = gate.GetKey();
+        GameObject keyGo = SceneItemManager.Instance.GetSceneObject(keyPrefab.tag);
+
+        GateList.Remove(gate);
+		KeySet.Remove(keyPrefab.type);
+
+        DestroyKeyEvent?.Invoke(keyGo);
+        DestroyGateEvent?.Invoke(gate.gameObject);
+
+        GameObject.Destroy(keyGo);
+        GameObject.Destroy(gate.gameObject);
     }
 
     public GameObject Create(Segment segment, Segment prevSegment, GateType type) {
@@ -187,7 +245,7 @@ public class GateManager : Singleton<GateManager>
 
     private void OnDisable()
     {
-        MainPlayer.CollectJewelEvent -= OnKeyFound;
+        Jewel.CollectJewelEvent -= OnKeyFound;
     }
 }
 
